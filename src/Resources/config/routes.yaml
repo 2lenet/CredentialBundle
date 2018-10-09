@@ -1,0 +1,4 @@
+credentials:
+    path: /credentials
+    defaults:
+        _controller: Lle\OAuthClientBundle\Controller\CredentialController::index
