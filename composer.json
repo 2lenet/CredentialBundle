@@ -1,0 +1,14 @@
+{
+    "name": "2lenet/credential-bundle",
+    "type": "symfony-bundle",
+    "description": "The 2LE's Credential Bundle.",
+    "license": "MIT",
+    "require": {
+	      "php": ">=7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lle\\CredentialBundle\\": "src/"
+        }
+    }
+}
