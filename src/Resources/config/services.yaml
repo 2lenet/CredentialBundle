@@ -3,9 +3,3 @@ services:
         autowire: true
         public: false
         autoconfigure: true
-
-    lle_oauth_user_provider:
-        class: Lle\OAuthClientBundle\Security\User\UserProvider
-
-    lle_oauth_guard:
-        class: Lle\OAuthClientBundle\Security\Guard\OAuthGuardAuthenticator

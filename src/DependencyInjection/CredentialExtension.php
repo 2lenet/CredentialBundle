@@ -1,6 +1,6 @@
 <?php
 
-namespace Lle\OAuthClientBundle\DependencyInjection;
+namespace Lle\CredentialBundle\DependencyInjection;
 
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

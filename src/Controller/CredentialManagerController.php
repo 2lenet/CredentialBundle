@@ -1,6 +1,6 @@
 <?php
 
-namespace Lle\OAuthClientBundle\Controller;
+namespace Lle\CredentialBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
