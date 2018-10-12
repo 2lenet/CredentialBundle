@@ -5,7 +5,7 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
 
 use Lle\CredentialBundle\DependencyInjection\CredentialExtension;
 
-class CredentialBundle extends Bundle
+class LleCredentialBundle extends Bundle
 {
     
 }

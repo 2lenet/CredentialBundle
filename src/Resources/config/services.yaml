@@ -3,3 +3,6 @@ services:
         autowire: true
         public: false
         autoconfigure: true
+
+    Lle\CredentialBundle\Security\:
+        resource: '../../Security'

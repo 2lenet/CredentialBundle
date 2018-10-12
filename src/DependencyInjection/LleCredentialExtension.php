@@ -9,7 +9,7 @@ use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader;
 
-class CredentialExtension extends Extension
+class LleCredentialExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container)
     {
