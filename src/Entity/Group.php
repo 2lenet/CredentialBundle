@@ -25,7 +25,6 @@ class Group
 
     /**
      * @ORM\OneToMany(targetEntity="GroupCredential", mappedBy="groupe")
-     * @ORM\OrderBy({"role" = "ASC"}) 
      * @ORM\JoinColumn(nullable=false)
      */
     private $credentials;
