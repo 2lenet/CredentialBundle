@@ -5,38 +5,28 @@ namespace Lle\CredentialBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Lle\CredentialBundle\Entity\Credential;
+use Lle\CredentialBundle\Entity\Group;
+use Lle\CredentialBundle\Entity\GroupRepository;
 
 use Symfony\Component\Routing\Annotation\Route;
 
-class SecurityController extends Controller
+class CredentialManagerController extends Controller
 {
     /**
-     * Login route that redirects to server.
-     * @Route("/login", name="login")
+     * @Route("/admin/credential", name="admin_credential")
      */
-    public function login()
+    public function index()
     {
-        return $this->get('oauth2.registry')
-        ->getClient('2le_oauth')
-        ->redirect();
+        $em = $this->getDoctrine()->getManager();
+        $credentialRepository = $em->getRepository(Credential::class);
+        $groupRepository = $em->getRepository(Group::class);
+
+        $credentials = $credentialRepository->findAll();
+        $groupes = $groupRepository->findAll();
+        return $this->render('@LleCredential/credential/index.html.twig', 
+            ['credentials' => $credentials,
+            'groupes' => $groupes]);
     }
 
-    /**
-     * Check route. Should be handled by the GuardAuthenticator.
-     * @Route("/login_check", name="login_check")
-     */
-    public function loginCheck()
-    {
-        throw new \RuntimeException('You must configure the check path to be handled by the firewall using form_login in your security firewall configuration.');
-    }
-
-    /**
-     * Logout from the server.
-     * @Route("/logout_oauth", name="logout_oauth")
-     */
-    public function logoutOAuth(Request $request)
-    {
-        $request->getSession()->invalidate();
-        return $this->redirect(getenv('DOMAIN') . 'logout');
-    }
 }

@@ -6,3 +6,9 @@ services:
 
     Lle\CredentialBundle\Security\:
         resource: '../../Security'
+
+    Lle\CredentialBundle\Repository\:
+        resource: '../../Repository'
+
+    Lle\CredentialBundle\Controller\:
+        resource: '../../Controller'
