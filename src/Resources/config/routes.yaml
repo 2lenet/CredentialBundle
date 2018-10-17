@@ -1,4 +1,4 @@
 credentials:
-    path: /credentials
+    path: /admin/credentials
     defaults:
         _controller: Lle\CredentialBundle\Controller\CredentialManagerController::index
