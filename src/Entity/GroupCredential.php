@@ -22,13 +22,13 @@ class GroupCredential
 
     /**
      * @ORM\ManyToOne(targetEntity="Credential")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */     
     private $credential;
 
     /**
      * @ORM\ManyToOne(targetEntity="Group")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $groupe;
 

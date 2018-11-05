@@ -22,11 +22,22 @@ class CredentialManagerController extends Controller
         $credentialRepository = $em->getRepository(Credential::class);
         $groupRepository = $em->getRepository(Group::class);
 
-        $credentials = $credentialRepository->findAll();
+        $credentials = $credentialRepository->findAllOrdered();
         $groupes = $groupRepository->findAll();
         return $this->render('@LleCredential/credential/index.html.twig', 
-            ['credentials' => $credentials,
-            'groupes' => $groupes]);
+            [
+                'credentials' => $credentials,
+                'groupes' => $groupes
+            ]);
     }
 
+    /**
+     * @Route("/admin/credential/toggle", name="admin_credential_toggle")
+     */
+    public function toggle()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $group_cred = $em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
+        return JsonResponse([]);
+    }    
 }

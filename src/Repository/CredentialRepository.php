@@ -13,19 +13,17 @@ class CredentialRepository extends EntityRepository
 //    /**
 //     * @return Credential[] Returns an array of Credential objects
 //     */
-    /*
-    public function findByExampleField($value)
+    
+    public function findAllOrdered()
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
+        return $this->createQueryBuilder('c', 'c.rubrique')
+            ->orderBy('c.rubrique', 'ASC')
+            ->addOrderBy('c.role', 'ASC')
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+    
 
     /*
     public function findOneBySomeField($value): ?Credential
