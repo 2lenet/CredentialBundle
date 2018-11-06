@@ -57,7 +57,7 @@ class CredentialVoter extends Voter
         }
 
 	foreach($roles as $role) {
-            $group_cred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($role, $attribute);
+            $group_cred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred(str_replace('ROLE_', '', $role), $attribute);
             if ($group_cred) {
                 return $group_cred->isAllowed();
             } 
