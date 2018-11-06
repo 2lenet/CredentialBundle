@@ -58,7 +58,6 @@ class CredentialManagerController extends Controller
         } else {
             $group_cred->setAllowed(! $group_cred->isAllowed);
         }
-
         $em->persist($group_cred);	
         $em->flush();            
         
