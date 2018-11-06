@@ -12,7 +12,6 @@ class GroupCredentialRepository extends EntityRepository
 
     public function findOneGroupCred($group, $cred) {
         $qb = $this->createQueryBuilder('l')
-            ->select('l.allowed')
             ->join('l.groupe','g')
             ->join('l.credential','c')
             ->where('c.role = :cred')

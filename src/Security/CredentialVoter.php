@@ -49,16 +49,20 @@ class CredentialVoter extends Voter
             return false;
         }
 
+	$roles = $user->getRoles();
+
         // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+        if (in_array('ROLE_SUPER_ADMIN', $roles)) {
             return true;
         }
-        $group_cred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
-        if ($group_cred) {
-            return $group_cred->isAllowed();
-        } else {
-            return false;
-        }
+
+	foreach($roles as $role) {
+            $group_cred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($role, $attribute);
+            if ($group_cred) {
+                return $group_cred->isAllowed();
+            } 
+	}
+        return false;
     }
 
 
