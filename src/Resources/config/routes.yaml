@@ -1,4 +1,4 @@
-credentials:
-    path: /admin/credentials
-    defaults:
-        _controller: Lle\CredentialBundle\Controller\CredentialManagerController::index
+
+cred_routes:
+    resource: '../../Controller/CredentialManagerController.php'
+    type: annotation
