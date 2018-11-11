@@ -11,6 +11,7 @@ use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupRepository;
 use Lle\CredentialBundle\Entity\GroupCredential;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -45,8 +46,9 @@ class CredentialManagerController extends Controller
      * @Route("/admin/credential/toggle", name="admin_credential_toggle")
      * @Security("has_role('ROLE_CREDENTIAL_TOGGLE') or has_role('ROLE_SUPER_ADMIN')")
      */
-    public function toggle(Request $request)
+    public function toggle(Request $request, AdapterInterface $cache)
     {
+        $cache->deleteItem('group_credentials');
         $var = $request->request->get('id');
         list($group, $cred) = explode('-',$var);
         $em = $this->getDoctrine()->getManager();
@@ -59,11 +61,10 @@ class CredentialManagerController extends Controller
             $group_cred->setCredential($credential);
             $group_cred->setAllowed(true);
         } else {
-            $group_cred->setAllowed(! $group_cred->isAllowed);
+            $group_cred->setAllowed(! $group_cred->isAllowed());
         }
         $em->persist($group_cred);	
         $em->flush();            
-        
         return new JsonResponse([]);
     }    
 }

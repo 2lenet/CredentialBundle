@@ -76,8 +76,8 @@ class CredentialVoter extends Voter
         }
 
         foreach($roles as $role) {
-            if (isset($this->groupRights[str_replace('ROLE_', '', $role)][$attribute])) {
-                return $true;
+            if (in_array($attribute, $this->groupRights[str_replace('ROLE_', '', $role)])) {
+                return true;
             }
         }
         return false;
