@@ -9,7 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
-
+use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 
 class CredentialVoter extends Voter
@@ -17,25 +17,44 @@ class CredentialVoter extends Voter
 
     private $decisionManager;
     private $em;
+    private $groupRights = [];
 
-    public function __construct(AccessDecisionManagerInterface $decisionManager, EntityManagerInterface $em)
+    public function __construct(AccessDecisionManagerInterface $decisionManager, EntityManagerInterface $em, AdapterInterface $cache)
     {
         $this->decisionManager = $decisionManager;
         $this->em = $em;
+        $cachedGroupRights = $cache->getItem('group_credentials');
+        if (!$cachedGroupRights->isHit()) {
+            $group_creds = $this->em->getRepository(GroupCredential::class)->findAll();
+            foreach($group_creds as $group_cred) {
+                if ($group_cred->isAllowed()) {
+                    $group_name = $group_cred->getGroupe()->getName();
+                    $cred_name = $group_cred->getCredential()->getRole();
+                    if (!array_key_exists($group_name, $this->groupRights)) {
+                        $this->groupRights[$group_name] = [];
+                    }
+                    $this->groupRights[$group_name][] = $cred_name;
+                }
+            }
+            $cachedGroupRights->set($this->groupRights);
+            $cache->save($cachedGroupRights);
+        } else {
+            $this->groupRights = $cachedGroupRights->get();
+        }
     }
 
     protected function supports($attribute, $subject)
     {
         // vote on everything
-        if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER'])) {
-            $credential = $this->em->getRepository(Credential::class)->findOneByRole($attribute);
+        if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER','IS_AUTHENTICATED_ANONYMOUS'])) {
+            /*$credential = $this->em->getRepository(Credential::class)->findOneByRole($attribute);
             if (!$credential) {  // insert on check
                 $credential = new Credential();
                 $credential->setRole($attribute);
                 $credential->setRubrique('Other');
                 $this->em->persist($credential);
                 $this->em->flush();
-            }
+            }*/
         }
         return true;
     }
@@ -49,19 +68,18 @@ class CredentialVoter extends Voter
             return false;
         }
 
-	$roles = $user->getRoles();
+	    $roles = $user->getRoles();
 
         // ROLE_SUPER_ADMIN can do anything! The power!
         if (in_array('ROLE_SUPER_ADMIN', $roles)) {
             return true;
         }
 
-	foreach($roles as $role) {
-            $group_cred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred(str_replace('ROLE_', '', $role), $attribute);
-            if ($group_cred) {
-                return $group_cred->isAllowed();
-            } 
-	}
+        foreach($roles as $role) {
+            if (isset($this->groupRights[str_replace('ROLE_', '', $role)][$attribute])) {
+                return $true;
+            }
+        }
         return false;
     }
 
