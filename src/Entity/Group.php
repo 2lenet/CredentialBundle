@@ -30,6 +30,10 @@ class Group
     private $credentials;
     
 
+    public function __toString(){
+        return $this->name;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -41,6 +45,15 @@ class Group
     public function getCredentials()
     {
         return $this->credentials;
+    }
+
+    public function getRoles(){
+        $roles = [];
+        foreach($this->getCredentials() as $gCredential){
+            /* @var GroupCredential $gCredential */
+            $roles[] = $gCredential->getCredential()->getRole();
+        }
+        return $roles;
     }
 
     /**

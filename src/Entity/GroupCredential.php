@@ -65,7 +65,7 @@ class GroupCredential
     /**
      * Get the value of credential
      */ 
-    public function getCredential()
+    public function getCredential(): ?Credential
     {
         return $this->credential;
     }
