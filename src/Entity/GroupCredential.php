@@ -27,7 +27,7 @@ class GroupCredential
     private $credential;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Group")
+     * @ORM\ManyToOne(targetEntity="Group", inversedBy="credentials")
      * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $groupe;
