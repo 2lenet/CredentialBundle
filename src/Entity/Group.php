@@ -28,6 +28,11 @@ class Group
      * @ORM\JoinColumn(nullable=false)
      */
     private $credentials;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isRole;
     
 
     public function __toString(){
@@ -87,4 +92,22 @@ class Group
 
         return $this;
     }
+
+    /**
+     * @return mixed
+     */
+    public function isRole()
+    {
+        return $this->isRole;
+    }
+
+    /**
+     * @param mixed $isRole
+     */
+    public function setIsRole($isRole)
+    {
+        $this->isRole = $isRole;
+    }
+
+
 }
