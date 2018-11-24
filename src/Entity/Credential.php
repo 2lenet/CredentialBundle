@@ -24,6 +24,11 @@ class Credential
     private $role;
 
     /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $libelle;
+
+    /**
      * @ORM\Column(type="string", length=255)
      */
     private $rubrique;
@@ -46,6 +51,17 @@ class Credential
     public function setRole(string $role): self
     {
         $this->role = $role;
+
+        return $this;
+    }
+    public function getLibelle(): ?string
+    {
+        return $this->libelle;
+    }
+
+    public function setLibelle(string $libelle): self
+    {
+        $this->libelle = $libelle;
 
         return $this;
     }

@@ -18,6 +18,9 @@ class CredentialVoter extends Voter
     private $decisionManager;
     private $em;
     private $groupRights = [];
+    private $roles = [];
+    private $cache;
+
 
     public function __construct(AccessDecisionManagerInterface $decisionManager, EntityManagerInterface $em, AdapterInterface $cache)
     {
@@ -41,20 +44,34 @@ class CredentialVoter extends Voter
         } else {
             $this->groupRights = $cachedGroupRights->get();
         }
+        $cachedRoles = $cache->getItem('all_credentials');
+        if (!$cachedRoles->isHit()) {
+            $all_creds = $this->em->getRepository(Credential::class)->findAll();
+            foreach ($all_creds as $cred) {
+                $this->roles[] = $cred->getRole();
+            }
+            $cachedRoles->set($this->roles);
+            $cache->save($cachedRoles);
+        } else {
+            $this->roles = $cachedRoles->get();
+        }
+        $this->cache = $cache;
     }
 
     protected function supports($attribute, $subject)
     {
         // vote on everything
         if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER','IS_AUTHENTICATED_ANONYMOUS'])) {
-            /*$credential = $this->em->getRepository(Credential::class)->findOneByRole($attribute);
-            if (!$credential) {  // insert on check
+            if (!in_array($attribute, $this->roles)) {  // insert on check
                 $credential = new Credential();
                 $credential->setRole($attribute);
+                $credential->setLibelle($attribute);
                 $credential->setRubrique('Other');
                 $this->em->persist($credential);
                 $this->em->flush();
-            }*/
+                $this->cache->deleteItem('all_credentials');
+                $this->roles[] = $attribute;
+            }
         }
         return true;
     }
