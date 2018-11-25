@@ -19,7 +19,7 @@ class CredentialManagerController extends Controller
 {
     /**
      * @Route("/admin/credential", name="admin_credential")
-     * @Security("has_role('ROLE_CREDENTIAL_LIST') or has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN_DROITS')")
      */
     public function index()
     {
@@ -44,7 +44,7 @@ class CredentialManagerController extends Controller
 
     /**
      * @Route("/admin/credential/toggle", name="admin_credential_toggle")
-     * @Security("has_role('ROLE_CREDENTIAL_TOGGLE') or has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN_DROITS')")
      */
     public function toggle(Request $request, AdapterInterface $cache)
     {
