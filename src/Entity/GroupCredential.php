@@ -18,7 +18,6 @@ class GroupCredential
      */
     private $id;
 
- 
 
     /**
      * @ORM\ManyToOne(targetEntity="Credential")

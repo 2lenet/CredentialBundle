@@ -33,7 +33,18 @@ class Group
      * @ORM\Column(type="boolean")
      */
     private $isRole;
-    
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $actif;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $requiredRole;
+
+
 
     public function __toString(){
         return $this->name;
@@ -109,5 +120,34 @@ class Group
         $this->isRole = $isRole;
     }
 
+    /**
+     * @return mixed
+     */
+    public function isActif()
+    {
+        return $this->actif;
+    }
+
+    public function setActif($actif)
+    {
+        $this->actif = $actif;
+    }
+
+ 
+    /**
+     * @return mixed
+     */
+    public function getRequiredRole()
+    {
+        return $this->requiredRole;
+    }
+
+    /**
+     * @param mixed $requiredRole
+     */
+    public function setRequiredRole($requiredRole): void
+    {
+        $this->requiredRole = $requiredRole;
+    }
 
 }
