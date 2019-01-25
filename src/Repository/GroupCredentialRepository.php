@@ -21,4 +21,6 @@ class GroupCredentialRepository extends EntityRepository
         ;
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+
 }
