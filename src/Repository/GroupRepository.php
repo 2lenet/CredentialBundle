@@ -22,8 +22,8 @@ class GroupRepository extends ServiceEntityRepository
 
     public function findMineQb() {
         $roles = array_map(function($r) { return $r->getRole(); }, $this->security->getToken()->getRoles());
-        $qb = $this->createQueryBuilder('g')
-            ->where('g.requiredRole in (:roles)')
+        $qb = $this->createQueryBuilder('entity')
+            ->andWhere(' (entity.requiredRole in (:roles) )')
             ->setParameter("roles", $roles);
         return $qb;
     }
