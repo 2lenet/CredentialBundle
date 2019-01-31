@@ -21,10 +21,10 @@ class GroupRepository extends ServiceEntityRepository
     }
 
     public function findMineQb() {
-        $roles = array_map(function($r) { return $r->getRole(); }, $this->security->getToken()->getRoles());
+        $role = $this->security->getToken()->getRoles()[0]->getRole();
         $qb = $this->createQueryBuilder('entity')
-            ->andWhere(' (entity.requiredRole in (:roles) )')
-            ->setParameter("roles", $roles);
+            ->andWhere(' FIND_IN_SET (:roles, entity.requiredRole) >0')
+            ->setParameter("roles", $role);
         return $qb;
     }
 }
