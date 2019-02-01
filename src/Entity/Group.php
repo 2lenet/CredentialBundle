@@ -44,10 +44,20 @@ class Group
      */
     private $requiredRole;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $tri;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $libelle;
+
 
 
     public function __toString(){
-        return $this->name;
+        return $this->libelle;
     }
 
     public function getId(): ?int
@@ -148,6 +158,31 @@ class Group
     public function setRequiredRole($requiredRole): void
     {
         $this->requiredRole = $requiredRole;
+    }
+
+
+    public function getTri(): ?int
+    {
+        return $this->tri;
+    }
+
+    public function setTri(int $tri): self
+    {
+        $this->tri = $tri;
+
+        return $this;
+    }
+
+    public function getLibelle(): ?string
+    {
+        return $this->libelle;
+    }
+
+    public function setLibelle(?string $libelle): self
+    {
+        $this->libelle = $libelle;
+
+        return $this;
     }
 
 }

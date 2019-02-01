@@ -67,6 +67,8 @@ class CredentialVoter extends Voter
                 $credential->setRole($attribute);
                 $credential->setLibelle($attribute);
                 $credential->setRubrique('Other');
+                $credential->setTri(0);
+
                 $this->em->persist($credential);
                 $this->em->flush();
                 $this->cache->deleteItem('all_credentials');

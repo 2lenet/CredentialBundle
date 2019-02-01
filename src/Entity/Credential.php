@@ -32,7 +32,12 @@ class Credential
      * @ORM\Column(type="string", length=255)
      */
     private $rubrique;
-        
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $tri;
+
     public function __toString()
     {
         return (string)$this->role;
@@ -82,6 +87,18 @@ class Credential
     public function setRubrique($rubrique)
     {
         $this->rubrique = $rubrique;
+
+        return $this;
+    }
+
+    public function getTri(): ?int
+    {
+        return $this->tri;
+    }
+
+    public function setTri(int $tri): self
+    {
+        $this->tri = $tri;
 
         return $this;
     }
