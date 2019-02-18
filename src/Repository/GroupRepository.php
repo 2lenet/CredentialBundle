@@ -27,4 +27,10 @@ class GroupRepository extends ServiceEntityRepository
             ->setParameter("roles", $role);
         return $qb;
     }
+
+    public function findMine() {
+        $qb = $this->findMineQb();
+        $qb->orderBy('entity.tri');
+        return $qb->getQuery()->getResult();
+    }
 }
