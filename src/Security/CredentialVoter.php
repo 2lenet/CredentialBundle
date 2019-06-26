@@ -87,13 +87,12 @@ class CredentialVoter extends Voter
             return false;
         }
 
-	    $roles = $user->getRoles();
+        $roles = $user->getRoles();
 
         // ROLE_SUPER_ADMIN can do anything! The power!
         if (in_array('ROLE_SUPER_ADMIN', $roles)) {
             return true;
         }
-
         foreach($roles as $role) {
             $k = str_replace('ROLE_', '', $role);
             if (isset($this->groupRights[$k]) && in_array($attribute, $this->groupRights[$k])) {
