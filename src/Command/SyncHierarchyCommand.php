@@ -59,11 +59,15 @@ class SyncHierarchyCommand extends Command{
         $this->generateListRoles($rootRole, $list);
         foreach($list as $role){
             $credential = $roles[$role] ?? new Credential();
-            $credential->setLibelle(strtolower(str_replace('ROLE_', '', $role)));
             $credential->setTri(0);
             $roles[$role] = $credential;
             $r = explode('_',$role);
             $credential->setRubrique($r[1] ?? 'other');
+            $credential->setLibelle(
+                strtolower(
+                    str_replace($credential->getRubrique(), '',
+                        str_replace('ROLE_', '', $role))));
+            $credential->setLibelle(ucfirst(trim(str_replace('_',' ', $credential->getLibelle()))));
             $credential->setRole($role);
             $this->em->persist($credential);
             $assoc = $this->em->getRepository(GroupCredential::class)->findOneBy(['credential'=> $credential, 'groupe'=> $groupe]) ?? new GroupCredential();
