@@ -15,12 +15,14 @@ class GroupCredentialRepository extends EntityRepository
             ->join('l.groupe','g')
             ->join('l.credential','c')
             ->where('c.role = :cred')
-            ->setParameter("cred", $cred)            
+            ->setParameter("cred", $cred)
             ->andWhere('g.name = :group')
             ->setParameter("group", $group)
         ;
         return $qb->getQuery()->getOneOrNullResult();
     }
+
+
 
 
 }

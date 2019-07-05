@@ -33,4 +33,13 @@ class GroupRepository extends ServiceEntityRepository
         $qb->orderBy('entity.tri');
         return $qb->getQuery()->getResult();
     }
+
+    public function findAllOrdered()
+    {
+        return $this->createQueryBuilder('g')//, 'c.rubrique')
+        ->orderBy('g.tri', 'ASC')->where('g.actif = 1')
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 }

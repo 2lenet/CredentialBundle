@@ -28,7 +28,7 @@ class CredentialManagerController extends Controller
         $groupRepository = $em->getRepository(Group::class);
 
         $credentials = $credentialRepository->findAllOrdered();
-        $groupes = $groupRepository->findAll();
+        $groupes = $groupRepository->findAllOrdered();
         $groupCreds = $em->getRepository(GroupCredential::class)->findAll();
         $actives = [];
         foreach($groupCreds as $groupCred) {
@@ -63,7 +63,7 @@ class CredentialManagerController extends Controller
         } else {
             $group_cred->setAllowed(! $group_cred->isAllowed());
         }
-        $em->persist($group_cred);	
+        $em->persist($group_cred);
         $em->flush();            
         return new JsonResponse([]);
     }    
