@@ -8,13 +8,14 @@ use Doctrine\ORM\EntityRepository;
 use Lle\CredentialBundle\Entity\Group;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Security\Core\Security;
+use Doctrine\Persistence\ManagerRegistry;
 
 class GroupRepository extends ServiceEntityRepository
 {
 
     private $security;
 
-    public function __construct(RegistryInterface $registry, Security $security)
+    public function __construct(ManagerRegistry $registry, Security $security)
     {
         $this->security = $security;
         parent::__construct($registry, Group::class);
