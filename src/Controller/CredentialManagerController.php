@@ -2,7 +2,7 @@
 
 namespace Lle\CredentialBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +15,7 @@ use Symfony\Component\Cache\Adapter\AdapterInterface;
 
 use Symfony\Component\Routing\Annotation\Route;
 
-class CredentialManagerController extends Controller
+class CredentialManagerController extends AbstractController
 {
     /**
      * @Route("/admin/credential", name="admin_credential")
