@@ -43,4 +43,14 @@ class GroupRepository extends ServiceEntityRepository
             ->getResult()
             ;
     }
+    
+    
+    public function findRolesQb(EntityRepository $er) {
+        $qb = $er->findMineQb()
+            ->andWhere('entity.isRole = 1')
+            ->andWhere('entity.actif = 1')
+            ->orderBy('entity.tri');
+
+        return $qb;
+    }
 }
