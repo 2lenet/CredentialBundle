@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityRepository;
 use Lle\CredentialBundle\Entity\Group;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Security\Core\Security;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 
 class GroupRepository extends ServiceEntityRepository
 {
