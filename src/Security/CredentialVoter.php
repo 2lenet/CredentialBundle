@@ -60,18 +60,23 @@ class CredentialVoter extends Voter
 
     protected function supports($attribute, $subject)
     {
-        // vote on everything
-        if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER','IS_AUTHENTICATED_ANONYMOUS'])) {
+         // vote on everything
+         if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER','IS_AUTHENTICATED_ANONYMOUS'])) {
             if (!in_array($attribute, $this->roles)) {  // insert on check
                 $credential = new Credential();
                 $credential->setRole($attribute);
                 $credential->setLibelle($attribute);
                 $credential->setRubrique('Other');
                 $credential->setTri(0);
-
+                $arr = explode('_', $attribute);
+                if (count($arr)==3) {
+                    $rubrique = $arr[1];
+                    $credential->setRubrique($rubrique);
+                }
                 $this->em->persist($credential);
                 $this->em->flush();
                 $this->cache->deleteItem('all_credentials');
+                $this->cache->deleteItem('group_credentials');
                 $this->roles[] = $attribute;
             }
         }
