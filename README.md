@@ -17,3 +17,9 @@ config/routes.yaml:
 credential:
     resource: "@LleCredentialBundle/Resources/config/routes.yaml"
 ```
+
+## RESET Rubrique name
+
+```sql
+UPDATE lle_credential_credential SET rubrique= SUBSTRING_INDEX(SUBSTRING_INDEX(role, '_', 2), '_', -1) WHERE role like "ROLE_%";
+``` 
