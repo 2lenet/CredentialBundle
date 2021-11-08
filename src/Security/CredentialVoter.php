@@ -61,7 +61,7 @@ class CredentialVoter extends Voter
     protected function supports($attribute, $subject)
     {
          // vote on everything
-         if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER','IS_AUTHENTICATED_ANONYMOUS'])) {
+         if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER','IS_AUTHENTICATED_ANONYMOUS','IS_AUTHENTICATED_FULLY','ROLE_SUPER_ADMIN'])) {
             if (!in_array($attribute, $this->roles)) {  // insert on check
                 $credential = new Credential();
                 $credential->setRole($attribute);
