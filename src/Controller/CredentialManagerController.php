@@ -2,6 +2,7 @@
 
 namespace Lle\CredentialBundle\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,6 +18,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CredentialManagerController extends AbstractController
 {
+    /** @var EntityManagerInterface */
+    private $em;
+    
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
+    
     /**
      * @Route("/admin/credential", name="admin_credential")
      * @Security("is_granted('ROLE_ADMIN_DROITS')")
@@ -64,7 +73,28 @@ class CredentialManagerController extends AbstractController
             $group_cred->setAllowed(! $group_cred->isAllowed());
         }
         $em->persist($group_cred);
-        $em->flush();            
+        $em->flush();
         return new JsonResponse([]);
-    }    
+    }
+
+    /**
+     * @Route("/admin/credential/check_all", name="admin_credential_check_all")
+     * @Security("is_granted('ROLE_ADMIN_DROITS')")
+     */
+    public function checkAll(Request $request)
+    {
+        $group = $request->request->get('group');
+        $rubrique = $request->request->get('rubrique');
+        $checked = $request->request->get('checked');
+        
+        $credentials = $this->em
+            ->getRepository(Credential::class)
+            ->findBy(["rubrique" => $rubrique]);
+
+        $groupCredentialRepository = $this->em->getRepository(GroupCredential::class);
+
+        $groupCredentialRepository->updateCredentials($group, $credentials, (bool)$checked);
+
+        dd("prout");
+    }
 }
