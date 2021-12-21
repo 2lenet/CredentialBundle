@@ -2,6 +2,7 @@
 
 namespace Lle\CredentialBundle\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,6 +18,14 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CredentialManagerController extends AbstractController
 {
+    /** @var EntityManagerInterface */
+    private $em;
+    
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
+    
     /**
      * @Route("/admin/credential", name="admin_credential")
      * @Security("is_granted('ROLE_ADMIN_DROITS')")
@@ -64,7 +73,46 @@ class CredentialManagerController extends AbstractController
             $group_cred->setAllowed(! $group_cred->isAllowed());
         }
         $em->persist($group_cred);
-        $em->flush();            
+        $em->flush();
         return new JsonResponse([]);
-    }    
+    }
+
+    /**
+     * @Route("/admin/credential/check_all", name="admin_credential_check_all")
+     * @Security("is_granted('ROLE_ADMIN_DROITS')")
+     */
+    public function checkAll(Request $request)
+    {
+        $group = $request->request->getInt('group');
+        $rubrique = $request->request->get('rubrique');
+        $checked = $request->request->getBoolean('checked');
+        
+        $credentials = $this->em
+            ->getRepository(Credential::class)
+            ->findBy(["rubrique" => $rubrique]);
+
+        $group = $this->em->find(Group::class, $group);
+
+        $groupCredentialRepository = $this->em->getRepository(GroupCredential::class);
+
+        $existingCredentials = $groupCredentialRepository->findByGroup($group, "credential");
+
+        /** @var Credential $credential */
+        foreach ($credentials as $credential) {
+            if (!array_key_exists($credential->getId(), $existingCredentials)) {
+                $groupCredential =  new GroupCredential();
+                $groupCredential->setGroupe($group);
+                $groupCredential->setCredential($credential);
+                $groupCredential->setAllowed($checked);
+
+                $this->em->persist($groupCredential);
+            }
+        }
+
+        $groupCredentialRepository->updateCredentials($group, $credentials, $checked);
+        
+        $this->em->flush();
+
+        return new JsonResponse([]);
+    }
 }

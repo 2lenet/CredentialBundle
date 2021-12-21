@@ -2,6 +2,7 @@
 
 namespace Lle\CredentialBundle\Repository;
 
+use Lle\CredentialBundle\Entity\GroupCredential;
 use Lle\CredentialBundle\Entity\UserGroup;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -9,7 +10,6 @@ use Doctrine\ORM\EntityRepository;
 
 class GroupCredentialRepository extends EntityRepository
 {
-
     public function findOneGroupCred($group, $cred) {
         $qb = $this->createQueryBuilder('l')
             ->join('l.groupe','g')
@@ -22,7 +22,26 @@ class GroupCredentialRepository extends EntityRepository
         return $qb->getQuery()->getOneOrNullResult();
     }
 
-
-
-
+    public function updateCredentials($group, $credentials, $allowed)
+    {
+        $queryBuilder = $this->createQueryBuilder("gc")
+            ->update()
+            ->set('gc.allowed', ':allowed')
+            ->andWhere('gc.groupe = :group')
+            ->andWhere('gc.credential IN (:credentials)')
+            ->setParameters([
+                'allowed' => $allowed,
+                'group' => $group,
+                'credentials' => $credentials,
+            ])->getQuery()->execute();
+    }
+    
+    public function findByGroup($group, ?string $indexBy = null)
+    {
+        return $this->createQueryBuilder("gc", "gc.$indexBy")
+            ->andWhere("gc.groupe = :group")
+            ->setParameter("group", $group)
+            ->getQuery()
+            ->getResult();
+    }
 }
