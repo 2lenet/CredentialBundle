@@ -27,12 +27,21 @@ class GroupCredentialRepository extends EntityRepository
         $queryBuilder = $this->createQueryBuilder("gc")
             ->update()
             ->set('gc.allowed', ':allowed')
-            ->where('gc.groupe = :group')
-            ->where('gc.credential IN (credentials)')
+            ->andWhere('gc.groupe = :group')
+            ->andWhere('gc.credential IN (:credentials)')
             ->setParameters([
+                'allowed' => $allowed,
                 'group' => $group,
                 'credentials' => $credentials,
-                'allowed' => $allowed,
             ])->getQuery()->execute();
+    }
+    
+    public function findByGroup($group, ?string $indexBy = null)
+    {
+        return $this->createQueryBuilder("gc", "gc.$indexBy")
+            ->andWhere("gc.groupe = :group")
+            ->setParameter("group", $group)
+            ->getQuery()
+            ->getResult();
     }
 }

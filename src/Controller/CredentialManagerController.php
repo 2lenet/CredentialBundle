@@ -83,18 +83,36 @@ class CredentialManagerController extends AbstractController
      */
     public function checkAll(Request $request)
     {
-        $group = $request->request->get('group');
+        $group = $request->request->getInt('group');
         $rubrique = $request->request->get('rubrique');
-        $checked = $request->request->get('checked');
+        $checked = $request->request->getBoolean('checked');
         
         $credentials = $this->em
             ->getRepository(Credential::class)
             ->findBy(["rubrique" => $rubrique]);
 
+        $group = $this->em->find(Group::class, $group);
+
         $groupCredentialRepository = $this->em->getRepository(GroupCredential::class);
 
-        $groupCredentialRepository->updateCredentials($group, $credentials, (bool)$checked);
+        $existingCredentials = $groupCredentialRepository->findByGroup($group, "credential");
 
-        dd("prout");
+        /** @var Credential $credential */
+        foreach ($credentials as $credential) {
+            if (!array_key_exists($credential->getId(), $existingCredentials)) {
+                $groupCredential =  new GroupCredential();
+                $groupCredential->setGroupe($group);
+                $groupCredential->setCredential($credential);
+                $groupCredential->setAllowed($checked);
+
+                $this->em->persist($groupCredential);
+            }
+        }
+
+        $groupCredentialRepository->updateCredentials($group, $credentials, $checked);
+        
+        $this->em->flush();
+
+        return new JsonResponse([]);
     }
 }
