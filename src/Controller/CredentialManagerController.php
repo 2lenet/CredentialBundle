@@ -32,13 +32,12 @@ class CredentialManagerController extends AbstractController
      */
     public function index()
     {
-        $em = $this->getDoctrine()->getManager();
-        $credentialRepository = $em->getRepository(Credential::class);
-        $groupRepository = $em->getRepository(Group::class);
+        $credentialRepository = $this->em->getRepository(Credential::class);
+        $groupRepository = $this->em->getRepository(Group::class);
 
         $credentials = $credentialRepository->findAllOrdered();
         $groupes = $groupRepository->findAllOrdered();
-        $groupCreds = $em->getRepository(GroupCredential::class)->findAll();
+        $groupCreds = $this->em->getRepository(GroupCredential::class)->findAll();
         $actives = [];
         foreach($groupCreds as $groupCred) {
             $actives[$groupCred->getGroupe()->getName().'-'.$groupCred->getCredential()->getRole()] = $groupCred->isAllowed();
@@ -60,11 +59,11 @@ class CredentialManagerController extends AbstractController
         $cache->deleteItem('group_credentials');
         $var = $request->request->get('id');
         list($group, $cred) = explode('-',$var);
-        $em = $this->getDoctrine()->getManager();
-        $group_cred = $em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
+        $group_cred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
+
         if (!$group_cred) {
-            $groupObj = $em->getRepository(Group::class)->findOneByName($group);
-            $credential = $em->getRepository(Credential::class)->findOneByRole($cred);
+            $groupObj = $this->em->getRepository(Group::class)->findOneByName($group);
+            $credential = $this->em->getRepository(Credential::class)->findOneByRole($cred);
             $group_cred =  new GroupCredential();
             $group_cred->setGroupe($groupObj);
             $group_cred->setCredential($credential);
@@ -72,13 +71,15 @@ class CredentialManagerController extends AbstractController
         } else {
             $group_cred->setAllowed(! $group_cred->isAllowed());
         }
-        $em->persist($group_cred);
-        $em->flush();
+
+        $this->em->persist($group_cred);
+        $this->em->flush();
+
         return new JsonResponse([]);
     }
 
     /**
-     * @Route("/admin/credential/check_all", name="admin_credential_check_all")
+     * @Route("/admin/credential/toggle_all")
      * @Security("is_granted('ROLE_ADMIN_DROITS')")
      */
     public function checkAll(Request $request)
@@ -87,9 +88,15 @@ class CredentialManagerController extends AbstractController
         $rubrique = $request->request->get('rubrique');
         $checked = $request->request->getBoolean('checked');
         
-        $credentials = $this->em
-            ->getRepository(Credential::class)
-            ->findBy(["rubrique" => $rubrique]);
+        if ($rubrique) {
+            $credentials = $this->em
+                ->getRepository(Credential::class)
+                ->findBy(["rubrique" => $rubrique]);
+        } else {
+            $credentials = $this->em
+                ->getRepository(Credential::class)
+                ->findAll();
+        }
 
         $group = $this->em->find(Group::class, $group);
 
@@ -110,7 +117,7 @@ class CredentialManagerController extends AbstractController
         }
 
         $groupCredentialRepository->updateCredentials($group, $credentials, $checked);
-        
+
         $this->em->flush();
 
         return new JsonResponse([]);
