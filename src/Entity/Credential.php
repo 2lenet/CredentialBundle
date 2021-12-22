@@ -38,6 +38,11 @@ class Credential
      */
     private $tri;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true, options={"default": true})
+     */
+    private $visible = true;
+
     public function __toString()
     {
         return (string)$this->role;
@@ -99,6 +104,18 @@ class Credential
     public function setTri(int $tri): self
     {
         $this->tri = $tri;
+
+        return $this;
+    }
+
+    public function isVisible(): ?bool
+    {
+        return $this->visible;
+    }
+
+    public function setVisible(bool $visible): self
+    {
+        $this->visible = $visible;
 
         return $this;
     }

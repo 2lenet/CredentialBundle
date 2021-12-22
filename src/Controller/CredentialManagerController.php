@@ -37,8 +37,11 @@ class CredentialManagerController extends AbstractController
 
         $credentials = $credentialRepository->findAllOrdered();
         $groupes = $groupRepository->findAllOrdered();
+
         $groupCreds = $this->em->getRepository(GroupCredential::class)->findAll();
+
         $actives = [];
+
         foreach($groupCreds as $groupCred) {
             $actives[$groupCred->getGroupe()->getName().'-'.$groupCred->getCredential()->getRole()] = $groupCred->isAllowed();
         }
@@ -64,6 +67,7 @@ class CredentialManagerController extends AbstractController
         if (!$group_cred) {
             $groupObj = $this->em->getRepository(Group::class)->findOneByName($group);
             $credential = $this->em->getRepository(Credential::class)->findOneByRole($cred);
+
             $group_cred =  new GroupCredential();
             $group_cred->setGroupe($groupObj);
             $group_cred->setCredential($credential);
@@ -79,10 +83,10 @@ class CredentialManagerController extends AbstractController
     }
 
     /**
-     * @Route("/admin/credential/toggle_all")
+     * @Route("/admin/credential/toggle_all" name="admin_credential_toggle_all")
      * @Security("is_granted('ROLE_ADMIN_DROITS')")
      */
-    public function checkAll(Request $request)
+    public function toggleAll(Request $request)
     {
         $group = $request->request->getInt('group');
         $rubrique = $request->request->get('rubrique');

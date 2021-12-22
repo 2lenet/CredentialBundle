@@ -17,6 +17,7 @@ class CredentialRepository extends EntityRepository
     public function findAllOrdered()
     {
         return $this->createQueryBuilder('c')//, 'c.rubrique')
+            ->andWhere('c.visible = true')
             ->orderBy('c.rubrique', 'ASC')
             ->addOrderBy('c.role', 'ASC')
             ->getQuery()
