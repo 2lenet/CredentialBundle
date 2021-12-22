@@ -18,6 +18,7 @@ class CredentialRepository extends EntityRepository
     {
         return $this->createQueryBuilder('c')//, 'c.rubrique')
             ->andWhere('c.visible = true')
+            ->orWhere('c.visible IS NULL')
             ->orderBy('c.rubrique', 'ASC')
             ->addOrderBy('c.role', 'ASC')
             ->getQuery()
