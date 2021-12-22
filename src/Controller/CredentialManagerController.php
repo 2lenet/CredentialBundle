@@ -83,7 +83,7 @@ class CredentialManagerController extends AbstractController
     }
 
     /**
-     * @Route("/admin/credential/toggle_all" name="admin_credential_toggle_all")
+     * @Route("/admin/credential/toggle_all", name="admin_credential_toggle_all")
      * @Security("is_granted('ROLE_ADMIN_DROITS')")
      */
     public function toggleAll(Request $request)
