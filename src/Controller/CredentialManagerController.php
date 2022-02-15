@@ -86,8 +86,9 @@ class CredentialManagerController extends AbstractController
      * @Route("/admin/credential/toggle_all", name="admin_credential_toggle_all")
      * @Security("is_granted('ROLE_ADMIN_DROITS')")
      */
-    public function toggleAll(Request $request)
+    public function toggleAll(Request $request, AdapterInterface $cache)
     {
+        $cache->deleteItem('group_credentials');
         $group = $request->request->getInt('group');
         $rubrique = $request->request->get('rubrique');
         $checked = $request->request->getBoolean('checked');
