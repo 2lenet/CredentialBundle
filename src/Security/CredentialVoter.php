@@ -11,6 +11,7 @@ use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
+use Psr\Cache\CacheItemPoolInterface;
 
 class CredentialVoter extends Voter
 {
@@ -22,7 +23,7 @@ class CredentialVoter extends Voter
     private $cache;
 
 
-    public function __construct(AccessDecisionManagerInterface $decisionManager, EntityManagerInterface $em, AdapterInterface $cache)
+    public function __construct(AccessDecisionManagerInterface $decisionManager, EntityManagerInterface $em, CacheItemPoolInterface $cache)
     {
         $this->decisionManager = $decisionManager;
         $this->em = $em;
@@ -58,7 +59,7 @@ class CredentialVoter extends Voter
         $this->cache = $cache;
     }
 
-    protected function supports($attribute, $subject)
+    protected function supports($attribute, $subject): bool
     {
          // vote on everything
          if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER','IS_AUTHENTICATED_ANONYMOUS','IS_AUTHENTICATED_FULLY','ROLE_SUPER_ADMIN'])) {
@@ -83,7 +84,7 @@ class CredentialVoter extends Voter
         return true;
     }
 
-    protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
+    protected function voteOnAttribute($attribute, $subject, TokenInterface $token): bool
     {
         $user = $token->getUser();
 
