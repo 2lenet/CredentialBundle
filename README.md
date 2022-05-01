@@ -10,9 +10,11 @@ Its goal is to make easy an association between User Group and Role (credential)
 
 ```composer require 2lenet/credential-bundle```
 
+flex should do the job
+
 ## Setting up
 
-config/routes.yaml:
+config/routes/credential.yaml:
 ```yml
 credential:
     resource: "@LleCredentialBundle/Resources/config/routes.yaml"
