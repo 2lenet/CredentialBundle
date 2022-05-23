@@ -169,9 +169,11 @@ class Group
     /**
      * @param mixed $requiredRole
      */
-    public function setRequiredRole(?string $requiredRole): void
+    public function setRequiredRole(?string $requiredRole): self
     {
         $this->requiredRole = $requiredRole;
+
+        return $this->requiredRole;
     }
 
 
