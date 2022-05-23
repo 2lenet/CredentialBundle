@@ -3,11 +3,13 @@
 namespace Lle\CredentialBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass="Lle\CredentialBundle\Repository\GroupRepository")
  * @ORM\Table(name="lle_credential_group")
- * 
+ *
  */
 class Group
 {
@@ -60,6 +62,11 @@ class Group
         return $this->libelle;
     }
 
+    public function __construct()
+    {
+        $this->credentials = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -67,18 +74,21 @@ class Group
 
     /**
      * Get the value of credentials
-     */ 
-    public function getCredentials()
+     */
+    public function getCredentials(): Collection
     {
         return $this->credentials;
     }
 
-    public function getRoles(){
+    public function getRoles()
+    {
         $roles = [];
+
         foreach($this->getCredentials() as $gCredential){
             /* @var GroupCredential $gCredential */
             $roles[] = $gCredential->getCredential()->getRole();
         }
+
         return $roles;
     }
 
@@ -86,8 +96,8 @@ class Group
      * Set the value of credentials
      *
      * @return  self
-     */ 
-    public function setCredentials($credentials)
+     */
+    public function setCredentials(Collection $credentials): self
     {
         $this->credentials = $credentials;
 
@@ -96,8 +106,8 @@ class Group
 
     /**
      * Get the value of name
-     */ 
-    public function getName()
+     */
+    public function getName(): ?string
     {
         return $this->name;
     }
@@ -106,8 +116,8 @@ class Group
      * Set the value of name
      *
      * @return  self
-     */ 
-    public function setName($name)
+     */
+    public function setName(?string $name): self
     {
         $this->name = $name;
 
@@ -117,7 +127,7 @@ class Group
     /**
      * @return mixed
      */
-    public function isRole()
+    public function isRole(): ?bool
     {
         return $this->isRole;
     }
@@ -125,29 +135,33 @@ class Group
     /**
      * @param mixed $isRole
      */
-    public function setIsRole($isRole)
+    public function setIsRole(?bool $isRole): self
     {
         $this->isRole = $isRole;
+
+        return $this;
     }
 
     /**
      * @return mixed
      */
-    public function isActif()
+    public function isActif(): ?bool
     {
         return $this->actif;
     }
 
-    public function setActif($actif)
+    public function setActif(?bool $actif): self
     {
         $this->actif = $actif;
+
+        return $this;
     }
 
- 
+
     /**
      * @return mixed
      */
-    public function getRequiredRole()
+    public function getRequiredRole(): ?string
     {
         return $this->requiredRole;
     }
@@ -155,7 +169,7 @@ class Group
     /**
      * @param mixed $requiredRole
      */
-    public function setRequiredRole($requiredRole): void
+    public function setRequiredRole(?string $requiredRole): void
     {
         $this->requiredRole = $requiredRole;
     }
@@ -166,7 +180,7 @@ class Group
         return $this->tri;
     }
 
-    public function setTri(int $tri): self
+    public function setTri(?int $tri): self
     {
         $this->tri = $tri;
 
