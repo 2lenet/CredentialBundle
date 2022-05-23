@@ -173,7 +173,7 @@ class Group
     {
         $this->requiredRole = $requiredRole;
 
-        return $this->requiredRole;
+        return $this;
     }
 
 
