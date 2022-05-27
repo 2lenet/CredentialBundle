@@ -20,12 +20,12 @@ class CredentialManagerController extends AbstractController
 {
     /** @var EntityManagerInterface */
     private $em;
-    
+
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
-    
+
     /**
      * @Route("/admin/credential", name="admin_credential")
      * @Security("is_granted('ROLE_ADMIN_DROITS')")
@@ -41,15 +41,22 @@ class CredentialManagerController extends AbstractController
         $groupCreds = $this->em->getRepository(GroupCredential::class)->findAll();
 
         $actives = [];
+        $statusAllowed = [];
 
         foreach($groupCreds as $groupCred) {
             $actives[$groupCred->getGroupe()->getName().'-'.$groupCred->getCredential()->getRole()] = $groupCred->isAllowed();
+
+            if ($groupCred->getCredential()->getListeStatus() !== null) {
+                $statusAllowed[$groupCred->getGroupe()->getName().'-'.$groupCred->getCredential()->getRole()] = $groupCred->isStatusAllowed();
+            }
         }
-        return $this->render('@LleCredential/credential/index.html.twig', 
+
+        return $this->render('@LleCredential/credential/index.html.twig',
             [
                 'credentials' => $credentials,
                 'groupes' => $groupes,
-                'actives' => $actives
+                'actives' => $actives,
+                'statusAllowed' => $statusAllowed,
             ]);
     }
 
@@ -92,7 +99,7 @@ class CredentialManagerController extends AbstractController
         $group = $request->request->getInt('group');
         $rubrique = $request->request->get('rubrique');
         $checked = $request->request->getBoolean('checked');
-        
+
         if ($rubrique) {
             $credentials = $this->em
                 ->getRepository(Credential::class)
@@ -123,6 +130,36 @@ class CredentialManagerController extends AbstractController
 
         $groupCredentialRepository->updateCredentials($group, $credentials, $checked);
 
+        $this->em->flush();
+
+        return new JsonResponse([]);
+    }
+
+    /**
+     * @Route("/admin/credential/status_allowed", name="admin_credential_status_allowed")
+     * @Security("is_granted('ROLE_ADMIN_DROITS')")
+     */
+    public function statusAllowed(Request $request, AdapterInterface $cache)
+    {
+        $cache->deleteItem('group_credentials');
+        $var = $request->request->get('id');
+        list($group, $cred) = explode('-',$var);
+        $group_cred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
+
+        if (!$group_cred) {
+            $groupObj = $this->em->getRepository(Group::class)->findOneByName($group);
+            $credential = $this->em->getRepository(Credential::class)->findOneByRole($cred);
+
+            $group_cred =  new GroupCredential();
+            $group_cred->setGroupe($groupObj);
+            $group_cred->setCredential($credential);
+            $group_cred->setAllowed(false);
+            $group_cred->setStatusAllowed(true);
+        } else {
+            $group_cred->setStatusAllowed(! $group_cred->isStatusAllowed());
+        }
+
+        $this->em->persist($group_cred);
         $this->em->flush();
 
         return new JsonResponse([]);

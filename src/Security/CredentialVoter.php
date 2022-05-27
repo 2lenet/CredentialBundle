@@ -61,8 +61,8 @@ class CredentialVoter extends Voter
 
     protected function supports($attribute, $subject): bool
     {
-         // vote on everything
-         if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER','IS_AUTHENTICATED_ANONYMOUS','IS_AUTHENTICATED_FULLY','ROLE_SUPER_ADMIN'])) {
+        // vote on everything
+        if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER','IS_AUTHENTICATED_ANONYMOUS','IS_AUTHENTICATED_FULLY'])) {
             if (!in_array($attribute, $this->roles)) {  // insert on check
                 $credential = new Credential();
                 $credential->setRole($attribute);
@@ -80,6 +80,8 @@ class CredentialVoter extends Voter
                 $this->cache->deleteItem('group_credentials');
                 $this->roles[] = $attribute;
             }
+        } else {
+            return false;
         }
         return true;
     }
@@ -99,6 +101,7 @@ class CredentialVoter extends Voter
         if (in_array('ROLE_SUPER_ADMIN', $roles)) {
             return true;
         }
+
         foreach($roles as $role) {
             $k = str_replace('ROLE_', '', $role);
             if (isset($this->groupRights[$k]) && in_array($attribute, $this->groupRights[$k])) {
