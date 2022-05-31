@@ -36,6 +36,11 @@ class GroupCredential
      */
     private $allowed = false;
 
+    /**
+     * @ORM\Column(type="boolean", nullable=true, options={"default": false})
+     */
+    private $statusAllowed = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -97,6 +102,18 @@ class GroupCredential
     public function setGroupe(Group $groupe): self
     {
         $this->groupe = $groupe;
+
+        return $this;
+    }
+
+    public function isStatusAllowed(): ?bool
+    {
+        return $this->statusAllowed;
+    }
+
+    public function setStatusAllowed(bool $statusAllowed): self
+    {
+        $this->statusAllowed = $statusAllowed;
 
         return $this;
     }
