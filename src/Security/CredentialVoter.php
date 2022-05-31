@@ -2,6 +2,8 @@
 
 namespace Lle\CredentialBundle\Security;
 
+use Lle\CredentialBundle\Model\StatusPropertyInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -12,6 +14,7 @@ use Lle\CredentialBundle\Entity\GroupCredential;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use function Composer\Autoload\includeFile;
 
 class CredentialVoter extends Voter
 {
@@ -118,10 +121,33 @@ class CredentialVoter extends Voter
             return true;
         }
 
-        foreach($roles as $role) {
-            $k = str_replace('ROLE_', '', $role);
+        $roleWithStatus = $this->em->getRepository(Credential::class)->findOneBy(["role" => $attribute]);
 
-            if (isset($this->groupRights[$k]) && in_array($attribute, $this->groupRights[$k])) {
+        foreach ($roles as $role) {
+            $groupName = str_replace("ROLE_", "", $role);
+            $group = $this->em->getRepository(Group::class)->findOneBy(["name" => $groupName]);
+
+            if ($group && $roleWithStatus->getListeStatus() !== null) {
+
+                /** @var StatusPropertyInterface|null $subject */
+
+                $groupCredential = $this->em->getRepository(GroupCredential::class)->findOneBy(["credential" => $roleWithStatus, "groupe" => $group]);
+
+                if ($subject && $groupCredential->isStatusAllowed()) {
+                    $listeStatus = $roleWithStatus->getListeStatus();
+
+                    $propertyAccessor = PropertyAccess::createPropertyAccessor();
+                    $statusProperty = $subject->getStatusProperty();
+
+                    $attribute .= "_" . strtoupper($propertyAccessor->getValue($subject, $statusProperty));
+
+                    if ($this->getVote($attribute, $groupName)) {
+                        return true;
+                    }
+                }
+            }
+
+            if ($this->getVote($attribute, $groupName)) {
                 return true;
             }
         }
@@ -129,5 +155,8 @@ class CredentialVoter extends Voter
         return false;
     }
 
-
+    public function getVote($attribute, $groupName): bool
+    {
+        return isset($this->groupRights[$groupName]) && in_array($attribute, $this->groupRights[$groupName]);
+    }
 }
