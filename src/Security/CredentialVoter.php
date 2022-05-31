@@ -14,7 +14,6 @@ use Lle\CredentialBundle\Entity\GroupCredential;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Psr\Cache\CacheItemPoolInterface;
-use function Composer\Autoload\includeFile;
 
 class CredentialVoter extends Voter
 {
