@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="Lle\CredentialBundle\Repository\CredentialRepository")
  * @ORM\Table(name="lle_credential_credential")
- * 
+ *
  */
 class Credential
 {
@@ -64,6 +64,7 @@ class Credential
 
         return $this;
     }
+
     public function getLibelle(): ?string
     {
         return $this->libelle;
@@ -78,8 +79,8 @@ class Credential
 
     /**
      * Get the value of rubrique
-     */ 
-    public function getRubrique()
+     */
+    public function getRubrique(): ?string
     {
         return $this->rubrique;
     }
@@ -88,8 +89,8 @@ class Credential
      * Set the value of rubrique
      *
      * @return  self
-     */ 
-    public function setRubrique($rubrique)
+     */
+    public function setRubrique(?string $rubrique): self
     {
         $this->rubrique = $rubrique;
 

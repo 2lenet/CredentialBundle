@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass="Lle\CredentialBundle\Repository\GroupCredentialRepository")
  * @ORM\Table(name="lle_credential_group_credential")
- * 
+ *
  */
 class GroupCredential
 {
@@ -22,7 +22,7 @@ class GroupCredential
     /**
      * @ORM\ManyToOne(targetEntity="Credential")
      * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
-     */     
+     */
     private $credential;
 
     /**
@@ -31,7 +31,7 @@ class GroupCredential
      */
     private $groupe;
 
-   /**
+    /**
      * @ORM\Column(type="boolean")
      */
     private $allowed = false;
@@ -43,8 +43,8 @@ class GroupCredential
 
     /**
      * Get the value of allowed
-     */ 
-    public function isAllowed()
+     */
+    public function isAllowed(): bool
     {
         return $this->allowed;
     }
@@ -53,8 +53,8 @@ class GroupCredential
      * Set the value of allowed
      *
      * @return  self
-     */ 
-    public function setAllowed($allowed)
+     */
+    public function setAllowed(bool $allowed): self
     {
         $this->allowed = $allowed;
 
@@ -63,7 +63,7 @@ class GroupCredential
 
     /**
      * Get the value of credential
-     */ 
+     */
     public function getCredential(): ?Credential
     {
         return $this->credential;
@@ -73,8 +73,8 @@ class GroupCredential
      * Set the value of credential
      *
      * @return  self
-     */ 
-    public function setCredential($credential)
+     */
+    public function setCredential(Credential $credential): self
     {
         $this->credential = $credential;
 
@@ -83,8 +83,8 @@ class GroupCredential
 
     /**
      * Get the value of groupe
-     */ 
-    public function getGroupe()
+     */
+    public function getGroupe(): ?Group
     {
         return $this->groupe;
     }
@@ -93,8 +93,8 @@ class GroupCredential
      * Set the value of groupe
      *
      * @return  self
-     */ 
-    public function setGroupe($groupe)
+     */
+    public function setGroupe(Group $groupe): self
     {
         $this->groupe = $groupe;
 
