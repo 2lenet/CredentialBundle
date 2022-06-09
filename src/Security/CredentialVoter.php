@@ -29,6 +29,7 @@ class CredentialVoter extends Voter
     {
         $this->decisionManager = $decisionManager;
         $this->em = $em;
+
         $cachedGroupRights = $cache->getItem('group_credentials');
 
         if (!$cachedGroupRights->isHit()) {
@@ -38,12 +39,16 @@ class CredentialVoter extends Voter
                 if ($group_cred->isAllowed()) {
                     $group_name = $group_cred->getGroupe()->getName();
                     $cred_name = $group_cred->getCredential()->getRole();
+                    $credListeStatus = $group_cred->getCredential()->getListeStatus();
 
                     if (!array_key_exists($group_name, $this->groupRights)) {
                         $this->groupRights[$group_name] = [];
                     }
 
-                    $this->groupRights[$group_name][] = $cred_name;
+                    $this->groupRights[$group_name][$cred_name] = [
+                        "listeStatus" => $credListeStatus,
+                        "statusAllowed" => $group_cred->isStatusAllowed(),
+                    ];
                 }
             }
 
@@ -120,33 +125,10 @@ class CredentialVoter extends Voter
             return true;
         }
 
-        $roleWithStatus = $this->em->getRepository(Credential::class)->findOneBy(["role" => $attribute]);
-
         foreach ($roles as $role) {
             $groupName = str_replace("ROLE_", "", $role);
-            $group = $this->em->getRepository(Group::class)->findOneBy(["name" => $groupName]);
 
-            if ($group && $roleWithStatus->getListeStatus() !== null) {
-
-                /** @var StatusPropertyInterface|null $subject */
-
-                $groupCredential = $this->em->getRepository(GroupCredential::class)->findOneBy(["credential" => $roleWithStatus, "groupe" => $group]);
-
-                if ($subject && $groupCredential->isStatusAllowed()) {
-                    $listeStatus = $roleWithStatus->getListeStatus();
-
-                    $propertyAccessor = PropertyAccess::createPropertyAccessor();
-                    $statusProperty = $subject->getStatusProperty();
-
-                    $attribute .= "_" . strtoupper($propertyAccessor->getValue($subject, $statusProperty));
-
-                    if ($this->getVote($attribute, $groupName)) {
-                        return true;
-                    }
-                }
-            }
-
-            if ($this->getVote($attribute, $groupName)) {
+            if ($this->getVote($attribute, $subject, $groupName)) {
                 return true;
             }
         }
@@ -154,8 +136,21 @@ class CredentialVoter extends Voter
         return false;
     }
 
-    public function getVote($attribute, $groupName): bool
+    public function getVote($attribute, $subject, $groupName): bool
     {
-        return isset($this->groupRights[$groupName]) && in_array($attribute, $this->groupRights[$groupName]);
+        if (isset($this->groupRights[$groupName]) && array_key_exists($attribute, $this->groupRights[$groupName])) {
+            $credential = $this->groupRights[$groupName][$attribute];
+
+            if ($subject && $credential["listeStatus"] && $credential["statusAllowed"]) {
+                $propertyAccessor = PropertyAccess::createPropertyAccessor();
+                $statusProperty = $subject->getStatusProperty();
+
+                $attribute .= "_" . strtoupper($propertyAccessor->getValue($subject, $statusProperty));
+
+                return array_key_exists($attribute, $this->groupRights[$groupName]);
+            }
+        }
+
+        return isset($this->groupRights[$groupName]) && array_key_exists($attribute, $this->groupRights[$groupName]);
     }
 }
