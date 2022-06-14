@@ -115,7 +115,12 @@ class CredentialManagerController extends AbstractController
 
         $groupCredentialRepository = $this->em->getRepository(GroupCredential::class);
 
-        $existingCredentials = $groupCredentialRepository->findByGroup($group, "credential");
+        $groupCredentials = $groupCredentialRepository->findByGroup($group);
+
+        $existingCredentials = [];
+        foreach ($groupCredentials as $groupCredential) {
+            $existingCredentials[$groupCredential->getCredential()->getId()] = $groupCredential;
+        }
 
         /** @var Credential $credential */
         foreach ($credentials as $credential) {
