@@ -36,9 +36,9 @@ class GroupCredentialRepository extends EntityRepository
             ])->getQuery()->execute();
     }
 
-    public function findByGroup($group, ?string $indexBy = null)
+    public function findByGroup($group)
     {
-        return $this->createQueryBuilder("gc", "gc.$indexBy")
+        return $this->createQueryBuilder("gc")
             ->andWhere("gc.groupe = :group")
             ->setParameter("group", $group)
             ->getQuery()
