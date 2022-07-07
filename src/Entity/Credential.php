@@ -43,6 +43,11 @@ class Credential
      */
     private $visible = true;
 
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $listeStatus;
+
     public function __toString()
     {
         return (string)$this->role;
@@ -117,6 +122,18 @@ class Credential
     public function setVisible(bool $visible): self
     {
         $this->visible = $visible;
+
+        return $this;
+    }
+
+    public function getListeStatus(): ?array
+    {
+        return $this->listeStatus;
+    }
+
+    public function setStatus(array $listeStatus): self
+    {
+        $this->listeStatus = $listeStatus;
 
         return $this;
     }
