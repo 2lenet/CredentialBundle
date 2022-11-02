@@ -2,16 +2,13 @@
 
 namespace Lle\CredentialBundle\Security;
 
-use Lle\CredentialBundle\Model\StatusPropertyInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
-use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
