@@ -131,7 +131,7 @@ class Credential
         return $this->listeStatus;
     }
 
-    public function setStatus(array $listeStatus): self
+    public function setListeStatus(array $listeStatus): self
     {
         $this->listeStatus = $listeStatus;
 
