@@ -1,4 +1,3 @@
-
 cred_routes:
     resource: '../../Controller/CredentialManagerController.php'
     type: annotation

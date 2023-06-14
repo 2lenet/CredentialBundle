@@ -12,7 +12,6 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class GroupRepository extends ServiceEntityRepository
 {
-
     private $security;
 
     public function __construct(ManagerRegistry $registry, Security $security)
@@ -21,17 +20,21 @@ class GroupRepository extends ServiceEntityRepository
         parent::__construct($registry, Group::class);
     }
 
-    public function findMineQb() {
+    public function findMineQb()
+    {
         $role = $this->security->getToken()->getRoles()[0]->getRole();
         $qb = $this->createQueryBuilder('entity')
             ->andWhere(' FIND_IN_SET (:roles, entity.requiredRole) >0')
             ->setParameter("roles", $role);
+
         return $qb;
     }
 
-    public function findMine() {
+    public function findMine()
+    {
         $qb = $this->findMineQb();
         $qb->orderBy('entity.tri');
+
         return $qb->getQuery()->getResult();
     }
 
@@ -40,11 +43,11 @@ class GroupRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('g')//, 'c.rubrique')
         ->orderBy('g.tri', 'ASC')->where('g.actif = 1')
             ->getQuery()
-            ->getResult()
-            ;
+            ->getResult();
     }
 
-    public function findRolesQb(EntityRepository $er) {
+    public function findRolesQb(EntityRepository $er)
+    {
         $qb = $er->findMineQb()
             ->andWhere('entity.isRole = 1')
             ->andWhere('entity.actif = 1')

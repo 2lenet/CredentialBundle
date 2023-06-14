@@ -14,16 +14,17 @@ use Psr\Cache\CacheItemPoolInterface;
 
 class CredentialVoter extends Voter
 {
-
     private $decisionManager;
     private $em;
     private $groupRights = [];
     private $roles = [];
     private $cache;
 
-
-    public function __construct(AccessDecisionManagerInterface $decisionManager, EntityManagerInterface $em, CacheItemPoolInterface $cache)
-    {
+    public function __construct(
+        AccessDecisionManagerInterface $decisionManager,
+        EntityManagerInterface $em,
+        CacheItemPoolInterface $cache
+    ) {
         $this->decisionManager = $decisionManager;
         $this->em = $em;
 
@@ -32,7 +33,7 @@ class CredentialVoter extends Voter
         if (!$cachedGroupRights->isHit()) {
             $group_creds = $this->em->getRepository(GroupCredential::class)->findAll();
 
-            foreach($group_creds as $group_cred) {
+            foreach ($group_creds as $group_cred) {
                 if ($group_cred->isAllowed()) {
                     $group_name = $group_cred->getGroupe()->getName();
                     $cred_name = $group_cred->getCredential()->getRole();
@@ -76,7 +77,16 @@ class CredentialVoter extends Voter
     protected function supports($attribute, $subject): bool
     {
         // vote on everything
-        if (!in_array($attribute, ['IS_AUTHENTICATED_REMEMBERED','ROLE_USER','IS_AUTHENTICATED_ANONYMOUS','IS_AUTHENTICATED_FULLY','ROLE_SUPER_ADMIN'])) {
+        if (!in_array(
+            $attribute,
+            [
+                'IS_AUTHENTICATED_REMEMBERED',
+                'ROLE_USER',
+                'IS_AUTHENTICATED_ANONYMOUS',
+                'IS_AUTHENTICATED_FULLY',
+                'ROLE_SUPER_ADMIN',
+            ]
+        )) {
             if (!in_array($attribute, $this->roles)) {  // insert on check
                 $credential = new Credential();
                 $credential->setRole($attribute);
@@ -86,7 +96,7 @@ class CredentialVoter extends Voter
 
                 $arr = explode('_', $attribute);
 
-                if (count($arr)==3) {
+                if (count($arr) == 3) {
                     $rubrique = $arr[1];
                     $credential->setRubrique($rubrique);
                 }

@@ -15,6 +15,7 @@ flex should do the job
 ## Setting up
 
 config/routes/credential.yaml:
+
 ```yml
 credential:
     resource: "@LleCredentialBundle/Resources/config/routes.yaml"
@@ -23,5 +24,7 @@ credential:
 ## RESET Rubrique name
 
 ```sql
-UPDATE lle_credential_credential SET rubrique= SUBSTRING_INDEX(SUBSTRING_INDEX(role, '_', 2), '_', -1) WHERE role like "ROLE_%";
+UPDATE lle_credential_credential
+SET rubrique= SUBSTRING_INDEX(SUBSTRING_INDEX(role, '_', 2), '_', -1)
+WHERE role like "ROLE_%";
 ``` 

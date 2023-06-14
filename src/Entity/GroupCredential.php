@@ -17,25 +17,20 @@ class GroupCredential
      * @ORM\Column(type="integer")
      */
     private $id;
-
-
     /**
      * @ORM\ManyToOne(targetEntity="Credential")
      * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $credential;
-
     /**
      * @ORM\ManyToOne(targetEntity="Group", inversedBy="credentials")
      * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $groupe;
-
     /**
      * @ORM\Column(type="boolean")
      */
     private $allowed = false;
-
     /**
      * @ORM\Column(type="boolean", nullable=true, options={"default": false})
      */

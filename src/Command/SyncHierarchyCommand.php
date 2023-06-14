@@ -1,6 +1,7 @@
 <?php
 
 namespace Lle\CredentialBundle\Command;
+
 use App\Entity\Eleve;
 use App\Service\GeoLoc;
 use Doctrine\ORM\EntityManagerInterface;
@@ -12,12 +13,10 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class SyncHierarchyCommand extends Command{
-
-
+class SyncHierarchyCommand extends Command
+{
     const ROLE_GROUPE = 'role_groupe';
     protected static $defaultName = 'lle:credential:sync-hierarchy';
-
     private $hierarchy;
     private $em;
 
@@ -32,20 +31,20 @@ class SyncHierarchyCommand extends Command{
     {
         $this
             ->setDescription('sync hierachy security')
-            ->addArgument(self::ROLE_GROUPE , InputArgument::REQUIRED, 'Role racine')
-        ;
+            ->addArgument(self::ROLE_GROUPE, InputArgument::REQUIRED, 'Role racine');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $roles = [];
-        foreach($this->em->getRepository(Credential::class)->findAll() as $r){
+        foreach ($this->em->getRepository(Credential::class)->findAll() as $r) {
             $roles[$r->getRole()] = $r;
         }
         $rootRole = $input->getArgument(self::ROLE_GROUPE);
         $list = [];
-        $groupe = $this->em->getRepository(Group::class)->findOneBy(['name' => str_replace('ROLE_', '', $rootRole)]); // not agree this
-        if(!$groupe){
+        $groupe = $this->em->getRepository(Group::class)->findOneBy(['name' => str_replace('ROLE_', '', $rootRole)]
+        ); // not agree this
+        if (!$groupe) {
             $groupe = new Group();
             $groupe->setName(str_replace('ROLE_', '', $rootRole));
             $groupe->setIsRole(true);
@@ -57,35 +56,42 @@ class SyncHierarchyCommand extends Command{
             $this->em->flush();
         }
         $this->generateListRoles($rootRole, $list);
-        foreach($list as $role){
+        foreach ($list as $role) {
             $credential = $roles[$role] ?? new Credential();
             $credential->setTri(0);
             $roles[$role] = $credential;
-            $r = explode('_',$role);
+            $r = explode('_', $role);
             $credential->setRubrique($r[1] ?? 'other');
             $credential->setLibelle(
                 strtolower(
-                    str_replace($credential->getRubrique(), '',
-                        str_replace('ROLE_', '', $role))));
-            $credential->setLibelle(ucfirst(trim(str_replace('_',' ', $credential->getLibelle()))));
+                    str_replace(
+                        $credential->getRubrique(),
+                        '',
+                        str_replace('ROLE_', '', $role)
+                    )
+                )
+            );
+            $credential->setLibelle(ucfirst(trim(str_replace('_', ' ', $credential->getLibelle()))));
             $credential->setRole($role);
             $this->em->persist($credential);
-            $assoc = $this->em->getRepository(GroupCredential::class)->findOneBy(['credential'=> $credential, 'groupe'=> $groupe]) ?? new GroupCredential();
+            $assoc = $this->em->getRepository(GroupCredential::class)->findOneBy(
+                ['credential' => $credential, 'groupe' => $groupe]
+            ) ?? new GroupCredential();
             $assoc->setCredential($credential);
             $assoc->setGroupe($groupe);
             $assoc->setAllowed(true);
             $this->em->persist($assoc);
-            $this->em->flush();
         }
-
+        $this->em->flush();
     }
 
-    private function generateListRoles($role, &$list){
-        if(isset($this->hierarchy[$role])){
-            foreach($this->hierarchy[$role] as $srole) {
+    private function generateListRoles($role, &$list)
+    {
+        if (isset($this->hierarchy[$role])) {
+            foreach ($this->hierarchy[$role] as $srole) {
                 $this->generateListRoles($srole, $list);
             }
-        }else{
+        } else {
             $list[] = $role;
         }
     }

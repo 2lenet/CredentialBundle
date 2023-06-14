@@ -4,7 +4,7 @@
     "description": "The 2LE's Credential Bundle.",
     "license": "MIT",
     "require": {
-	      "php": ">=7.2"
+        "php": ">=7.2"
     },
     "autoload": {
         "psr-4": {

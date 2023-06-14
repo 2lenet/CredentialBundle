@@ -19,46 +19,38 @@ class Group
      * @ORM\Column(type="integer")
      */
     private $id;
-
     /**
      * @ORM\Column(type="string", length=255)
      */
     private $name;
-
     /**
      * @ORM\OneToMany(targetEntity="GroupCredential", mappedBy="groupe")
      * @ORM\JoinColumn(nullable=false)
      */
     private $credentials;
-
     /**
      * @ORM\Column(type="boolean")
      */
     private $isRole;
-
     /**
      * @ORM\Column(type="boolean")
      */
     private $actif;
-
     /**
      * @ORM\Column(type="string", length=255)
      */
     private $requiredRole;
-
     /**
      * @ORM\Column(type="integer")
      */
     private $tri;
-
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $libelle;
 
-
-
-    public function __toString(){
+    public function __toString()
+    {
         return $this->libelle;
     }
 
@@ -84,7 +76,7 @@ class Group
     {
         $roles = [];
 
-        foreach($this->getCredentials() as $gCredential){
+        foreach ($this->getCredentials() as $gCredential) {
             /* @var GroupCredential $gCredential */
             $roles[] = $gCredential->getCredential()->getRole();
         }
@@ -157,7 +149,6 @@ class Group
         return $this;
     }
 
-
     /**
      * @return mixed
      */
@@ -175,7 +166,6 @@ class Group
 
         return $this;
     }
-
 
     public function getTri(): ?int
     {
@@ -200,5 +190,4 @@ class Group
 
         return $this;
     }
-
 }

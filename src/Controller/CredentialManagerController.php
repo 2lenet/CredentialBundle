@@ -43,22 +43,25 @@ class CredentialManagerController extends AbstractController
         $actives = [];
         $statusAllowed = [];
 
-        foreach($groupCreds as $groupCred) {
-            $actives[$groupCred->getGroupe()->getName().'-'.$groupCred->getCredential()->getRole()] = $groupCred->isAllowed();
+        foreach ($groupCreds as $groupCred) {
+            $actives[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole(
+            )] = $groupCred->isAllowed();
 
             if ($groupCred->getCredential()->getListeStatus() !== null) {
-                $statusAllowed[$groupCred->getGroupe()->getName().'-'.$groupCred->getCredential()->getRole()] = $groupCred->isStatusAllowed();
+                $statusAllowed[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole(
+                )] = $groupCred->isStatusAllowed();
             }
-
         }
 
-        return $this->render('@LleCredential/credential/index.html.twig',
+        return $this->render(
+            '@LleCredential/credential/index.html.twig',
             [
                 'credentials' => $credentials,
                 'groupes' => $groupes,
                 'actives' => $actives,
                 'statusAllowed' => $statusAllowed,
-            ]);
+            ]
+        );
     }
 
     /**
@@ -69,7 +72,7 @@ class CredentialManagerController extends AbstractController
     {
         $cache->deleteItem('group_credentials');
         $var = $request->request->get('id');
-        list($group, $cred) = explode('-',$var);
+        [$group, $cred] = explode('-', $var);
         $group_cred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
 
         if (!$group_cred) {
@@ -151,7 +154,7 @@ class CredentialManagerController extends AbstractController
 
         $var = $request->request->get("id");
 
-        list($group, $cred, $status) = explode("-", $var);
+        [$group, $cred, $status] = explode("-", $var);
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
 
         if (!$groupCred) {
@@ -183,7 +186,7 @@ class CredentialManagerController extends AbstractController
 
         $var = $request->request->get("id");
 
-        list($group, $cred, $status) = explode("-", $var);
+        [$group, $cred, $status] = explode("-", $var);
         $statusCred = $cred . "_" . strtoupper($status);
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $statusCred);
 
