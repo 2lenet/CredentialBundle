@@ -3,6 +3,7 @@
 namespace Lle\CredentialBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Lle\CredentialBundle\Service\CredentialService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,9 +19,12 @@ class CredentialManagerController extends AbstractController
 {
     private EntityManagerInterface $em;
 
-    public function __construct(EntityManagerInterface $em)
+    private CredentialService $credentialService;
+
+    public function __construct(EntityManagerInterface $em, CredentialService $credentialService)
     {
         $this->em = $em;
+        $this->credentialService = $credentialService;
     }
 
     #[Route('/admin/credential', name: 'admin_credential')]
@@ -118,7 +122,7 @@ class CredentialManagerController extends AbstractController
             $existingCredentials[$groupCredential->getCredential()->getId()] = $groupCredential;
         }
 
-        $this->toggleAll($credentials, $existingCredentials, $group, $checked);
+        $this->credentialService->toggleAll($credentials, $existingCredentials, $group, $checked);
 
         $groupCredentialRepository->updateCredentials($group, $credentials, $checked);
 
@@ -174,7 +178,7 @@ class CredentialManagerController extends AbstractController
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $statusCred);
 
         if (!$groupCred) {
-            $this->allowedByStatus($group, $cred, $status);
+            $this->credentialService->allowedByStatus($group, $cred, $status);
         } else {
             $groupCred->setAllowed(!$groupCred->isAllowed());
         }
@@ -183,44 +187,5 @@ class CredentialManagerController extends AbstractController
         $this->em->flush();
 
         return new JsonResponse([]);
-    }
-
-    public function toggleAll(array $credentials, array $existingCredentials, Group $group, bool $checked): void
-    {
-        /** @var Credential $credential */
-        foreach ($credentials as $credential) {
-            if (!array_key_exists($credential->getId(), $existingCredentials)) {
-                $groupCredential = new GroupCredential();
-                $groupCredential->setGroupe($group);
-                $groupCredential->setCredential($credential);
-                $groupCredential->setAllowed($checked);
-
-                $this->em->persist($groupCredential);
-            }
-        }
-    }
-
-    public function allowedByStatus(?string $group, ?string $statusCred, ?string $cred): void
-    {
-        $groupObj = $this->em->getRepository(Group::class)->findOneByName($group);
-        $credential = $this->em->getRepository(Credential::class)->findOneByRole($statusCred);
-
-        $cred = $this->em->getRepository(Credential::class)->findOneByRole($cred);
-
-        if (!$credential) {
-            $credential = new Credential();
-            $credential->setRole($statusCred);
-            $credential->setLibelle($statusCred);
-            $credential->setRubrique($cred->getRubrique());
-            $credential->setTri(false);
-            $credential->setVisible(true);
-
-            $this->em->persist($credential);
-        }
-
-        $groupCred = new GroupCredential();
-        $groupCred->setGroupe($groupObj);
-        $groupCred->setCredential($credential);
-        $groupCred->setAllowed(true);
     }
 }

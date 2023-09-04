@@ -18,3 +18,5 @@ services:
         arguments: ["@doctrine.orm.default_entity_manager","%security.role_hierarchy.roles%"]
         tags:
             - { name: 'console.command' }
+
+    Lle\CredentialBundle\Service\CredentialService: ~
