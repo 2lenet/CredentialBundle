@@ -16,8 +16,13 @@ class CredentialService
         $this->em = $em;
     }
 
-    public function toggleAll(array $credentials, array $existingCredentials, Group $group, bool $checked): void
+    public function toggleAll(array $groupCredentials, array $credentials, Group $group, bool $checked): void
     {
+        $existingCredentials = [];
+        foreach ($groupCredentials as $groupCredential) {
+            $existingCredentials[$groupCredential->getCredential()->getId()] = $groupCredential;
+        }
+
         /** @var Credential $credential */
         foreach ($credentials as $credential) {
             if (!array_key_exists($credential->getId(), $existingCredentials)) {

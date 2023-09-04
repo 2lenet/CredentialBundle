@@ -17,26 +17,32 @@ class Credential
      * @ORM\Column(type="integer")
      */
     private $id;
+
     /**
      * @ORM\Column(type="string", length=255)
      */
     private $role;
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $libelle;
+
     /**
      * @ORM\Column(type="string", length=255)
      */
     private $rubrique;
+
     /**
      * @ORM\Column(type="integer")
      */
     private $tri;
+
     /**
      * @ORM\Column(type="boolean", nullable=true, options={"default": true})
      */
     private $visible = true;
+
     /**
      * @ORM\Column(type="json", nullable=true)
      */

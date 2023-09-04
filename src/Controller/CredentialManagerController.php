@@ -117,12 +117,7 @@ class CredentialManagerController extends AbstractController
 
         $groupCredentials = $groupCredentialRepository->findByGroup($group);
 
-        $existingCredentials = [];
-        foreach ($groupCredentials as $groupCredential) {
-            $existingCredentials[$groupCredential->getCredential()->getId()] = $groupCredential;
-        }
-
-        $this->credentialService->toggleAll($credentials, $existingCredentials, $group, $checked);
+        $this->credentialService->toggleAll($groupCredentials, $credentials, $group, $checked);
 
         $groupCredentialRepository->updateCredentials($group, $credentials, $checked);
 
