@@ -9,28 +9,23 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
-use Lle\CredentialBundle\Entity\GroupRepository;
 use Lle\CredentialBundle\Entity\GroupCredential;
 use Psr\Cache\CacheItemPoolInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class CredentialManagerController extends AbstractController
 {
-    /** @var EntityManagerInterface */
-    private $em;
+    private EntityManagerInterface $em;
 
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
 
-    /**
-     * @Route("/admin/credential", name="admin_credential")
-     * @Security("is_granted('ROLE_ADMIN_DROITS')")
-     */
-    public function index()
+    #[Route('/admin/credential', name: 'admin_credential')]
+    #[IsGranted('ROLE_ADMIN_DROITS')]
+    public function index(): Response
     {
         $credentialRepository = $this->em->getRepository(Credential::class);
         $groupRepository = $this->em->getRepository(Group::class);
@@ -44,12 +39,12 @@ class CredentialManagerController extends AbstractController
         $statusAllowed = [];
 
         foreach ($groupCreds as $groupCred) {
-            $actives[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole(
-            )] = $groupCred->isAllowed();
+            $actives[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole()] =
+                $groupCred->isAllowed();
 
             if ($groupCred->getCredential()->getListeStatus() !== null) {
-                $statusAllowed[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole(
-                )] = $groupCred->isStatusAllowed();
+                $statusAllowed[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole()] =
+                    $groupCred->isStatusAllowed();
             }
         }
 
@@ -64,15 +59,15 @@ class CredentialManagerController extends AbstractController
         );
     }
 
-    /**
-     * @Route("/admin/credential/toggle", name="admin_credential_toggle")
-     * @Security("is_granted('ROLE_ADMIN_DROITS')")
-     */
+    #[Route('/admin/credential/toggle', name: 'admin_credential_toggle')]
+    #[IsGranted('ROLE_ADMIN_DROITS')]
     public function toggle(Request $request, CacheItemPoolInterface $cache): JsonResponse
     {
         $cache->deleteItem('group_credentials');
         $var = $request->request->get('id');
         [$group, $cred] = explode('-', $var);
+
+        /** @var ?GroupCredential $group_cred */
         $group_cred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
 
         if (!$group_cred) {
@@ -93,10 +88,8 @@ class CredentialManagerController extends AbstractController
         return new JsonResponse([]);
     }
 
-    /**
-     * @Route("/admin/credential/toggle_all", name="admin_credential_toggle_all")
-     * @Security("is_granted('ROLE_ADMIN_DROITS')")
-     */
+    #[Route('/admin/credential/toggle_all', name: 'admin_credential_toggle_all')]
+    #[IsGranted('ROLE_ADMIN_DROITS')]
     public function toggleAll(Request $request, CacheItemPoolInterface $cache): JsonResponse
     {
         $cache->deleteItem('group_credentials');
@@ -144,10 +137,8 @@ class CredentialManagerController extends AbstractController
         return new JsonResponse([]);
     }
 
-    /**
-     * @Route("/admin/credential/allowed_status", name="admin_credential_allowed_status")
-     * @Security("is_granted('ROLE_ADMIN_DROITS')")
-     */
+    #[Route('/admin/credential/allowed_status', name: 'admin_credential_allowed_status')]
+    #[IsGranted('ROLE_ADMIN_DROITS')]
     public function allowedStatus(Request $request, CacheItemPoolInterface $cache): JsonResponse
     {
         $cache->deleteItem("group_credentials");
@@ -155,6 +146,8 @@ class CredentialManagerController extends AbstractController
         $var = $request->request->get("id");
 
         [$group, $cred, $status] = explode("-", $var);
+
+        /** @var ?GroupCredential $groupCred */
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
 
         if (!$groupCred) {
@@ -176,10 +169,8 @@ class CredentialManagerController extends AbstractController
         return new JsonResponse([]);
     }
 
-    /**
-     * @Route("/admin/credential/allowed_for_status", name="admin_credential_allowed_for_status")
-     * @Security("is_granted('ROLE_ADMIN_DROITS')")
-     */
+    #[Route('/admin/credential/allowed_for_status', name: 'admin_credential_allowed_for_status')]
+    #[IsGranted('ROLE_ADMIN_DROITS')]
     public function allowedByStatus(Request $request, CacheItemPoolInterface $cache): JsonResponse
     {
         $cache->deleteItem("group_credentials");
@@ -188,6 +179,8 @@ class CredentialManagerController extends AbstractController
 
         [$group, $cred, $status] = explode("-", $var);
         $statusCred = $cred . "_" . strtoupper($status);
+
+        /** @var ?GroupCredential $groupCred */
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $statusCred);
 
         if (!$groupCred) {

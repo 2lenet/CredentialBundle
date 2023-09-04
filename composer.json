@@ -4,7 +4,7 @@
     "description": "The 2LE's Credential Bundle.",
     "license": "MIT",
     "require": {
-        "php": ">=7.2",
+        "php": "^8.0",
         "symfony/console": "^6.0",
         "symfony/framework-bundle": "^6.0",
         "symfony/http-kernel": "^6.0",
