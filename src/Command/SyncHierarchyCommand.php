@@ -16,34 +16,40 @@ use Symfony\Component\Console\Output\OutputInterface;
 class SyncHierarchyCommand extends Command
 {
     const ROLE_GROUPE = 'role_groupe';
-    protected static $defaultName = 'lle:credential:sync-hierarchy';
-    private $hierarchy;
-    private $em;
 
-    public function __construct(EntityManagerInterface $em, $hierarchy)
+    protected static $defaultName = 'lle:credential:sync-hierarchy';
+
+    private array $hierarchy = [];
+
+    private EntityManagerInterface $em;
+
+    public function __construct(EntityManagerInterface $em, array $hierarchy)
     {
         parent::__construct();
         $this->hierarchy = $hierarchy;
         $this->em = $em;
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setDescription('sync hierachy security')
             ->addArgument(self::ROLE_GROUPE, InputArgument::REQUIRED, 'Role racine');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): void
     {
         $roles = [];
+
         foreach ($this->em->getRepository(Credential::class)->findAll() as $r) {
             $roles[$r->getRole()] = $r;
         }
+
         $rootRole = $input->getArgument(self::ROLE_GROUPE);
         $list = [];
-        $groupe = $this->em->getRepository(Group::class)->findOneBy(['name' => str_replace('ROLE_', '', $rootRole)]
-        ); // not agree this
+
+        $groupe = $this->em->getRepository(Group::class)
+            ->findOneBy(['name' => str_replace('ROLE_', '', $rootRole)]); // not agree this
         if (!$groupe) {
             $groupe = new Group();
             $groupe->setName(str_replace('ROLE_', '', $rootRole));
@@ -52,15 +58,20 @@ class SyncHierarchyCommand extends Command
             $groupe->setRequiredRole('');
             $groupe->setTri(0);
             $groupe->setLibelle(strtolower($groupe->getName()));
+
             $this->em->persist($groupe);
             $this->em->flush();
         }
+
         $this->generateListRoles($rootRole, $list);
+
         foreach ($list as $role) {
             $credential = $roles[$role] ?? new Credential();
             $credential->setTri(0);
+
             $roles[$role] = $credential;
             $r = explode('_', $role);
+
             $credential->setRubrique($r[1] ?? 'other');
             $credential->setLibelle(
                 strtolower(
@@ -73,19 +84,22 @@ class SyncHierarchyCommand extends Command
             );
             $credential->setLibelle(ucfirst(trim(str_replace('_', ' ', $credential->getLibelle()))));
             $credential->setRole($role);
+
             $this->em->persist($credential);
-            $assoc = $this->em->getRepository(GroupCredential::class)->findOneBy(
-                ['credential' => $credential, 'groupe' => $groupe]
-            ) ?? new GroupCredential();
+
+            $assoc = $this->em->getRepository(GroupCredential::class)
+                ->findOneBy(['credential' => $credential, 'groupe' => $groupe]) ?? new GroupCredential();
             $assoc->setCredential($credential);
             $assoc->setGroupe($groupe);
             $assoc->setAllowed(true);
+
             $this->em->persist($assoc);
         }
+
         $this->em->flush();
     }
 
-    private function generateListRoles($role, &$list)
+    private function generateListRoles(string $role, mixed &$list): void
     {
         if (isset($this->hierarchy[$role])) {
             foreach ($this->hierarchy[$role] as $srole) {

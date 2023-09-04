@@ -9,23 +9,22 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\GroupCredential;
-use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Psr\Cache\CacheItemPoolInterface;
 
 class CredentialVoter extends Voter
 {
-    private $decisionManager;
-    private $em;
-    private $groupRights = [];
-    private $roles = [];
-    private $cache;
+    private EntityManagerInterface $em;
+
+    private CacheItemPoolInterface $cache;
+
+    private array $groupRights = [];
+
+    private array $roles = [];
 
     public function __construct(
-        AccessDecisionManagerInterface $decisionManager,
         EntityManagerInterface $em,
         CacheItemPoolInterface $cache
     ) {
-        $this->decisionManager = $decisionManager;
         $this->em = $em;
 
         $cachedGroupRights = $cache->getItem('group_credentials');
@@ -74,7 +73,7 @@ class CredentialVoter extends Voter
         $this->cache = $cache;
     }
 
-    protected function supports($attribute, $subject): bool
+    protected function supports(?string $attribute, mixed $subject): bool
     {
         // vote on everything
         if (!in_array(
@@ -116,7 +115,7 @@ class CredentialVoter extends Voter
         return true;
     }
 
-    protected function voteOnAttribute($attribute, $subject, TokenInterface $token): bool
+    protected function voteOnAttribute(?string $attribute, mixed $subject, TokenInterface $token): bool
     {
         $user = $token->getUser();
 
@@ -143,7 +142,7 @@ class CredentialVoter extends Voter
         return false;
     }
 
-    public function getVote($attribute, $subject, $groupName): bool
+    public function getVote(?string $attribute, mixed $subject, ?string $groupName): bool
     {
         if (isset($this->groupRights[$groupName]) && array_key_exists($attribute, $this->groupRights[$groupName])) {
             $credential = $this->groupRights[$groupName][$attribute];
