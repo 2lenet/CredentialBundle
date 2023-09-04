@@ -25,7 +25,7 @@ class CredentialManagerController extends AbstractController
 
     #[Route('/admin/credential', name: 'admin_credential')]
     #[IsGranted('ROLE_ADMIN_DROITS')]
-    public function index(): Response
+    public function indexAction(): Response
     {
         $credentialRepository = $this->em->getRepository(Credential::class);
         $groupRepository = $this->em->getRepository(Group::class);
@@ -61,7 +61,7 @@ class CredentialManagerController extends AbstractController
 
     #[Route('/admin/credential/toggle', name: 'admin_credential_toggle')]
     #[IsGranted('ROLE_ADMIN_DROITS')]
-    public function toggle(Request $request, CacheItemPoolInterface $cache): JsonResponse
+    public function toggleAction(Request $request, CacheItemPoolInterface $cache): JsonResponse
     {
         $cache->deleteItem('group_credentials');
         $var = $request->request->get('id');
@@ -90,7 +90,7 @@ class CredentialManagerController extends AbstractController
 
     #[Route('/admin/credential/toggle_all', name: 'admin_credential_toggle_all')]
     #[IsGranted('ROLE_ADMIN_DROITS')]
-    public function toggleAll(Request $request, CacheItemPoolInterface $cache): JsonResponse
+    public function toggleAllAction(Request $request, CacheItemPoolInterface $cache): JsonResponse
     {
         $cache->deleteItem('group_credentials');
         $group = $request->request->getInt('group');
@@ -139,7 +139,7 @@ class CredentialManagerController extends AbstractController
 
     #[Route('/admin/credential/allowed_status', name: 'admin_credential_allowed_status')]
     #[IsGranted('ROLE_ADMIN_DROITS')]
-    public function allowedStatus(Request $request, CacheItemPoolInterface $cache): JsonResponse
+    public function allowedStatusAction(Request $request, CacheItemPoolInterface $cache): JsonResponse
     {
         $cache->deleteItem("group_credentials");
 
@@ -171,7 +171,7 @@ class CredentialManagerController extends AbstractController
 
     #[Route('/admin/credential/allowed_for_status', name: 'admin_credential_allowed_for_status')]
     #[IsGranted('ROLE_ADMIN_DROITS')]
-    public function allowedByStatus(Request $request, CacheItemPoolInterface $cache): JsonResponse
+    public function allowedByStatusAction(Request $request, CacheItemPoolInterface $cache): JsonResponse
     {
         $cache->deleteItem("group_credentials");
 
