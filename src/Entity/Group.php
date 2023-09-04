@@ -72,7 +72,7 @@ class Group
         return $this->credentials;
     }
 
-    public function getRoles()
+    public function getRoles(): array
     {
         $roles = [];
 
