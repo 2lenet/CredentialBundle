@@ -118,17 +118,7 @@ class CredentialManagerController extends AbstractController
             $existingCredentials[$groupCredential->getCredential()->getId()] = $groupCredential;
         }
 
-        /** @var Credential $credential */
-        foreach ($credentials as $credential) {
-            if (!array_key_exists($credential->getId(), $existingCredentials)) {
-                $groupCredential = new GroupCredential();
-                $groupCredential->setGroupe($group);
-                $groupCredential->setCredential($credential);
-                $groupCredential->setAllowed($checked);
-
-                $this->em->persist($groupCredential);
-            }
-        }
+        $this->toggleAll($credentials, $existingCredentials, $group, $checked);
 
         $groupCredentialRepository->updateCredentials($group, $credentials, $checked);
 
@@ -184,26 +174,7 @@ class CredentialManagerController extends AbstractController
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $statusCred);
 
         if (!$groupCred) {
-            $groupObj = $this->em->getRepository(Group::class)->findOneByName($group);
-            $credential = $this->em->getRepository(Credential::class)->findOneByRole($statusCred);
-
-            $cred = $this->em->getRepository(Credential::class)->findOneByRole($cred);
-
-            if (!$credential) {
-                $credential = new Credential();
-                $credential->setRole($statusCred);
-                $credential->setLibelle($statusCred);
-                $credential->setRubrique($cred->getRubrique());
-                $credential->setTri(false);
-                $credential->setVisible(true);
-
-                $this->em->persist($credential);
-            }
-
-            $groupCred = new GroupCredential();
-            $groupCred->setGroupe($groupObj);
-            $groupCred->setCredential($credential);
-            $groupCred->setAllowed(true);
+            $this->allowedByStatus($group, $cred, $status);
         } else {
             $groupCred->setAllowed(!$groupCred->isAllowed());
         }
@@ -212,5 +183,44 @@ class CredentialManagerController extends AbstractController
         $this->em->flush();
 
         return new JsonResponse([]);
+    }
+
+    public function toggleAll(array $credentials, array $existingCredentials, Group $group, bool $checked): void
+    {
+        /** @var Credential $credential */
+        foreach ($credentials as $credential) {
+            if (!array_key_exists($credential->getId(), $existingCredentials)) {
+                $groupCredential = new GroupCredential();
+                $groupCredential->setGroupe($group);
+                $groupCredential->setCredential($credential);
+                $groupCredential->setAllowed($checked);
+
+                $this->em->persist($groupCredential);
+            }
+        }
+    }
+
+    public function allowedByStatus(?string $group, ?string $statusCred, ?string $cred): void
+    {
+        $groupObj = $this->em->getRepository(Group::class)->findOneByName($group);
+        $credential = $this->em->getRepository(Credential::class)->findOneByRole($statusCred);
+
+        $cred = $this->em->getRepository(Credential::class)->findOneByRole($cred);
+
+        if (!$credential) {
+            $credential = new Credential();
+            $credential->setRole($statusCred);
+            $credential->setLibelle($statusCred);
+            $credential->setRubrique($cred->getRubrique());
+            $credential->setTri(false);
+            $credential->setVisible(true);
+
+            $this->em->persist($credential);
+        }
+
+        $groupCred = new GroupCredential();
+        $groupCred->setGroupe($groupObj);
+        $groupCred->setCredential($credential);
+        $groupCred->setAllowed(true);
     }
 }
