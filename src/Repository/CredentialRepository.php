@@ -8,10 +8,10 @@ use Doctrine\ORM\EntityRepository;
 
 class CredentialRepository extends EntityRepository
 {
-    public function findAllOrdered()
+    public function findAllOrdered(): array
     {
         return $this->createQueryBuilder('c')//, 'c.rubrique')
-        ->andWhere('c.visible = true')
+            ->andWhere('c.visible = true')
             ->orWhere('c.visible IS NULL')
             ->orderBy('c.rubrique', 'ASC')
             ->addOrderBy('c.role', 'ASC')

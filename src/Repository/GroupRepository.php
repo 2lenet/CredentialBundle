@@ -3,56 +3,53 @@
 namespace Lle\CredentialBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Lle\CredentialBundle\Entity\Credential;
-use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Lle\CredentialBundle\Entity\Group;
-use Symfony\Bridge\Doctrine\RegistryInterface;
-use Symfony\Component\Security\Core\Security;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class GroupRepository extends ServiceEntityRepository
 {
-    private $security;
+    private Security $security;
 
     public function __construct(ManagerRegistry $registry, Security $security)
     {
-        $this->security = $security;
         parent::__construct($registry, Group::class);
+        $this->security = $security;
     }
 
-    public function findMineQb()
+    public function findMineQb(): QueryBuilder
     {
-        $role = $this->security->getToken()->getRoles()[0]->getRole();
-        $qb = $this->createQueryBuilder('entity')
-            ->andWhere(' FIND_IN_SET (:roles, entity.requiredRole) >0')
+        $token = $this->security->getToken();
+        $role = $token->getRoles()[0]->getRole();
+
+        return $this->createQueryBuilder('entity')
+            ->andWhere('FIND_IN_SET (:roles, entity.requiredRole) > 0')
             ->setParameter("roles", $role);
-
-        return $qb;
     }
 
-    public function findMine()
+    public function findMine(): mixed
     {
-        $qb = $this->findMineQb();
-        $qb->orderBy('entity.tri');
-
-        return $qb->getQuery()->getResult();
-    }
-
-    public function findAllOrdered()
-    {
-        return $this->createQueryBuilder('g')//, 'c.rubrique')
-        ->orderBy('g.tri', 'ASC')->where('g.actif = 1')
+        return $this->findMineQb()
+            ->orderBy('entity.tri')
             ->getQuery()
             ->getResult();
     }
 
-    public function findRolesQb(EntityRepository $er)
+    public function findAllOrdered(): mixed
     {
-        $qb = $er->findMineQb()
+        return $this->createQueryBuilder('g')
+            ->orderBy('g.tri', 'ASC')->where('g.actif = 1')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findRolesQb(): QueryBuilder
+    {
+        return $this
+            ->findMineQb()
             ->andWhere('entity.isRole = 1')
             ->andWhere('entity.actif = 1')
             ->orderBy('entity.tri');
-
-        return $qb;
     }
 }

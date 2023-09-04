@@ -37,7 +37,7 @@ class GroupCredentialRepository extends EntityRepository
             ->execute();
     }
 
-    public function findByGroup(?int $group): array
+    public function findByGroup(?int $group): mixed
     {
         return $this->createQueryBuilder("gc")
             ->andWhere("gc.groupe = :group")
