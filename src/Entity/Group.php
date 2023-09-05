@@ -19,31 +19,38 @@ class Group
      * @ORM\Column(type="integer")
      */
     private $id;
+
     /**
      * @ORM\Column(type="string", length=255)
      */
     private $name;
+
     /**
      * @ORM\OneToMany(targetEntity="GroupCredential", mappedBy="groupe")
      * @ORM\JoinColumn(nullable=false)
      */
     private $credentials;
+
     /**
      * @ORM\Column(type="boolean")
      */
     private $isRole;
+
     /**
      * @ORM\Column(type="boolean")
      */
     private $actif;
+
     /**
      * @ORM\Column(type="string", length=255)
      */
     private $requiredRole;
+
     /**
      * @ORM\Column(type="integer")
      */
     private $tri;
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
@@ -72,7 +79,7 @@ class Group
         return $this->credentials;
     }
 
-    public function getRoles()
+    public function getRoles(): array
     {
         $roles = [];
 
