@@ -9,11 +9,9 @@ use Lle\CredentialBundle\Entity\GroupCredential;
 
 class CredentialService
 {
-    private EntityManagerInterface $em;
-
-    public function __construct(EntityManagerInterface $em)
-    {
-        $this->em = $em;
+    public function __construct(
+        private EntityManagerInterface $em,
+    ) {
     }
 
     public function toggleAll(array $groupCredentials, array $credentials, Group $group, bool $checked): void
@@ -38,17 +36,17 @@ class CredentialService
 
     public function allowedByStatus(?string $group, ?string $statusCred, ?string $cred): void
     {
-        $groupObj = $this->em->getRepository(Group::class)->findOneByName($group);
-        $credential = $this->em->getRepository(Credential::class)->findOneByRole($statusCred);
+        $groupObj = $this->em->getRepository(Group::class)->findOneBy(['name' => $group]);
+        $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $statusCred]);
 
-        $cred = $this->em->getRepository(Credential::class)->findOneByRole($cred);
+        $cred = $this->em->getRepository(Credential::class)->findOneBy(['role' => $cred]);
 
         if (!$credential) {
             $credential = new Credential();
             $credential->setRole($statusCred);
             $credential->setLibelle($statusCred);
             $credential->setRubrique($cred->getRubrique());
-            $credential->setTri(false);
+            $credential->setTri(0);
             $credential->setVisible(true);
 
             $this->em->persist($credential);

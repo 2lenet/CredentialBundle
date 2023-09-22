@@ -8,7 +8,7 @@ services:
         resource: '../../Security'
 
     Lle\CredentialBundle\Repository\:
-        resource: '../../Repository'
+        resource: '../../Repository/*'
 
     Lle\CredentialBundle\Controller\:
         resource: '../../Controller'

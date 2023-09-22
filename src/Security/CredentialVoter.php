@@ -2,49 +2,41 @@
 
 namespace Lle\CredentialBundle\Security;
 
-use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\Voter\Voter;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\GroupCredential;
 use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\Voter\Voter;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class CredentialVoter extends Voter
 {
-    private EntityManagerInterface $em;
-
-    private CacheItemPoolInterface $cache;
-
-    private array $groupRights = [];
-
-    private array $roles = [];
-
     public function __construct(
-        EntityManagerInterface $em,
-        CacheItemPoolInterface $cache
+        private EntityManagerInterface $em,
+        private CacheItemPoolInterface $cache,
+        private array $groupRights = [],
+        private array $roles = [],
     ) {
-        $this->em = $em;
-
         $cachedGroupRights = $cache->getItem('group_credentials');
 
         if (!$cachedGroupRights->isHit()) {
-            $group_creds = $this->em->getRepository(GroupCredential::class)->findAll();
+            $groupCreds = $this->em->getRepository(GroupCredential::class)->findAll();
 
-            foreach ($group_creds as $group_cred) {
-                if ($group_cred->isAllowed()) {
-                    $group_name = $group_cred->getGroupe()->getName();
-                    $cred_name = $group_cred->getCredential()->getRole();
-                    $credListeStatus = $group_cred->getCredential()->getListeStatus();
+            foreach ($groupCreds as $groupCred) {
+                if ($groupCred->isAllowed()) {
+                    $groupName = $groupCred->getGroupe()->getName();
+                    $credName = $groupCred->getCredential()->getRole();
+                    $credListeStatus = $groupCred->getCredential()->getListeStatus();
 
-                    if (!array_key_exists($group_name, $this->groupRights)) {
-                        $this->groupRights[$group_name] = [];
+                    if (!array_key_exists($groupName, $this->groupRights)) {
+                        $this->groupRights[$groupName] = [];
                     }
 
-                    $this->groupRights[$group_name][$cred_name] = [
+                    $this->groupRights[$groupName][$credName] = [
                         "listeStatus" => $credListeStatus,
-                        "statusAllowed" => $group_cred->isStatusAllowed(),
+                        "statusAllowed" => $groupCred->isStatusAllowed(),
                     ];
                 }
             }
@@ -58,9 +50,9 @@ class CredentialVoter extends Voter
         $cachedRoles = $cache->getItem('all_credentials');
 
         if (!$cachedRoles->isHit()) {
-            $all_creds = $this->em->getRepository(Credential::class)->findAll();
+            $allCreds = $this->em->getRepository(Credential::class)->findAll();
 
-            foreach ($all_creds as $cred) {
+            foreach ($allCreds as $cred) {
                 $this->roles[] = $cred->getRole();
             }
 
@@ -69,23 +61,23 @@ class CredentialVoter extends Voter
         } else {
             $this->roles = $cachedRoles->get();
         }
-
-        $this->cache = $cache;
     }
 
     protected function supports(?string $attribute, mixed $subject): bool
     {
         // vote on everything
-        if (!in_array(
-            $attribute,
-            [
-                'IS_AUTHENTICATED_REMEMBERED',
-                'ROLE_USER',
-                'IS_AUTHENTICATED_ANONYMOUS',
-                'IS_AUTHENTICATED_FULLY',
-                'ROLE_SUPER_ADMIN',
-            ]
-        )) {
+        if (
+            !in_array(
+                $attribute,
+                [
+                    'IS_AUTHENTICATED_REMEMBERED',
+                    'ROLE_USER',
+                    'IS_AUTHENTICATED_ANONYMOUS',
+                    'IS_AUTHENTICATED_FULLY',
+                    'ROLE_SUPER_ADMIN',
+                ]
+            )
+        ) {
             if (!in_array($attribute, $this->roles)) {  // insert on check
                 $credential = new Credential();
                 $credential->setRole($attribute);

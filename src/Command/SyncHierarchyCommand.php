@@ -2,8 +2,6 @@
 
 namespace Lle\CredentialBundle\Command;
 
-use App\Entity\Eleve;
-use App\Service\GeoLoc;
 use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
@@ -15,19 +13,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SyncHierarchyCommand extends Command
 {
-    const ROLE_GROUPE = 'role_groupe';
+    public const ROLE_GROUPE = 'role_groupe';
 
     protected static $defaultName = 'lle:credential:sync-hierarchy';
 
-    private array $hierarchy = [];
-
-    private EntityManagerInterface $em;
-
-    public function __construct(EntityManagerInterface $em, array $hierarchy)
-    {
+    public function __construct(
+        private EntityManagerInterface $em,
+        private array $hierarchy = [],
+    ) {
         parent::__construct();
-        $this->hierarchy = $hierarchy;
-        $this->em = $em;
     }
 
     protected function configure(): void
@@ -37,7 +31,7 @@ class SyncHierarchyCommand extends Command
             ->addArgument(self::ROLE_GROUPE, InputArgument::REQUIRED, 'Role racine');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): void
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $roles = [];
 
@@ -49,12 +43,12 @@ class SyncHierarchyCommand extends Command
         $list = [];
 
         $groupe = $this->em->getRepository(Group::class)
-            ->findOneBy(['name' => str_replace('ROLE_', '', $rootRole)]); // not agree this
+            ->findOneBy(['name' => str_replace('ROLE_', '', $rootRole)]);
         if (!$groupe) {
             $groupe = new Group();
             $groupe->setName(str_replace('ROLE_', '', $rootRole));
             $groupe->setIsRole(true);
-            $groupe->setActif(1);
+            $groupe->setActif(true);
             $groupe->setRequiredRole('');
             $groupe->setTri(0);
             $groupe->setLibelle(strtolower($groupe->getName()));
@@ -97,6 +91,8 @@ class SyncHierarchyCommand extends Command
         }
 
         $this->em->flush();
+
+        return Command::SUCCESS;
     }
 
     private function generateListRoles(string $role, mixed &$list): void

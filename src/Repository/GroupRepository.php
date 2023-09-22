@@ -3,37 +3,20 @@
 namespace Lle\CredentialBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\QueryBuilder;
-use Lle\CredentialBundle\Entity\Group;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Bundle\SecurityBundle\Security;
+use Lle\CredentialBundle\Entity\Group;
 
+/**
+ * @method Group|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Group|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Group[]    findAll()
+ * @method Group[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
 class GroupRepository extends ServiceEntityRepository
 {
-    private Security $security;
-
-    public function __construct(ManagerRegistry $registry, Security $security)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Group::class);
-        $this->security = $security;
-    }
-
-    public function findMineQb(): QueryBuilder
-    {
-        $token = $this->security->getToken();
-        $role = $token->getRoles()[0]->getRole();
-
-        return $this->createQueryBuilder('entity')
-            ->andWhere('FIND_IN_SET (:roles, entity.requiredRole) > 0')
-            ->setParameter("roles", $role);
-    }
-
-    public function findMine(): mixed
-    {
-        return $this->findMineQb()
-            ->orderBy('entity.tri')
-            ->getQuery()
-            ->getResult();
     }
 
     public function findAllOrdered(): mixed
@@ -42,14 +25,5 @@ class GroupRepository extends ServiceEntityRepository
             ->orderBy('g.tri', 'ASC')->where('g.actif = 1')
             ->getQuery()
             ->getResult();
-    }
-
-    public function findRolesQb(): QueryBuilder
-    {
-        return $this
-            ->findMineQb()
-            ->andWhere('entity.isRole = 1')
-            ->andWhere('entity.actif = 1')
-            ->orderBy('entity.tri');
     }
 }

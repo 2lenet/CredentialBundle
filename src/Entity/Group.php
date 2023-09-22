@@ -2,59 +2,41 @@
 
 namespace Lle\CredentialBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Lle\CredentialBundle\Repository\GroupRepository;
 
-/**
- * @ORM\Entity(repositoryClass="Lle\CredentialBundle\Repository\GroupRepository")
- * @ORM\Table(name="lle_credential_group")
- *
- */
+#[ORM\Table(name: 'lle_credential_group')]
+#[ORM\Entity(repositoryClass: GroupRepository::class)]
 class Group
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $name;
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $name = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity="GroupCredential", mappedBy="groupe")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $credentials;
+    #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: GroupCredential::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private Collection $credentials;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $isRole;
+    #[ORM\Column(type: 'boolean')]
+    private ?bool $isRole = null;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $actif;
+    #[ORM\Column(type: 'boolean')]
+    private ?bool $actif = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $requiredRole;
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $requiredRole = null;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $tri;
+    #[ORM\Column(type: 'integer')]
+    private ?int $tri = null;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $libelle;
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $libelle = null;
 
     public function __toString()
     {
@@ -71,9 +53,6 @@ class Group
         return $this->id;
     }
 
-    /**
-     * Get the value of credentials
-     */
     public function getCredentials(): Collection
     {
         return $this->credentials;
@@ -91,11 +70,6 @@ class Group
         return $roles;
     }
 
-    /**
-     * Set the value of credentials
-     *
-     * @return  self
-     */
     public function setCredentials(Collection $credentials): self
     {
         $this->credentials = $credentials;
@@ -103,19 +77,11 @@ class Group
         return $this;
     }
 
-    /**
-     * Get the value of name
-     */
     public function getName(): ?string
     {
         return $this->name;
     }
 
-    /**
-     * Set the value of name
-     *
-     * @return  self
-     */
     public function setName(?string $name): self
     {
         $this->name = $name;
@@ -123,17 +89,11 @@ class Group
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
     public function isRole(): ?bool
     {
         return $this->isRole;
     }
 
-    /**
-     * @param mixed $isRole
-     */
     public function setIsRole(?bool $isRole): self
     {
         $this->isRole = $isRole;
@@ -141,9 +101,6 @@ class Group
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
     public function isActif(): ?bool
     {
         return $this->actif;
@@ -156,17 +113,11 @@ class Group
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
     public function getRequiredRole(): ?string
     {
         return $this->requiredRole;
     }
 
-    /**
-     * @param mixed $requiredRole
-     */
     public function setRequiredRole(?string $requiredRole): self
     {
         $this->requiredRole = $requiredRole;
