@@ -30,7 +30,7 @@ class Credential
     private ?bool $visible = true;
 
     #[ORM\Column(type: 'json', nullable: true)]
-    private array $listeStatus = [];
+    private ?array $listeStatus = [];
 
     public function __toString()
     {
