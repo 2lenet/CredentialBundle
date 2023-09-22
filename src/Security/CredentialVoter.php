@@ -75,6 +75,7 @@ class CredentialVoter extends Voter
                     'IS_AUTHENTICATED_ANONYMOUS',
                     'IS_AUTHENTICATED_FULLY',
                     'ROLE_SUPER_ADMIN',
+                    'PUBLIC_ACCESS',
                 ]
             )
         ) {
