@@ -14,7 +14,7 @@ class Credential
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'integer', length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     private ?string $role = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
