@@ -51,7 +51,7 @@ class SyncHierarchyCommand extends Command
             $groupe->setActif(true);
             $groupe->setRequiredRole('');
             $groupe->setTri(0);
-            $groupe->setLibelle(strtolower($groupe->getName()));
+            $groupe->setLibelle(strtolower((string)$groupe->getName()));
 
             $this->em->persist($groupe);
             $this->em->flush();
@@ -67,16 +67,14 @@ class SyncHierarchyCommand extends Command
             $r = explode('_', $role);
 
             $credential->setRubrique($r[1] ?? 'other');
-            $credential->setLibelle(
-                strtolower(
-                    str_replace(
-                        $credential->getRubrique(),
-                        '',
-                        str_replace('ROLE_', '', $role)
-                    )
-                )
+            /** @var string $libelle */
+            $libelle = str_replace(
+                (string)$credential->getRubrique(),
+                '',
+                str_replace('ROLE_', '', $role)
             );
-            $credential->setLibelle(ucfirst(trim(str_replace('_', ' ', $credential->getLibelle()))));
+            $credential->setLibelle(strtolower($libelle));
+            $credential->setLibelle(ucfirst(trim(str_replace('_', ' ', (string)$credential->getLibelle()))));
             $credential->setRole($role);
 
             $this->em->persist($credential);

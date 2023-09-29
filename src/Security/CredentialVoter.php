@@ -26,9 +26,10 @@ class CredentialVoter extends Voter
 
             foreach ($groupCreds as $groupCred) {
                 if ($groupCred->isAllowed()) {
-                    $groupName = $groupCred->getGroupe()->getName();
-                    $credName = $groupCred->getCredential()->getRole();
-                    $credListeStatus = $groupCred->getCredential()->getListeStatus();
+                    /** @var string $groupName */
+                    $groupName = $groupCred->getGroupe()?->getName();
+                    $credName = $groupCred->getCredential()?->getRole();
+                    $credListeStatus = $groupCred->getCredential()?->getListeStatus();
 
                     if (!array_key_exists($groupName, $this->groupRights)) {
                         $this->groupRights[$groupName] = [];
@@ -81,12 +82,12 @@ class CredentialVoter extends Voter
         ) {
             if (!in_array($attribute, $this->roles)) {  // insert on check
                 $credential = new Credential();
-                $credential->setRole($attribute);
-                $credential->setLibelle($attribute);
+                $credential->setRole((string)$attribute);
+                $credential->setLibelle((string)$attribute);
                 $credential->setRubrique('Other');
                 $credential->setTri(0);
 
-                $arr = explode('_', $attribute);
+                $arr = explode('_', (string)$attribute);
 
                 if (count($arr) == 3) {
                     $rubrique = $arr[1];
@@ -137,7 +138,7 @@ class CredentialVoter extends Voter
 
     public function getVote(?string $attribute, mixed $subject, ?string $groupName): bool
     {
-        if (isset($this->groupRights[$groupName]) && array_key_exists($attribute, $this->groupRights[$groupName])) {
+        if (isset($this->groupRights[$groupName]) && array_key_exists((string)$attribute, $this->groupRights[$groupName])) {
             $credential = $this->groupRights[$groupName][$attribute];
 
             if ($subject && $credential["listeStatus"] && $credential["statusAllowed"]) {
@@ -150,6 +151,6 @@ class CredentialVoter extends Voter
             }
         }
 
-        return isset($this->groupRights[$groupName]) && array_key_exists($attribute, $this->groupRights[$groupName]);
+        return isset($this->groupRights[$groupName]) && array_key_exists((string)$attribute, $this->groupRights[$groupName]);
     }
 }

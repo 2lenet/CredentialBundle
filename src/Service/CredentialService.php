@@ -23,7 +23,7 @@ class CredentialService
 
         /** @var Credential $credential */
         foreach ($credentials as $credential) {
-            if (!array_key_exists($credential->getId(), $existingCredentials)) {
+            if (!array_key_exists((int)$credential->getId(), $existingCredentials)) {
                 $groupCredential = new GroupCredential();
                 $groupCredential->setGroupe($group);
                 $groupCredential->setCredential($credential);
@@ -36,6 +36,7 @@ class CredentialService
 
     public function allowedByStatus(?string $group, ?string $statusCred, ?string $cred): void
     {
+        /** @var Group $groupObj */
         $groupObj = $this->em->getRepository(Group::class)->findOneBy(['name' => $group]);
         $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $statusCred]);
 
@@ -43,9 +44,9 @@ class CredentialService
 
         if (!$credential) {
             $credential = new Credential();
-            $credential->setRole($statusCred);
-            $credential->setLibelle($statusCred);
-            $credential->setRubrique($cred->getRubrique());
+            $credential->setRole((string)$statusCred);
+            $credential->setLibelle((string)$statusCred);
+            $credential->setRubrique($cred?->getRubrique());
             $credential->setTri(0);
             $credential->setVisible(true);
 
