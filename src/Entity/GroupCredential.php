@@ -33,7 +33,7 @@ class GroupCredential
         return $this->id;
     }
 
-    public function isAllowed(): bool
+    public function isAllowed(): ?bool
     {
         return $this->allowed;
     }

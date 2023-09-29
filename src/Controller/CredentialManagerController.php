@@ -36,12 +36,14 @@ class CredentialManagerController extends AbstractController
         $statusAllowed = [];
 
         foreach ($groupCreds as $groupCred) {
-            $actives[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole()] =
-                $groupCred->isAllowed();
+            if ($groupCred->getGroupe() && $groupCred->getCredential()) {
+                $actives[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole()] =
+                    $groupCred->isAllowed();
 
-            if ($groupCred->getCredential()->getListeStatus() !== null) {
-                $statusAllowed[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole()] =
-                    $groupCred->isStatusAllowed();
+                if ($groupCred->getCredential()->getListeStatus() !== null) {
+                    $statusAllowed[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole()] =
+                        $groupCred->isStatusAllowed();
+                }
             }
         }
 
@@ -61,6 +63,7 @@ class CredentialManagerController extends AbstractController
     public function toggleAction(Request $request, CacheItemPoolInterface $cache): JsonResponse
     {
         $cache->deleteItem('group_credentials');
+        /** @var string $var */
         $var = $request->request->get('id');
         [$group, $cred] = explode('-', $var);
 
@@ -68,7 +71,9 @@ class CredentialManagerController extends AbstractController
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
 
         if (!$groupCred) {
+            /** @var Group $groupObj */
             $groupObj = $this->em->getRepository(Group::class)->findOneBy(['name' => $group]);
+            /** @var Credential $credential */
             $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $cred]);
 
             $groupCred = new GroupCredential();
@@ -104,11 +109,12 @@ class CredentialManagerController extends AbstractController
                 ->findAll();
         }
 
+        /** @var Group $group */
         $group = $this->em->find(Group::class, $group);
 
         $groupCredentialRepository = $this->em->getRepository(GroupCredential::class);
 
-        $groupCredentials = $groupCredentialRepository->findByGroup($group);
+        $groupCredentials = $groupCredentialRepository->findBy(['groupe' => $group]);
 
         $this->credentialService->toggleAll($groupCredentials, $credentials, $group, $checked);
 
@@ -125,6 +131,7 @@ class CredentialManagerController extends AbstractController
     {
         $cache->deleteItem("group_credentials");
 
+        /** @var string $var */
         $var = $request->request->get("id");
 
         [$group, $cred, $status] = explode("-", $var);
@@ -133,7 +140,9 @@ class CredentialManagerController extends AbstractController
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
 
         if (!$groupCred) {
+            /** @var Group $groupObj */
             $groupObj = $this->em->getRepository(Group::class)->findOneBy(['name' => $group]);
+            /** @var Credential $credential */
             $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $cred]);
 
             $groupCred = new GroupCredential();
@@ -157,6 +166,7 @@ class CredentialManagerController extends AbstractController
     {
         $cache->deleteItem("group_credentials");
 
+        /** @var string $var */
         $var = $request->request->get("id");
 
         [$group, $cred, $status] = explode("-", $var);
@@ -171,6 +181,7 @@ class CredentialManagerController extends AbstractController
             $groupCred->setAllowed(!$groupCred->isAllowed());
         }
 
+        /** @var GroupCredential $groupCred */
         $this->em->persist($groupCred);
         $this->em->flush();
 

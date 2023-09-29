@@ -38,9 +38,9 @@ class Group
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $libelle = null;
 
-    public function __toString()
+    public function __toString(): string
     {
-        return $this->libelle;
+        return $this->libelle ?? '';
     }
 
     public function __construct()
