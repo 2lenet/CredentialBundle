@@ -3,39 +3,32 @@
 namespace Lle\CredentialBundle\Controller;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Lle\CredentialBundle\Service\CredentialService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
+use Lle\CredentialBundle\Service\CredentialService;
 use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class CredentialManagerController extends AbstractController
 {
-    private EntityManagerInterface $em;
-
-    private CredentialService $credentialService;
-
-    public function __construct(EntityManagerInterface $em, CredentialService $credentialService)
-    {
-        $this->em = $em;
-        $this->credentialService = $credentialService;
+    public function __construct(
+        private EntityManagerInterface $em,
+        private CredentialService $credentialService,
+    ) {
     }
 
     #[Route('/admin/credential', name: 'admin_credential')]
     #[IsGranted('ROLE_ADMIN_DROITS')]
     public function indexAction(): Response
     {
-        $credentialRepository = $this->em->getRepository(Credential::class);
-        $groupRepository = $this->em->getRepository(Group::class);
-
-        $credentials = $credentialRepository->findAllOrdered();
-        $groupes = $groupRepository->findAllOrdered();
+        $credentials = $this->em->getRepository(Credential::class)->findAllOrdered();
+        $groupes = $this->em->getRepository(Group::class)->findAllOrdered();
 
         $groupCreds = $this->em->getRepository(GroupCredential::class)->findAll();
 
@@ -71,22 +64,22 @@ class CredentialManagerController extends AbstractController
         $var = $request->request->get('id');
         [$group, $cred] = explode('-', $var);
 
-        /** @var ?GroupCredential $group_cred */
-        $group_cred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
+        /** @var ?GroupCredential $groupCred */
+        $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
 
-        if (!$group_cred) {
-            $groupObj = $this->em->getRepository(Group::class)->findOneByName($group);
-            $credential = $this->em->getRepository(Credential::class)->findOneByRole($cred);
+        if (!$groupCred) {
+            $groupObj = $this->em->getRepository(Group::class)->findOneBy(['name' => $group]);
+            $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $cred]);
 
-            $group_cred = new GroupCredential();
-            $group_cred->setGroupe($groupObj);
-            $group_cred->setCredential($credential);
-            $group_cred->setAllowed(true);
+            $groupCred = new GroupCredential();
+            $groupCred->setGroupe($groupObj);
+            $groupCred->setCredential($credential);
+            $groupCred->setAllowed(true);
         } else {
-            $group_cred->setAllowed(!$group_cred->isAllowed());
+            $groupCred->setAllowed(!$groupCred->isAllowed());
         }
 
-        $this->em->persist($group_cred);
+        $this->em->persist($groupCred);
         $this->em->flush();
 
         return new JsonResponse([]);
@@ -140,8 +133,8 @@ class CredentialManagerController extends AbstractController
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
 
         if (!$groupCred) {
-            $groupObj = $this->em->getRepository(Group::class)->findOneByName($group);
-            $credential = $this->em->getRepository(Credential::class)->findOneByRole($cred);
+            $groupObj = $this->em->getRepository(Group::class)->findOneBy(['name' => $group]);
+            $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $cred]);
 
             $groupCred = new GroupCredential();
             $groupCred->setGroupe($groupObj);

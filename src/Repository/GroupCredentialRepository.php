@@ -2,12 +2,24 @@
 
 namespace Lle\CredentialBundle\Repository;
 
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Lle\CredentialBundle\Entity\Group;
-use Doctrine\ORM\EntityRepository;
 use Lle\CredentialBundle\Entity\GroupCredential;
 
-class GroupCredentialRepository extends EntityRepository
+/**
+ * @method GroupCredential|null find($id, $lockMode = null, $lockVersion = null)
+ * @method GroupCredential|null findOneBy(array $criteria, array $orderBy = null)
+ * @method GroupCredential[]    findAll()
+ * @method GroupCredential[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
+class GroupCredentialRepository extends ServiceEntityRepository
 {
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, GroupCredential::class);
+    }
+
     public function findOneGroupCred(string|int|Group $group, ?string $cred): ?GroupCredential
     {
         $qb = $this->createQueryBuilder('l')

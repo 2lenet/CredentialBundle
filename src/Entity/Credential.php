@@ -3,50 +3,34 @@
 namespace Lle\CredentialBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Lle\CredentialBundle\Repository\CredentialRepository;
 
-/**
- * @ORM\Entity(repositoryClass="Lle\CredentialBundle\Repository\CredentialRepository")
- * @ORM\Table(name="lle_credential_credential")
- *
- */
+#[ORM\Table(name: 'lle_credential_credential')]
+#[ORM\Entity(repositoryClass: CredentialRepository::class)]
 class Credential
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $role;
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $role = null;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $libelle;
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $libelle = null;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $rubrique;
+    #[ORM\Column(type: 'string', length: 255)]
+    private ?string $rubrique = null;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $tri;
+    #[ORM\Column(type: 'integer')]
+    private ?int $tri = null;
 
-    /**
-     * @ORM\Column(type="boolean", nullable=true, options={"default": true})
-     */
-    private $visible = true;
+    #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => true])]
+    private ?bool $visible = true;
 
-    /**
-     * @ORM\Column(type="json", nullable=true)
-     */
-    private $listeStatus;
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $listeStatus = [];
 
     public function __toString()
     {
@@ -82,19 +66,11 @@ class Credential
         return $this;
     }
 
-    /**
-     * Get the value of rubrique
-     */
     public function getRubrique(): ?string
     {
         return $this->rubrique;
     }
 
-    /**
-     * Set the value of rubrique
-     *
-     * @return  self
-     */
     public function setRubrique(?string $rubrique): self
     {
         $this->rubrique = $rubrique;

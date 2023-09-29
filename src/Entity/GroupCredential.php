@@ -3,61 +3,41 @@
 namespace Lle\CredentialBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Lle\CredentialBundle\Repository\GroupCredentialRepository;
 
-/**
- * @ORM\Entity(repositoryClass="Lle\CredentialBundle\Repository\GroupCredentialRepository")
- * @ORM\Table(name="lle_credential_group_credential")
- *
- */
+#[ORM\Table(name: 'lle_credential_group_credential')]
+#[ORM\Entity(repositoryClass: GroupCredentialRepository::class)]
 class GroupCredential
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Credential")
-     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
-     */
-    private $credential;
+    #[ORM\ManyToOne(targetEntity: Credential::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Credential $credential = null;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Group", inversedBy="credentials")
-     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
-     */
-    private $groupe;
+    #[ORM\ManyToOne(targetEntity: Group::class, inversedBy: 'credentials')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Group $groupe = null;
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $allowed = false;
+    #[ORM\Column(type: 'boolean')]
+    private ?bool $allowed = false;
 
-    /**
-     * @ORM\Column(type="boolean", nullable=true, options={"default": false})
-     */
-    private $statusAllowed = false;
+    #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => false])]
+    private ?bool $statusAllowed = false;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * Get the value of allowed
-     */
     public function isAllowed(): bool
     {
         return $this->allowed;
     }
 
-    /**
-     * Set the value of allowed
-     *
-     * @return  self
-     */
     public function setAllowed(bool $allowed): self
     {
         $this->allowed = $allowed;
@@ -65,19 +45,11 @@ class GroupCredential
         return $this;
     }
 
-    /**
-     * Get the value of credential
-     */
     public function getCredential(): ?Credential
     {
         return $this->credential;
     }
 
-    /**
-     * Set the value of credential
-     *
-     * @return  self
-     */
     public function setCredential(Credential $credential): self
     {
         $this->credential = $credential;
@@ -85,19 +57,11 @@ class GroupCredential
         return $this;
     }
 
-    /**
-     * Get the value of groupe
-     */
     public function getGroupe(): ?Group
     {
         return $this->groupe;
     }
 
-    /**
-     * Set the value of groupe
-     *
-     * @return  self
-     */
     public function setGroupe(Group $groupe): self
     {
         $this->groupe = $groupe;
