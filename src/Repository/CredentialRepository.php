@@ -25,7 +25,7 @@ class CredentialRepository extends ServiceEntityRepository
             ->andWhere('c.visible = true')
             ->orWhere('c.visible IS NULL')
             ->orderBy('c.rubrique', 'ASC')
-            ->addOrderBy('c.role', 'ASC')
+            ->addOrderBy('c.tri', 'ASC')
             ->getQuery()
             ->getResult();
     }

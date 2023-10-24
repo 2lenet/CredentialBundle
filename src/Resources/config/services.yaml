@@ -14,8 +14,7 @@ services:
         resource: '../../Controller'
         tags: ['controller.service_arguments']
 
-    Lle\CredentialBundle\Command\SyncHierarchyCommand:
-        arguments: ["@doctrine.orm.default_entity_manager","%security.role_hierarchy.roles%"]
+    Lle\CredentialBundle\Command\CredentialWarmupCommand:
         tags:
             - { name: 'console.command' }
 

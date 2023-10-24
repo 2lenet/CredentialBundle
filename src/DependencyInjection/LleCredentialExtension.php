@@ -2,6 +2,7 @@
 
 namespace Lle\CredentialBundle\DependencyInjection;
 
+use Lle\CredentialBundle\Contracts\CredentialWarmupInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader;
@@ -13,5 +14,7 @@ class LleCredentialExtension extends Extension
     {
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
+        $container->registerForAutoconfiguration(CredentialWarmupInterface::class)->addTag('credential.warmup');
+
     }
 }

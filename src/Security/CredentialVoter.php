@@ -66,47 +66,8 @@ class CredentialVoter extends Voter
 
     protected function supports(?string $attribute, mixed $subject): bool
     {
-        // vote on everything
-        if (
-            !in_array(
-                $attribute,
-                [
-                    'IS_AUTHENTICATED_REMEMBERED',
-                    'ROLE_USER',
-                    'IS_AUTHENTICATED_ANONYMOUS',
-                    'IS_AUTHENTICATED_FULLY',
-                    'ROLE_SUPER_ADMIN',
-                    'PUBLIC_ACCESS',
-                ]
-            )
-        ) {
-            if (!in_array($attribute, $this->roles)) {  // insert on check
-                $credential = new Credential();
-                $credential->setRole((string)$attribute);
-                $credential->setLibelle((string)$attribute);
-                $credential->setRubrique('Other');
-                $credential->setTri(0);
-
-                $arr = explode('_', (string)$attribute);
-
-                if (count($arr) == 3) {
-                    $rubrique = $arr[1];
-                    $credential->setRubrique($rubrique);
-                }
-
-                $this->em->persist($credential);
-                $this->em->flush();
-
-                $this->cache->deleteItem('all_credentials');
-                $this->cache->deleteItem('group_credentials');
-
-                $this->roles[] = $attribute;
-            }
-        } else {
-            return false;
-        }
-
-        return true;
+         // vote on every role in database
+        return in_array($attribute, $this->roles);
     }
 
     protected function voteOnAttribute(?string $attribute, mixed $subject, TokenInterface $token): bool
