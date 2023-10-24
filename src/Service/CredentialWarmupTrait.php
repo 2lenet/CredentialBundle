@@ -12,7 +12,7 @@ trait CredentialWarmupTrait
     protected function checkAndCreateCredential(string $role, string $rubrique, string $libelle, int $tri): void
     {
         $cred = $this->credentialRepository->findOneBy(['role' => $role]);
-        if ( $cred == null) {
+        if ( $cred === null) {
             $cred = new Credential();
             $cred->setRole($role);
         }
