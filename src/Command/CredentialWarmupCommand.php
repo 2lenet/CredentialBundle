@@ -29,7 +29,9 @@ class CredentialWarmupCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $output->writeln("Warmup Credential");
         foreach ($this->warmuppers as $warmup) {
+            $output->writeln("Warmuppper ". get_class($warmup));
             $warmup->warmup();
         }
         return Command::SUCCESS;
