@@ -20,6 +20,7 @@ trait CredentialWarmupTrait
         if ($cred === null) {
             echo "not found $role  / $libelle\n";
             $cred = new Credential();
+            $cred->setCreatedAt(new \DateTimeImmutable());
             $cred->setRole($role);
             $cred->setRubrique("");
             $cred->setTri(0);
@@ -37,6 +38,7 @@ trait CredentialWarmupTrait
         if ($tri !== null) {
             $cred->setTri($tri);
         }
+        $cred->setCreatedAt(new \DateTimeImmutable());
         $this->entityManager->persist($cred);
         $this->entityManager->flush();
     }

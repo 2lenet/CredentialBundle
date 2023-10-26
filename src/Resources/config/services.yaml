@@ -17,5 +17,10 @@ services:
     Lle\CredentialBundle\Command\CredentialWarmupCommand:
         tags:
             - { name: 'console.command' }
-
+    Lle\CredentialBundle\Command\CredentialDumpCommand:
+        tags:
+            - { name: 'console.command' }
+    Lle\CredentialBundle\Command\CredentialLoadCommand:
+        tags:
+            - { name: 'console.command' }
     Lle\CredentialBundle\Service\CredentialService: ~

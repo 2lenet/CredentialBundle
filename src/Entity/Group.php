@@ -9,32 +9,25 @@ use Lle\CredentialBundle\Repository\GroupRepository;
 
 #[ORM\Table(name: 'lle_credential_group')]
 #[ORM\Entity(repositoryClass: GroupRepository::class)]
-class Group
+class Group implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
-
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $name = null;
-
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: GroupCredential::class)]
     #[ORM\JoinColumn(nullable: false)]
     private Collection $credentials;
-
     #[ORM\Column(type: 'boolean')]
     private ?bool $isRole = null;
-
     #[ORM\Column(type: 'boolean')]
     private ?bool $actif = null;
-
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $requiredRole = null;
-
     #[ORM\Column(type: 'integer')]
     private ?int $tri = null;
-
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $libelle = null;
 
@@ -46,6 +39,30 @@ class Group
     public function __construct()
     {
         $this->credentials = new ArrayCollection();
+    }
+
+    public function jsonSerialize(): mixed
+    {
+        return [
+            "id" => $this->id,
+            "name" => $this->name,
+            "isRole" => $this->isRole,
+            "libelle" => $this->libelle,
+            "requiredRole" => $this->requiredRole,
+            "tri" => $this->tri,
+            "actif" => $this->actif,
+        ];
+    }
+
+    public function fromArray(array $data): void
+    {
+        $this->id = $data["id"];
+        $this->name = $data["name"];
+        $this->libelle = $data["libelle"];
+        $this->isRole = $data["isRole"];
+        $this->tri = $data["tri"];
+        $this->requiredRole = $data["requiredRole"];
+        $this->actif = $data["actif"];
     }
 
     public function getId(): ?int
