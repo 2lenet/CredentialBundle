@@ -31,7 +31,7 @@ class CredentialWarmupCommand extends Command
     {
         $output->writeln("Warmup Credential");
         foreach ($this->warmuppers as $warmup) {
-            $output->writeln("Warmuppper ". get_class($warmup));
+            $output->writeln("\n** Warmuppper ". get_class($warmup)." ** \n");
             $warmup->warmup();
         }
         return Command::SUCCESS;

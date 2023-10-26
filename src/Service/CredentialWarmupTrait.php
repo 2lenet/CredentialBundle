@@ -9,19 +9,35 @@ use Lle\CredentialBundle\Entity\GroupCredential;
 
 trait CredentialWarmupTrait
 {
-    protected function checkAndCreateCredential(string $role, string $rubrique, string $libelle, int $tri): void
-    {
+    protected function checkAndCreateCredential(
+        string $role,
+        ?string $rubrique,
+        ?string $libelle,
+        ?int $tri,
+        ?array $listeStatus = null,
+    ): void {
         $cred = $this->credentialRepository->findOneBy(['role' => $role]);
-        if ( $cred === null) {
+        if ($cred === null) {
+            echo "not found $role  / $libelle\n";
             $cred = new Credential();
             $cred->setRole($role);
+            $cred->setRubrique("");
+            $cred->setTri(0);
         }
-        $cred->setLibelle($libelle);
-        $cred->setRubrique($rubrique);
+        if ($libelle !== null) {
+            $cred->setLibelle($libelle);
+        }
+        if ($rubrique !== null) {
+            $cred->setRubrique($rubrique);
+        }
         $cred->setVisible(true);
-        $cred->setTri($tri);
+        if ($listeStatus !== null) {
+            $cred->setListeStatus($listeStatus);
+        }
+        if ($tri !== null) {
+            $cred->setTri($tri);
+        }
         $this->entityManager->persist($cred);
         $this->entityManager->flush();
     }
-
 }

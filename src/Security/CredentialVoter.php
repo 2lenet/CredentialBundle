@@ -103,10 +103,8 @@ class CredentialVoter extends Voter
             $credential = $this->groupRights[$groupName][$attribute];
 
             if ($subject && $credential["listeStatus"] && $credential["statusAllowed"]) {
-                $propertyAccessor = PropertyAccess::createPropertyAccessor();
-                $statusProperty = $subject->getStatusProperty();
-
-                $attribute .= "_" . strtoupper($propertyAccessor->getValue($subject, $statusProperty));
+                $statusPropertyValue = $subject->getStatusPropertyValue();
+                $attribute .= "_" . strtoupper($statusPropertyValue);
 
                 return array_key_exists($attribute, $this->groupRights[$groupName]);
             }
