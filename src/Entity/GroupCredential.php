@@ -9,7 +9,7 @@ use Lle\CredentialBundle\Repository\GroupCredentialRepository;
 #[ORM\Entity(repositoryClass: GroupCredentialRepository::class)]
 #[ORM\UniqueConstraint(
   name: 'groupe_cred_unique_idx',
-  columns: ['groupe', 'credential']
+  columns: ['groupe_id', 'credential_id']
 )]
 class GroupCredential implements \JsonSerializable
 {
