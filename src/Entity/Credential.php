@@ -13,39 +13,36 @@ class Credential implements \JsonSerializable
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
-
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $role = null;
-
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $libelle = null;
-
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $rubrique = null;
-
     #[ORM\Column(type: 'integer')]
     private ?int $tri = null;
-
     #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => true])]
     private ?bool $visible = true;
-
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $listeStatus = [];
-
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $createdAt;
 
     public function jsonSerialize(): mixed
     {
-        return [
+        $data = [
             "id" => $this->id,
             "role" => $this->role,
             "libelle" => $this->libelle,
             "rubrique" => $this->rubrique,
             "tri" => $this->tri,
             "listeStatus" => $this->listeStatus,
-            "createdAt" => $this->createdAt,
         ];
+        if ($this->createdAt !== null) {
+            $data["createdAt"] = $this->createdAt->format("Y-m-d H:i:s");
+        }
+
+        return $data;
     }
 
     public function fromArray(array $data): void
@@ -56,7 +53,9 @@ class Credential implements \JsonSerializable
         $this->rubrique = $data["rubrique"];
         $this->tri = $data["tri"];
         $this->listeStatus = $data["listeStatus"];
-        $this->createdAt = $data["createdAt"];
+        if (array_key_exists("createdAt", $data)) {
+            $this->createdAt = new \DateTimeImmutable($data["createdAt"]);
+        }
     }
 
     public function __toString()
