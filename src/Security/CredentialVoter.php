@@ -6,7 +6,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\GroupCredential;
 use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -15,7 +14,7 @@ class CredentialVoter extends Voter
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private CacheItemPoolInterface $cache,
+        CacheItemPoolInterface $cache,
         private array $groupRights = [],
         private array $roles = [],
     ) {
@@ -66,7 +65,7 @@ class CredentialVoter extends Voter
 
     protected function supports(?string $attribute, mixed $subject): bool
     {
-         // vote on every role in database
+        // vote on every role in database
         return in_array($attribute, $this->roles);
     }
 
@@ -99,7 +98,10 @@ class CredentialVoter extends Voter
 
     public function getVote(?string $attribute, mixed $subject, ?string $groupName): bool
     {
-        if (isset($this->groupRights[$groupName]) && array_key_exists((string)$attribute, $this->groupRights[$groupName])) {
+        if (isset($this->groupRights[$groupName]) && array_key_exists(
+                (string)$attribute,
+                $this->groupRights[$groupName]
+            )) {
             $credential = $this->groupRights[$groupName][$attribute];
 
             if ($subject && $credential["listeStatus"] && $credential["statusAllowed"]) {
@@ -110,6 +112,9 @@ class CredentialVoter extends Voter
             }
         }
 
-        return isset($this->groupRights[$groupName]) && array_key_exists((string)$attribute, $this->groupRights[$groupName]);
+        return isset($this->groupRights[$groupName]) && array_key_exists(
+                (string)$attribute,
+                $this->groupRights[$groupName]
+            );
     }
 }

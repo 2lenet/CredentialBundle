@@ -15,19 +15,26 @@ class Group implements \JsonSerializable
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
+
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $name = null;
+
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: GroupCredential::class)]
     #[ORM\JoinColumn(nullable: false)]
     private Collection $credentials;
+
     #[ORM\Column(type: 'boolean')]
     private ?bool $isRole = null;
+
     #[ORM\Column(type: 'boolean')]
     private ?bool $actif = null;
+
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $requiredRole = null;
+
     #[ORM\Column(type: 'integer')]
     private ?int $tri = null;
+
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $libelle = null;
 

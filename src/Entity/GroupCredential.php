@@ -8,8 +8,8 @@ use Lle\CredentialBundle\Repository\GroupCredentialRepository;
 #[ORM\Table(name: 'lle_credential_group_credential')]
 #[ORM\Entity(repositoryClass: GroupCredentialRepository::class)]
 #[ORM\UniqueConstraint(
-  name: 'groupe_cred_unique_idx',
-  columns: ['groupe_id', 'credential_id']
+    name: 'groupe_cred_unique_idx',
+    columns: ['groupe_id', 'credential_id']
 )]
 class GroupCredential implements \JsonSerializable
 {
@@ -36,12 +36,13 @@ class GroupCredential implements \JsonSerializable
     {
         return [
             "id" => $this->id,
-            "group" => $this->groupe->getId(),
-            "credential" => $this->credential->getId(),
+            "group" => $this->groupe?->getId(),
+            "credential" => $this->credential?->getId(),
             "allowed" => $this->allowed,
             "statusAllowed" => $this->statusAllowed,
         ];
     }
+
     public function getId(): ?int
     {
         return $this->id;

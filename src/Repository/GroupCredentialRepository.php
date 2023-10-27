@@ -29,6 +29,7 @@ class GroupCredentialRepository extends ServiceEntityRepository
             ->setParameter("cred", $cred)
             ->andWhere('g.name = :group')
             ->setParameter("group", $group);
+
         return $qb->getQuery()->getOneOrNullResult();
     }
 

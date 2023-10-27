@@ -15,6 +15,5 @@ class LleCredentialExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
         $container->registerForAutoconfiguration(CredentialWarmupInterface::class)->addTag('credential.warmup');
-
     }
 }

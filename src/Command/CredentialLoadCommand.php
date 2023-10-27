@@ -31,7 +31,7 @@ class CredentialLoadCommand extends Command
     {
         $filename = "config/credentials.json";
         $output->writeln("Load Credentials from file $filename");
-        $data = json_decode(file_get_contents($filename), true);
+        $data = json_decode((string)file_get_contents($filename), true);
         $this->em->getRepository(Credential::class)->createQueryBuilder("c")->delete()->getQuery()->execute();
         $this->em->getRepository(GroupCredential::class)->createQueryBuilder("c")->delete()->getQuery()->execute();
         // $this->em->getRepository(Group::class)->createQueryBuilder("c")->delete()->getQuery()->execute();
@@ -59,7 +59,9 @@ class CredentialLoadCommand extends Command
         }
         foreach ($data["group_credential"] as $groupcred) {
             $gc = new GroupCredential();
+            /** @var Credential $c */
             $c = $this->em->getReference(Credential::class, $groupcred["credential"]);
+            /** @var Group $g */
             $g = $this->em->getReference(Group::class, $groupcred["group"]);
             $gc->setCredential($c);
             $gc->setGroupe($g);

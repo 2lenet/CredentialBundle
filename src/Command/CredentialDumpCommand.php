@@ -36,8 +36,15 @@ class CredentialDumpCommand extends Command
         $groups = $this->groupRepository->findAll();
         $groupCredentials = $this->groupCredentialRepository->findAll();
         $f = fopen($filename, "wb");
-        fwrite($f, json_encode(["credential" => $creds, "group" => $groups, "group_credential" => $groupCredentials]));
-        fclose($f);
+        if ($f) {
+            fwrite(
+                $f,
+                (string)json_encode(
+                    ["credential" => $creds, "group" => $groups, "group_credential" => $groupCredentials]
+                )
+            );
+            fclose($f);
+        }
 
         return Command::SUCCESS;
     }

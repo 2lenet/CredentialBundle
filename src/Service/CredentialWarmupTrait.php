@@ -2,10 +2,7 @@
 
 namespace Lle\CredentialBundle\Service;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
-use Lle\CredentialBundle\Entity\Group;
-use Lle\CredentialBundle\Entity\GroupCredential;
 
 trait CredentialWarmupTrait
 {

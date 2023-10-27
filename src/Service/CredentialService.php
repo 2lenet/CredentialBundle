@@ -57,6 +57,7 @@ class CredentialService
         $groupCred->setGroupe($groupObj);
         $groupCred->setCredential($credential);
         $groupCred->setAllowed(true);
+
         return $groupCred;
     }
 }
