@@ -98,10 +98,12 @@ class CredentialVoter extends Voter
 
     public function getVote(?string $attribute, mixed $subject, ?string $groupName): bool
     {
-        if (isset($this->groupRights[$groupName]) && array_key_exists(
+        if (
+            isset($this->groupRights[$groupName]) && array_key_exists(
                 (string)$attribute,
                 $this->groupRights[$groupName]
-            )) {
+            )
+        ) {
             $credential = $this->groupRights[$groupName][$attribute];
 
             if ($subject && $credential["listeStatus"] && $credential["statusAllowed"]) {
@@ -112,9 +114,8 @@ class CredentialVoter extends Voter
             }
         }
 
-        return isset($this->groupRights[$groupName]) && array_key_exists(
-                (string)$attribute,
-                $this->groupRights[$groupName]
-            );
+        return
+            isset($this->groupRights[$groupName])
+            && array_key_exists((string)$attribute, $this->groupRights[$groupName]);
     }
 }
