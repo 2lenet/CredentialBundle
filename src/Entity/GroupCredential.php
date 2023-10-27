@@ -7,6 +7,10 @@ use Lle\CredentialBundle\Repository\GroupCredentialRepository;
 
 #[ORM\Table(name: 'lle_credential_group_credential')]
 #[ORM\Entity(repositoryClass: GroupCredentialRepository::class)]
+#[ORM\UniqueConstraint(
+  name: 'groupe_cred_unique_idx',
+  columns: ['groupe', 'credential']
+)]
 class GroupCredential implements \JsonSerializable
 {
     #[ORM\Id]
@@ -27,7 +31,7 @@ class GroupCredential implements \JsonSerializable
 
     #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => false])]
     private ?bool $statusAllowed = false;
-    
+
     public function jsonSerialize(): mixed
     {
         return [

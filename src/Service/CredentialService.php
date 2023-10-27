@@ -34,21 +34,21 @@ class CredentialService
         }
     }
 
-    public function allowedByStatus(?string $group, ?string $statusCred, ?string $cred): void
+    public function allowedByStatus(?string $group, ?string $statusCred, ?string $parentCred): GroupCredential
     {
         /** @var Group $groupObj */
         $groupObj = $this->em->getRepository(Group::class)->findOneBy(['name' => $group]);
-        $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $statusCred]);
+        $parentCred = $this->em->getRepository(Credential::class)->findOneBy(['role' => $parentCred]);
 
-        $cred = $this->em->getRepository(Credential::class)->findOneBy(['role' => $cred]);
+        $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $statusCred]);
 
         if (!$credential) {
             $credential = new Credential();
             $credential->setRole((string)$statusCred);
             $credential->setLibelle((string)$statusCred);
-            $credential->setRubrique($cred?->getRubrique());
+            $credential->setRubrique($parentCred?->getRubrique());
             $credential->setTri(0);
-            $credential->setVisible(true);
+            $credential->setVisible(false);
 
             $this->em->persist($credential);
         }
@@ -57,5 +57,6 @@ class CredentialService
         $groupCred->setGroupe($groupObj);
         $groupCred->setCredential($credential);
         $groupCred->setAllowed(true);
+        return $groupCred;
     }
 }

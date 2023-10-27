@@ -135,7 +135,6 @@ class CredentialManagerController extends AbstractController
         $var = $request->request->get("id");
 
         [$group, $cred, $status] = explode("-", $var);
-
         /** @var ?GroupCredential $groupCred */
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $cred);
 
@@ -174,9 +173,8 @@ class CredentialManagerController extends AbstractController
 
         /** @var ?GroupCredential $groupCred */
         $groupCred = $this->em->getRepository(GroupCredential::class)->findOneGroupCred($group, $statusCred);
-
         if (!$groupCred) {
-            $this->credentialService->allowedByStatus($group, $cred, $status);
+            $groupCred = $this->credentialService->allowedByStatus($group, $statusCred, $cred);
         } else {
             $groupCred->setAllowed(!$groupCred->isAllowed());
         }

@@ -34,7 +34,7 @@ class CredentialLoadCommand extends Command
         $data = json_decode(file_get_contents($filename), true);
         $this->em->getRepository(Credential::class)->createQueryBuilder("c")->delete()->getQuery()->execute();
         $this->em->getRepository(GroupCredential::class)->createQueryBuilder("c")->delete()->getQuery()->execute();
-        $this->em->getRepository(Group::class)->createQueryBuilder("c")->delete()->getQuery()->execute();
+        // $this->em->getRepository(Group::class)->createQueryBuilder("c")->delete()->getQuery()->execute();
 
         // keep the ids
         $metadata = $this->em->getClassMetaData(Credential::class);
@@ -50,7 +50,10 @@ class CredentialLoadCommand extends Command
             $this->em->persist($c);
         }
         foreach ($data["group"] as $group) {
-            $g = new Group();
+            $g = $this->em->getRepository(Group::class)->find($group["id"]);
+            if ($g === null) {
+                $g = new Group();
+            }
             $g->fromArray($group);
             $this->em->persist($g);
         }
