@@ -2,13 +2,15 @@
 
 namespace Lle\CredentialBundle\Command;
 
-use Lle\CredentialBundle\Repository\CredentialRepository;
-use Lle\CredentialBundle\Repository\GroupCredentialRepository;
-use Lle\CredentialBundle\Repository\GroupRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Lle\CredentialBundle\Entity\Credential;
+use Lle\CredentialBundle\Entity\Group;
+use Lle\CredentialBundle\Entity\GroupCredential;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 #[AsCommand(
     name: 'credential:dump',
@@ -17,33 +19,30 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CredentialDumpCommand extends Command
 {
     public function __construct(
-        protected CredentialRepository $credentialRepository,
-        protected GroupCredentialRepository $groupCredentialRepository,
-        protected GroupRepository $groupRepository,
+        protected KernelInterface $kernel,
+        protected EntityManagerInterface $em,
     ) {
         parent::__construct();
     }
 
-    protected function configure(): void
-    {
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $filename = "config/credentials.json";
+        $filename = $this->kernel->getProjectDir() . '/data/credential/credentials.json';
         $output->writeln("Dump Credentials to file $filename");
-        $creds = $this->credentialRepository->findAllOrdered();
-        $groups = $this->groupRepository->findAll();
-        $groupCredentials = $this->groupCredentialRepository->findAll();
-        $f = fopen($filename, "wb");
-        if ($f) {
+
+        $credentials = $this->em->getRepository(Credential::class)->findAllOrdered();
+        $groups = $this->em->getRepository(Group::class)->findAll();
+        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findAll();
+
+        $file = fopen($filename, 'wb');
+        if ($file) {
             fwrite(
-                $f,
+                $file,
                 (string)json_encode(
-                    ["credential" => $creds, "group" => $groups, "group_credential" => $groupCredentials]
+                    ['credential' => $credentials, 'group' => $groups, 'group_credential' => $groupCredentials]
                 )
             );
-            fclose($f);
+            fclose($file);
         }
 
         return Command::SUCCESS;
