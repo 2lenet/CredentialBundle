@@ -37,7 +37,6 @@ class CredentialLoadCommand extends Command
 
         $this->em->getRepository(Credential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();
         $this->em->getRepository(GroupCredential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();
-        // $this->em->getRepository(Group::class)->createQueryBuilder("c")->delete()->getQuery()->execute();
 
         // keep the ids
         $metadata = $this->em->getClassMetaData(Credential::class);
