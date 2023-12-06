@@ -2,13 +2,12 @@
 
 namespace Lle\CredentialBundle\Command;
 
-use Lle\CredentialBundle\Repository\CredentialRepository;
-use Lle\CredentialBundle\Repository\GroupCredentialRepository;
-use Lle\CredentialBundle\Repository\GroupRepository;
+use Lle\CredentialBundle\Service\CredentialService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
     name: 'credential:dump',
@@ -17,34 +16,18 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CredentialDumpCommand extends Command
 {
     public function __construct(
-        protected CredentialRepository $credentialRepository,
-        protected GroupCredentialRepository $groupCredentialRepository,
-        protected GroupRepository $groupRepository,
+        private ParameterBagInterface $parameterBag,
+        private CredentialService $credentialService,
     ) {
         parent::__construct();
     }
 
-    protected function configure(): void
-    {
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $filename = "config/credentials.json";
+        $filename = $this->parameterBag->get('kernel.project_dir') . '/data/credential/credentials.json';
         $output->writeln("Dump Credentials to file $filename");
-        $creds = $this->credentialRepository->findAllOrdered();
-        $groups = $this->groupRepository->findAll();
-        $groupCredentials = $this->groupCredentialRepository->findAll();
-        $f = fopen($filename, "wb");
-        if ($f) {
-            fwrite(
-                $f,
-                (string)json_encode(
-                    ["credential" => $creds, "group" => $groups, "group_credential" => $groupCredentials]
-                )
-            );
-            fclose($f);
-        }
+
+        $this->credentialService->dumpCredentials($filename);
 
         return Command::SUCCESS;
     }

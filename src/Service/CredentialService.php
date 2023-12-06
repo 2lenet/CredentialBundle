@@ -60,4 +60,70 @@ class CredentialService
 
         return $groupCred;
     }
+
+    public function dumpCredentials(string $filename): void
+    {
+        $credentials = $this->em->getRepository(Credential::class)->findAllOrdered();
+        $groups = $this->em->getRepository(Group::class)->findAll();
+        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findAll();
+
+        $file = fopen($filename, 'wb');
+        if ($file) {
+            fwrite(
+                $file,
+                (string)json_encode(
+                    ['credential' => $credentials, 'group' => $groups, 'group_credential' => $groupCredentials]
+                )
+            );
+            fclose($file);
+        }
+    }
+
+    public function loadCredentials($filename): void
+    {
+        $data = json_decode((string)file_get_contents($filename), true);
+
+        $this->em->getRepository(Credential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();
+        $this->em->getRepository(GroupCredential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();
+
+        // keep the ids
+        $metadata = $this->em->getClassMetaData(Credential::class);
+        $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
+        $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+        $metadata = $this->em->getClassMetaData(Group::class);
+        $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
+        $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+
+        foreach ($data['credential'] as $cred) {
+            $c = new Credential();
+            $c->fromArray($cred);
+            $this->em->persist($c);
+        }
+
+        foreach ($data['group'] as $group) {
+            $g = $this->em->getRepository(Group::class)->find($group['id']);
+            if ($g === null) {
+                $g = new Group();
+            }
+
+            $g->fromArray($group);
+            $this->em->persist($g);
+        }
+
+        foreach ($data['group_credential'] as $groupcred) {
+            $gc = new GroupCredential();
+            /** @var Credential $c */
+            $c = $this->em->getReference(Credential::class, $groupcred['credential']);
+            /** @var Group $g */
+            $g = $this->em->getReference(Group::class, $groupcred['group']);
+            $gc->setCredential($c);
+            $gc->setGroupe($g);
+            $gc->setAllowed($groupcred['allowed']);
+            $gc->setStatusAllowed($groupcred['statusAllowed']);
+
+            $this->em->persist($gc);
+        }
+
+        $this->em->flush();
+    }
 }
