@@ -13,7 +13,8 @@
         "symfony/security-bundle": "^6.0",
         "doctrine/persistence": "^3.2",
         "symfony/translation": "^6.4",
-        "symfony/form": "^6.4"
+        "symfony/form": "^6.4",
+        "symfony/validator": "^6.4"
     },
     "autoload": {
         "psr-4": {
