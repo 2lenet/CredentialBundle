@@ -9,16 +9,12 @@ use Lle\CredentialBundle\Entity\GroupCredential;
 use Lle\CredentialBundle\Form\LoadCredentialsFileType;
 use Lle\CredentialBundle\Service\CredentialService;
 use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -28,7 +24,6 @@ class CredentialManagerController extends AbstractController
     public function __construct(
         private EntityManagerInterface $em,
         private CredentialService $credentialService,
-        private KernelInterface $kernel,
         private TranslatorInterface $translator,
     ) {
     }
@@ -200,9 +195,11 @@ class CredentialManagerController extends AbstractController
     #[IsGranted('ROLE_ADMIN_DROITS')]
     public function saveCredentials(): Response
     {
-        $this->executeCommand('credential:dump');
+        $filename = $this->getParameter('kernel.project_dir') . '/data/credential/credentials.json';
 
-        return $this->file($this->kernel->getProjectDir() . '/data/credential/credentials.json');
+        $this->credentialService->dumpCredentials($filename);
+
+        return $this->file($filename);
     }
 
     #[Route('/admin/credential/load', name: 'admin_credential_load')]
@@ -215,17 +212,18 @@ class CredentialManagerController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var UploadedFile $file */
             $file = $form->get('file')->getData();
-            $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.' . $file->guessExtension();
+            $directory = $this->getParameter('kernel.project_dir') . '/data/credential/';
+            $filename = 'credentials.json';
 
             try {
-                $file->move($this->kernel->getProjectDir() . '/data/credential', $filename);
+                $file->move($directory, $filename);
             } catch (FileException $e) {
                 $this->addFlash('danger', $this->translator->trans('text.move_file_error', [], 'CredentialBundle', 'fr'));
 
                 return $this->redirectToRoute('admin_credential_load');
             }
 
-            $this->executeCommand('credential:load');
+            $this->credentialService->loadCredentials($directory . $filename);
 
             $this->addFlash('success', $this->translator->trans('text.import_file_success', [], 'CredentialBundle', 'fr'));
 
@@ -235,18 +233,5 @@ class CredentialManagerController extends AbstractController
         return $this->render('@LleCredential/credential/load_credentials.html.twig', [
             'form' => $form->createView(),
         ]);
-    }
-
-    public function executeCommand(string $command): void
-    {
-        $application = new Application($this->kernel);
-        $application->setAutoExit(false);
-
-        $input = new ArrayInput([
-            'command' => $command,
-        ]);
-        $output = new NullOutput();
-
-        $application->run($input, $output);
     }
 }
