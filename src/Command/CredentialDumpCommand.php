@@ -24,7 +24,10 @@ class CredentialDumpCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $filename = $this->parameterBag->get('kernel.project_dir') . '/config/credentials.json';
+        /** @var string $projectDir */
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $filename = $projectDir . '/config/credentials.json';
+
         $output->writeln("Dump Credentials to file $filename");
 
         $this->credentialService->dumpCredentials($filename);

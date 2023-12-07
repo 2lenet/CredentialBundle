@@ -24,7 +24,10 @@ class CredentialLoadCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $filename = $this->parameterBag->get('kernel.project_dir') . '/config/credentials.json';
+        /** @var string $projectDir */
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $filename = $projectDir . '/config/credentials.json';
+
         $output->writeln("Load Credentials from file $filename");
 
         $this->credentialService->loadCredentials($filename);

@@ -79,7 +79,7 @@ class CredentialService
         }
     }
 
-    public function loadCredentials($filename): void
+    public function loadCredentials(string $filename): void
     {
         $data = json_decode((string)file_get_contents($filename), true);
 
