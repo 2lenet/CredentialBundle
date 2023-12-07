@@ -25,7 +25,13 @@ services:
             - { name: 'console.command' }
     Lle\CredentialBundle\Service\CredentialService: ~
 
-    Lle\CredentialBundle\Form\LoadCredentialsFileType:
+    Lle\CredentialBundle\Form\LoadCredentialsType:
+        tags:
+            - { name: 'form.type' }
+        arguments:
+            - '@translator'
+
+    Lle\CredentialBundle\Form\DumpCredentialsType:
         tags:
             - { name: 'form.type' }
         arguments:

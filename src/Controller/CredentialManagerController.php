@@ -6,7 +6,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
-use Lle\CredentialBundle\Form\LoadCredentialsFileType;
+use Lle\CredentialBundle\Form\DumpCredentialsType;
+use Lle\CredentialBundle\Form\LoadCredentialsType;
 use Lle\CredentialBundle\Service\CredentialService;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -193,27 +194,42 @@ class CredentialManagerController extends AbstractController
 
     #[Route('/admin/credential/save', name: 'admin_credential_save')]
     #[IsGranted('ROLE_ADMIN_DROITS')]
-    public function saveCredentials(): Response
+    public function saveCredentials(Request $request): Response
     {
-        $filename = $this->getParameter('kernel.project_dir') . '/data/credential/credentials.json';
+        $form = $this->createForm(DumpCredentialsType::class);
+        $form->handleRequest($request);
 
-        $this->credentialService->dumpCredentials($filename);
+        if ($form->isSubmitted() && $form->isValid()) {
+            /** @var string $projectDir */
+            $projectDir = $this->getParameter('kernel.project_dir');
+            $directory = $projectDir . '/data/credential/';
+            $filename = $directory . $form->get('filename')->getData() . '.json';
 
-        return $this->file($filename);
+            $this->credentialService->dumpCredentials($filename);
+
+            return $this->file($filename);
+        }
+
+        return $this->render('@LleCredential/credential/dump_credentials.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     #[Route('/admin/credential/load', name: 'admin_credential_load')]
     #[IsGranted('ROLE_ADMIN_DROITS')]
     public function loadCredentials(Request $request): Response
     {
-        $form = $this->createForm(LoadCredentialsFileType::class);
+        $form = $this->createForm(LoadCredentialsType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var UploadedFile $file */
             $file = $form->get('file')->getData();
-            $directory = $this->getParameter('kernel.project_dir') . '/data/credential/';
-            $filename = 'credentials.json';
+
+            /** @var string $projectDir */
+            $projectDir = $this->getParameter('kernel.project_dir');
+            $directory = $projectDir . '/data/credential/';
+            $filename = $form->get('filename')->getData() . '.json';
 
             try {
                 $file->move($directory, $filename);
