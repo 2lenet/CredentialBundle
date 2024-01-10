@@ -35,6 +35,7 @@ class Credential implements \JsonSerializable
             "role" => $this->role,
             "libelle" => $this->libelle,
             "rubrique" => $this->rubrique,
+            "visible" => $this->visible,
             "tri" => $this->tri,
             "listeStatus" => $this->listeStatus,
         ];
@@ -52,6 +53,7 @@ class Credential implements \JsonSerializable
         $this->libelle = $data["libelle"];
         $this->rubrique = $data["rubrique"];
         $this->tri = $data["tri"];
+        $this->visible = $data["visible"];
         $this->listeStatus = $data["listeStatus"];
         if (array_key_exists("createdAt", $data)) {
             $this->createdAt = new \DateTimeImmutable($data["createdAt"]);
