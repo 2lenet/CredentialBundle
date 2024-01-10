@@ -63,7 +63,7 @@ class CredentialService
 
     public function dumpCredentials(string $filename): void
     {
-        $credentials = $this->em->getRepository(Credential::class)->findAllOrdered();
+        $credentials = $this->em->getRepository(Credential::class)->findAll();
         $groups = $this->em->getRepository(Group::class)->findAll();
         $groupCredentials = $this->em->getRepository(GroupCredential::class)->findAll();
 
