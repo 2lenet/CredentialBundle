@@ -12,6 +12,7 @@ trait CredentialWarmupTrait
         ?string $libelle,
         ?int $tri,
         ?array $listeStatus = null,
+        ?bool $visible = true
     ): void {
         $cred = $this->credentialRepository->findOneBy(['role' => $role]);
         if ($cred === null) {
@@ -28,7 +29,7 @@ trait CredentialWarmupTrait
         if ($rubrique !== null) {
             $cred->setRubrique($rubrique);
         }
-        $cred->setVisible(true);
+        $cred->setVisible($visible);
         if ($listeStatus !== null) {
             $cred->setListeStatus($listeStatus);
         }
