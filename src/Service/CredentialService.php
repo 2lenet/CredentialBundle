@@ -72,7 +72,8 @@ class CredentialService
             fwrite(
                 $file,
                 (string)json_encode(
-                    ['credential' => $credentials, 'group' => $groups, 'group_credential' => $groupCredentials]
+                    ['credential' => $credentials, 'group' => $groups, 'group_credential' => $groupCredentials],
+                    JSON_PRETTY_PRINT
                 )
             );
             fclose($file);
