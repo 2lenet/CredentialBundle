@@ -43,6 +43,13 @@ class GroupCredential implements \JsonSerializable
         ];
     }
 
+    public function fromArray(array $data): void
+    {
+        $this->id = $data["id"];
+        $this->allowed = $data["allowed"];
+        $this->statusAllowed = $data["statusAllowed"];
+    }
+
     public function getId(): ?int
     {
         return $this->id;
