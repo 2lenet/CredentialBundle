@@ -91,13 +91,19 @@ class CredentialService
         $metadata = $this->em->getClassMetaData(Credential::class);
         $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+
         $metadata = $this->em->getClassMetaData(Group::class);
+        $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
+        $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+
+        $metadata = $this->em->getClassMetaData(GroupCredential::class);
         $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
         $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
 
         foreach ($data['credential'] as $cred) {
             $c = new Credential();
             $c->fromArray($cred);
+
             $this->em->persist($c);
         }
 
@@ -108,19 +114,22 @@ class CredentialService
             }
 
             $g->fromArray($group);
+
             $this->em->persist($g);
         }
 
         foreach ($data['group_credential'] as $groupcred) {
             $gc = new GroupCredential();
+            $gc->fromArray($groupcred);
+
             /** @var Credential $c */
             $c = $this->em->getReference(Credential::class, $groupcred['credential']);
             /** @var Group $g */
             $g = $this->em->getReference(Group::class, $groupcred['group']);
-            $gc->setCredential($c);
-            $gc->setGroupe($g);
-            $gc->setAllowed($groupcred['allowed']);
-            $gc->setStatusAllowed($groupcred['statusAllowed']);
+
+            $gc
+                ->setGroupe($g)
+                ->setCredential($c);
 
             $this->em->persist($gc);
         }
