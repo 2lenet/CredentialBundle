@@ -8,10 +8,10 @@
         "symfony/console": "^6.0",
         "symfony/framework-bundle": "^6.0",
         "symfony/http-kernel": "^6.0",
-        "doctrine/orm": "^2.15",
-        "doctrine/doctrine-bundle": "^2.10",
+        "doctrine/orm": "^2.15 || ^3.0",
+        "doctrine/doctrine-bundle": "^2.0",
         "symfony/security-bundle": "^6.0",
-        "doctrine/persistence": "^3.2",
+        "doctrine/persistence": "^2.0 || ^3.0",
         "symfony/translation": "^6.4",
         "symfony/form": "^6.4",
         "symfony/validator": "^6.4"
