@@ -3,6 +3,7 @@
 namespace Lle\CredentialBundle\Command;
 
 use Lle\CredentialBundle\Service\CredentialService;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,6 +19,7 @@ class CredentialLoadCommand extends Command
     public function __construct(
         private ParameterBagInterface $parameterBag,
         private CredentialService $credentialService,
+        private CacheItemPoolInterface $cache,
     ) {
         parent::__construct();
     }
@@ -31,6 +33,14 @@ class CredentialLoadCommand extends Command
         $output->writeln("Load Credentials from file $filename");
 
         $this->credentialService->loadCredentials($filename);
+
+        if ($this->cache->hasItem('group_credentials')) {
+            $this->cache->deleteItem('group_credentials');
+        }
+
+        if ($this->cache->hasItem('all_credentials')) {
+            $this->cache->deleteItem('all_credentials');
+        }
 
         return Command::SUCCESS;
     }
