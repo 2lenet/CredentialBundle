@@ -40,11 +40,9 @@ class GroupCredentialRepository extends ServiceEntityRepository
             ->set('gc.allowed', ':allowed')
             ->andWhere('gc.groupe = :group')
             ->andWhere('gc.credential IN (:credentials)')
-            ->setParameters([
-                'allowed' => $allowed,
-                'group' => $group,
-                'credentials' => $credentials,
-            ])
+            ->setParameter('allowed', $allowed)
+            ->setParameter('group', $group)
+            ->setParameter('credentials', $credentials)
             ->getQuery()
             ->execute();
     }
