@@ -5,16 +5,16 @@
     "license": "MIT",
     "require": {
         "php": "^8.0",
-        "symfony/console": "^6.0",
-        "symfony/framework-bundle": "^6.0",
-        "symfony/http-kernel": "^6.0",
+        "symfony/console": "^6.0 || ^7.0",
+        "symfony/framework-bundle": "^6.0 || ^7.0",
+        "symfony/http-kernel": "^6.0 || ^7.0",
         "doctrine/orm": "^2.15 || ^3.0",
         "doctrine/doctrine-bundle": "^2.0",
-        "symfony/security-bundle": "^6.0",
+        "symfony/security-bundle": "^6.0 || ^7.0",
         "doctrine/persistence": "^2.0 || ^3.0",
-        "symfony/translation": "^6.4",
-        "symfony/form": "^6.4",
-        "symfony/validator": "^6.4"
+        "symfony/translation": "^6.0 || ^7.0",
+        "symfony/form": "^6.0 || 7.0",
+        "symfony/validator": "^6.0 || 7.0"
     },
     "autoload": {
         "psr-4": {
