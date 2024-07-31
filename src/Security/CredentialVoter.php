@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\GroupCredential;
 use Psr\Cache\CacheItemPoolInterface;
+use Scheb\TwoFactorBundle\Security\Authentication\Token\TwoFactorTokenInterface;    
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -71,6 +72,12 @@ class CredentialVoter extends Voter
 
     protected function voteOnAttribute(?string $attribute, mixed $subject, TokenInterface $token): bool
     {
+        if (class_exists(TwoFactorTokenInterface::class)) {
+            if ($token instanceof TwoFactorTokenInterface) {
+                return false;
+            }
+        }
+
         $user = $token->getUser();
 
         // if the user is anonymous, do not grant access
