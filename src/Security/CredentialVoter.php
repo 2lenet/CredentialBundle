@@ -72,7 +72,7 @@ class CredentialVoter extends Voter
 
     protected function voteOnAttribute(?string $attribute, mixed $subject, TokenInterface $token): bool
     {
-        if (class_exists(TwoFactorTokenInterface::class)) {
+        if (interface_exists(TwoFactorTokenInterface::class)) {
             if ($token instanceof TwoFactorTokenInterface) {
                 return false;
             }
