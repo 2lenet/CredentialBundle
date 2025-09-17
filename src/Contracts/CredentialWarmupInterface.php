@@ -4,5 +4,5 @@ namespace Lle\CredentialBundle\Contracts;
 
 interface CredentialWarmupInterface
 {
-    public function warmUp(): void;
+    public function warmUp(): array;
 }

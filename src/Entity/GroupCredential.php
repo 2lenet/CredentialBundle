@@ -31,7 +31,7 @@ class GroupCredential
 
     #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => false])]
     private ?bool $statusAllowed = false;
-
+    
 
     public function getId(): ?int
     {

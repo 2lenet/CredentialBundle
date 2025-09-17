@@ -28,7 +28,7 @@ class CredentialLoadCommand extends Command
     {
         $this->credentialService->loadCredentials();
         $output->writeln("Load Credential from crudit-studio");
-
+        
         if ($this->cache->hasItem('group_credentials')) {
             $this->cache->deleteItem('group_credentials');
         }

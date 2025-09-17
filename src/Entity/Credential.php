@@ -34,7 +34,7 @@ class Credential
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $createdAt;
-
+    
 
     public function __toString()
     {

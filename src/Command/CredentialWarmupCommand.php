@@ -34,10 +34,10 @@ class CredentialWarmupCommand extends Command
         }
 
         $response = $this->credentialService->sendCredentials($results);
-        if ($response === 200) {
-            $this->credentialService->loadCredentials();
-        }
-
+//        if ($response === 200) {
+//            $this->credentialService->loadCredentials();
+//        }
+        
         if ($this->cache->hasItem('group_credentials')) {
             $this->cache->deleteItem('group_credentials');
         }

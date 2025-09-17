@@ -2,8 +2,13 @@
 
 namespace Lle\CredentialBundle\Service;
 
+use Lle\CredentialBundle\Dto\GroupCredentialDto;
+use Lle\CredentialBundle\Dto\GroupDto;
 use Lle\CredentialBundle\Dto\InitProjectDto;
 use Doctrine\ORM\EntityManagerInterface;
+use Lle\CredentialBundle\Contracts\CredentialWarmupInterface;
+use Lle\CredentialBundle\DependencyInjection\Configuration;
+use Lle\CredentialBundle\Dto\CredentialDto;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
@@ -30,7 +35,7 @@ class CredentialService
     {
         $projectUrl = $this->container->get('lle_credential.crudit_studio_url');
         $projectName = $this->container->get('lle_credential.project_name');
-
+        
         $response = $this->client->request(
             'GET',
             $projectUrl . '/api/credential/pull/' . $projectName,
@@ -76,7 +81,7 @@ class CredentialService
             );
         }
     }
-
+    
     public function sendCredentials(array $credentials): int
     {
         $projectUrl = $this->container->get('lle_credential.crudit_studio_url');
@@ -95,7 +100,7 @@ class CredentialService
 
         return $response->getStatusCode();
     }
-
+    
     public function initProject(): void
     {
         $projectUrl = $this->container->get('lle_credential.crudit_studio_url');
@@ -121,29 +126,29 @@ class CredentialService
             ]
         );
     }
-
+    
     public function createInitProjectDto(array $credentials, array $groups, array $groupCredentials): InitProjectDto
     {
         $initProjectDto = new InitProjectDto();
-
+        
         foreach ($credentials as $credential) {
             $credentialDto = $this->credentialFactory->createCredentialDto($credential);
 
             $initProjectDto->credentials[] = $credentialDto;
         }
-
+        
         foreach ($groups as $group) {
             $groupDto = $this->groupFactory->createGroupDto($group);
 
             $initProjectDto->groups[] = $groupDto;
         }
-
+        
         foreach ($groupCredentials as $groupCredential) {
             $groupCredentialDto = $this->groupCredentialFactory->createGroupCredentialDto($groupCredential);
 
             $initProjectDto->groupCredentials[] = $groupCredentialDto;
         }
-
+     
         return $initProjectDto;
     }
 }

@@ -16,7 +16,7 @@ class LleCredentialExtension extends Extension implements ExtensionInterface
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
         $container->registerForAutoconfiguration(CredentialWarmupInterface::class)->addTag('credential.warmup');
-
+        
         $configuration = new Configuration();
         $processedConfig = $this->processConfiguration($configuration, $configs);
 

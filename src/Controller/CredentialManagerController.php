@@ -34,7 +34,7 @@ class CredentialManagerController extends AbstractController
 
         $groupCreds = $this->em->getRepository(GroupCredential::class)->findAll();
 
-        $cruditStudioUrl =
+        $cruditStudioUrl = 
             $this->container->get('parameter_bag')->get('lle_credential.crudit_studio_public_url')
             . '/project/project/'
             . $this->container->get('parameter_bag')->get('lle_credential.project_name');
