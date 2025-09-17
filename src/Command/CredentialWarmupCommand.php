@@ -2,6 +2,7 @@
 
 namespace Lle\CredentialBundle\Command;
 
+use Lle\CredentialBundle\Service\CredentialService;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -18,20 +19,23 @@ class CredentialWarmupCommand extends Command
     public function __construct(
         #[AutowireIterator('credential.warmup')] protected iterable $warmuppers,
         private CacheItemPoolInterface $cache,
+        protected CredentialService $credentialService,
     ) {
         parent::__construct();
     }
 
-    protected function configure(): void
-    {
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $results = [];
         $output->writeln("Warmup Credential");
         foreach ($this->warmuppers as $warmup) {
             $output->writeln("\n** Warmuppper " . get_class($warmup) . " ** \n");
-            $warmup->warmup();
+            $results = array_merge($results, $warmup->warmup());
+        }
+
+        $response = $this->credentialService->sendCredentials($results);
+        if ($response === 200) {
+            $this->credentialService->loadCredentials();
         }
 
         if ($this->cache->hasItem('group_credentials')) {

@@ -9,7 +9,7 @@ use Lle\CredentialBundle\Repository\GroupRepository;
 
 #[ORM\Table(name: 'lle_credential_group')]
 #[ORM\Entity(repositoryClass: GroupRepository::class)]
-class Group implements \JsonSerializable
+class Group
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -46,30 +46,6 @@ class Group implements \JsonSerializable
     public function __construct()
     {
         $this->credentials = new ArrayCollection();
-    }
-
-    public function jsonSerialize(): mixed
-    {
-        return [
-            "id" => $this->id,
-            "name" => $this->name,
-            "isRole" => $this->isRole,
-            "libelle" => $this->libelle,
-            "requiredRole" => $this->requiredRole,
-            "tri" => $this->tri,
-            "actif" => $this->actif,
-        ];
-    }
-
-    public function fromArray(array $data): void
-    {
-        $this->id = $data["id"];
-        $this->name = $data["name"];
-        $this->libelle = $data["libelle"];
-        $this->isRole = $data["isRole"];
-        $this->tri = $data["tri"];
-        $this->requiredRole = $data["requiredRole"];
-        $this->actif = $data["actif"];
     }
 
     public function getId(): ?int

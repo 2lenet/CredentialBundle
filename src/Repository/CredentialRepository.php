@@ -29,4 +29,14 @@ class CredentialRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findByLatestTri(): ?Credential
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.tri IS NOT NULL')
+            ->orderBy('c.tri', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

@@ -10,10 +10,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
-    name: 'credential:dump',
-    description: 'Dump credential configuration',
+    name: 'credential:init',
+    description: 'Initialize a project',
 )]
-class CredentialDumpCommand extends Command
+class CredentialInitProjectCommand extends Command
 {
     public function __construct(
         private ParameterBagInterface $parameterBag,
@@ -24,13 +24,7 @@ class CredentialDumpCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        /** @var string $projectDir */
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $filename = $projectDir . '/config/credentials.json';
-
-        $output->writeln("Dump Credentials to file $filename");
-
-        $this->credentialService->dumpCredentials($filename);
+        $this->credentialService->initProject();
 
         return Command::SUCCESS;
     }

@@ -7,7 +7,7 @@ use Lle\CredentialBundle\Repository\CredentialRepository;
 
 #[ORM\Table(name: 'lle_credential_credential')]
 #[ORM\Entity(repositoryClass: CredentialRepository::class)]
-class Credential implements \JsonSerializable
+class Credential
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -35,37 +35,6 @@ class Credential implements \JsonSerializable
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $createdAt;
 
-    public function jsonSerialize(): mixed
-    {
-        $data = [
-            "id" => $this->id,
-            "role" => $this->role,
-            "libelle" => $this->libelle,
-            "rubrique" => $this->rubrique,
-            "visible" => $this->visible,
-            "tri" => $this->tri,
-            "listeStatus" => $this->listeStatus,
-        ];
-        if ($this->createdAt !== null) {
-            $data["createdAt"] = $this->createdAt->format("Y-m-d H:i:s");
-        }
-
-        return $data;
-    }
-
-    public function fromArray(array $data): void
-    {
-        $this->id = $data["id"];
-        $this->role = $data["role"];
-        $this->libelle = $data["libelle"];
-        $this->rubrique = $data["rubrique"];
-        $this->tri = $data["tri"];
-        $this->visible = $data["visible"];
-        $this->listeStatus = $data["listeStatus"];
-        if (array_key_exists("createdAt", $data)) {
-            $this->createdAt = new \DateTimeImmutable($data["createdAt"]);
-        }
-    }
 
     public function __toString()
     {

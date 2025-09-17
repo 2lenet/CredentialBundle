@@ -17,22 +17,12 @@ services:
     Lle\CredentialBundle\Command\CredentialWarmupCommand:
         tags:
             - { name: 'console.command' }
-    Lle\CredentialBundle\Command\CredentialDumpCommand:
-        tags:
-            - { name: 'console.command' }
     Lle\CredentialBundle\Command\CredentialLoadCommand:
         tags:
             - { name: 'console.command' }
+    Lle\CredentialBundle\Command\CredentialInitProjectCommand:
+        tags:
+            - { name: 'console.command' }
     Lle\CredentialBundle\Service\CredentialService: ~
-
-    Lle\CredentialBundle\Form\LoadCredentialsType:
-        tags:
-            - { name: 'form.type' }
-        arguments:
-            - '@translator'
-
-    Lle\CredentialBundle\Form\DumpCredentialsType:
-        tags:
-            - { name: 'form.type' }
-        arguments:
-            - '@translator'
+    Lle\CredentialBundle\Factory\:
+        resource: '../../Factory'

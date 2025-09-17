@@ -2,138 +2,148 @@
 
 namespace Lle\CredentialBundle\Service;
 
+use Lle\CredentialBundle\Dto\InitProjectDto;
 use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
+use Lle\CredentialBundle\Factory\CredentialFactory;
+use Lle\CredentialBundle\Factory\GroupCredentialFactory;
+use Lle\CredentialBundle\Factory\GroupFactory;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class CredentialService
 {
     public function __construct(
         private EntityManagerInterface $em,
+        private ContainerBagInterface $container,
+        private HttpClientInterface $client,
+        private CredentialFactory $credentialFactory,
+        private GroupFactory $groupFactory,
+        private GroupCredentialFactory $groupCredentialFactory,
     ) {
     }
 
-    public function toggleAll(array $groupCredentials, array $credentials, Group $group, bool $checked): void
+    public function loadCredentials(): void
     {
-        $existingCredentials = [];
-        foreach ($groupCredentials as $groupCredential) {
-            $existingCredentials[$groupCredential->getCredential()->getId()] = $groupCredential;
-        }
+        $projectUrl = $this->container->get('lle_credential.crudit_studio_url');
+        $projectName = $this->container->get('lle_credential.project_name');
 
-        /** @var Credential $credential */
-        foreach ($credentials as $credential) {
-            if (!array_key_exists((int)$credential->getId(), $existingCredentials)) {
-                $groupCredential = new GroupCredential();
-                $groupCredential->setGroupe($group);
-                $groupCredential->setCredential($credential);
-                $groupCredential->setAllowed($checked);
-
-                $this->em->persist($groupCredential);
-            }
-        }
-    }
-
-    public function allowedByStatus(?string $group, ?string $statusCred, ?string $parentCred): GroupCredential
-    {
-        /** @var Group $groupObj */
-        $groupObj = $this->em->getRepository(Group::class)->findOneBy(['name' => $group]);
-        $parentCred = $this->em->getRepository(Credential::class)->findOneBy(['role' => $parentCred]);
-
-        $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $statusCred]);
-
-        if (!$credential) {
-            $credential = new Credential();
-            $credential->setRole((string)$statusCred);
-            $credential->setLibelle((string)$statusCred);
-            $credential->setRubrique($parentCred?->getRubrique());
-            $credential->setTri(0);
-            $credential->setVisible(false);
-
-            $this->em->persist($credential);
-        }
-
-        $groupCred = new GroupCredential();
-        $groupCred->setGroupe($groupObj);
-        $groupCred->setCredential($credential);
-        $groupCred->setAllowed(true);
-
-        return $groupCred;
-    }
-
-    public function dumpCredentials(string $filename): void
-    {
-        $credentials = $this->em->getRepository(Credential::class)->findAll();
-        $groups = $this->em->getRepository(Group::class)->findAll();
-        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findAll();
-
-        $file = fopen($filename, 'wb');
-        if ($file) {
-            fwrite(
-                $file,
-                (string)json_encode(
-                    ['credential' => $credentials, 'group' => $groups, 'group_credential' => $groupCredentials],
-                    JSON_PRETTY_PRINT
-                )
-            );
-            fclose($file);
-        }
-    }
-
-    public function loadCredentials(string $filename): void
-    {
-        $data = json_decode((string)file_get_contents($filename), true);
+        $response = $this->client->request(
+            'GET',
+            $projectUrl . '/api/credential/pull/' . $projectName,
+        );
+        $credentials = json_decode($response->getContent());
 
         $this->em->getRepository(Credential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();
         $this->em->getRepository(GroupCredential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();
 
-        // keep the ids
-        $metadata = $this->em->getClassMetaData(Credential::class);
-        $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
-
-        $metadata = $this->em->getClassMetaData(Group::class);
-        $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
-
-        $metadata = $this->em->getClassMetaData(GroupCredential::class);
-        $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
-
-        foreach ($data['credential'] as $cred) {
-            $c = new Credential();
-            $c->fromArray($cred);
-
-            $this->em->persist($c);
+        foreach ($credentials->credentials as $credentialDto) {
+            $this->credentialFactory->createCredentials(
+                $credentialDto->role,
+                $credentialDto->rubrique,
+                $credentialDto->libelle,
+                $credentialDto->listeStatus,
+                $credentialDto->visible,
+                $credentialDto->tri
+            );
         }
 
-        foreach ($data['group'] as $group) {
-            $g = $this->em->getRepository(Group::class)->find($group['id']);
-            if ($g === null) {
-                $g = new Group();
-            }
+        foreach ($credentials->groups as $groupDto) {
+            $group = $this->em->getRepository(Group::class)->findOneBy(['name' => $groupDto->name]);
 
-            $g->fromArray($group);
-
-            $this->em->persist($g);
+            $this->groupFactory->createGroup(
+                $groupDto->name,
+                $groupDto->libelle,
+                $groupDto->isRole,
+                $groupDto->active,
+                $groupDto->requiredRole,
+                $groupDto->tri,
+                $group === null,
+            );
         }
 
-        foreach ($data['group_credential'] as $groupcred) {
-            $gc = new GroupCredential();
-            $gc->fromArray($groupcred);
+        foreach ($credentials->group_credentials as $groupcredDto) {
+            $group = $this->em->getRepository(Group::class)->findOneBy(['name' => $groupcredDto->groupName]);
+            $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $groupcredDto->credentialRole]);
+            $this->groupCredentialFactory->createGroupCredential(
+                $group,
+                $credential,
+                $groupcredDto->allowed,
+                $groupcredDto->statusAllowed
+            );
+        }
+    }
 
-            /** @var Credential $c */
-            $c = $this->em->getReference(Credential::class, $groupcred['credential']);
-            /** @var Group $g */
-            $g = $this->em->getReference(Group::class, $groupcred['group']);
+    public function sendCredentials(array $credentials): int
+    {
+        $projectUrl = $this->container->get('lle_credential.crudit_studio_url');
+        $projectName = $this->container->get('lle_credential.project_name');
 
-            $gc
-                ->setGroupe($g)
-                ->setCredential($c);
+        $response = $this->client->request(
+            'POST',
+            $projectUrl . '/api/credential/warmup/' . $projectName,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+                'body' => json_encode($credentials)
+            ]
+        );
 
-            $this->em->persist($gc);
+        return $response->getStatusCode();
+    }
+
+    public function initProject(): void
+    {
+        $projectUrl = $this->container->get('lle_credential.crudit_studio_url');
+        $projectName = $this->container->get('lle_credential.project_name');
+
+        $credentials = $this->em->getRepository(Credential::class)->findAllOrdered();
+        $groups = $this->em->getRepository(Group::class)->findAllOrdered();
+        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findAll();
+
+        $initProjectDto = $this->createInitProjectDto($credentials, $groups, $groupCredentials);
+
+        $response = $this->client->request(
+            'POST',
+            $projectUrl . '/api/credential/init' . $projectName,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+                'body' => json_encode(
+                    $initProjectDto,
+                    JSON_PRETTY_PRINT
+                )
+            ]
+        );
+    }
+
+    public function createInitProjectDto(array $credentials, array $groups, array $groupCredentials): InitProjectDto
+    {
+        $initProjectDto = new InitProjectDto();
+
+        foreach ($credentials as $credential) {
+            $credentialDto = $this->credentialFactory->createCredentialDto($credential);
+
+            $initProjectDto->credentials[] = $credentialDto;
         }
 
-        $this->em->flush();
+        foreach ($groups as $group) {
+            $groupDto = $this->groupFactory->createGroupDto($group);
+
+            $initProjectDto->groups[] = $groupDto;
+        }
+
+        foreach ($groupCredentials as $groupCredential) {
+            $groupCredentialDto = $this->groupCredentialFactory->createGroupCredentialDto($groupCredential);
+
+            $initProjectDto->groupCredentials[] = $groupCredentialDto;
+        }
+
+        return $initProjectDto;
     }
 }

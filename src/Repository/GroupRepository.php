@@ -26,4 +26,24 @@ class GroupRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findByLatestTri(): ?Group
+    {
+        return $this->createQueryBuilder('g')
+            ->andWhere('g.tri IS NOT NULL')
+            ->orderBy('g.tri', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findByProjectExceptSuperAdmin(): array
+    {
+        return $this->createQueryBuilder('g')
+            ->andWhere('g.name != :superadmin')
+            ->setParameter('superadmin', 'SUPER_ADMIN')
+            ->orderBy('g.tri', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

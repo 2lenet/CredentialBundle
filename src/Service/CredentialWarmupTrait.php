@@ -2,42 +2,25 @@
 
 namespace Lle\CredentialBundle\Service;
 
-use Lle\CredentialBundle\Entity\Credential;
+use Lle\CredentialBundle\Dto\CredentialDto;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 trait CredentialWarmupTrait
 {
-    protected function checkAndCreateCredential(
+    protected function getCredentials(
         string $role,
         ?string $rubrique,
         ?string $libelle,
-        ?int $tri,
-        ?array $listeStatus = null,
+        ?array $listeStatus = [],
         ?bool $visible = true
-    ): void {
-        $cred = $this->credentialRepository->findOneBy(['role' => $role]);
-        if ($cred === null) {
-            echo "not found $role  / $libelle\n";
-            $cred = new Credential();
-            $cred->setCreatedAt(new \DateTimeImmutable());
-            $cred->setRole($role);
-            $cred->setRubrique("");
-            $cred->setTri(0);
-        }
-        if ($libelle !== null) {
-            $cred->setLibelle($libelle);
-        }
-        if ($rubrique !== null) {
-            $cred->setRubrique($rubrique);
-        }
-        $cred->setVisible($visible);
-        if ($listeStatus !== null) {
-            $cred->setListeStatus($listeStatus);
-        }
-        if ($tri !== null) {
-            $cred->setTri($tri);
-        }
-        $cred->setCreatedAt(new \DateTimeImmutable());
-        $this->entityManager->persist($cred);
-        $this->entityManager->flush();
+    ): CredentialDto {
+        $dto = new CredentialDto();
+        $dto->role = $role;
+        $dto->libelle = $libelle;
+        $dto->rubrique = $rubrique;
+        $dto->listeStatus = $listeStatus;
+        $dto->visible = $visible;
+
+        return $dto;
     }
 }

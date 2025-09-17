@@ -26,13 +26,8 @@ class CredentialLoadCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        /** @var string $projectDir */
-        $projectDir = $this->parameterBag->get('kernel.project_dir');
-        $filename = $projectDir . '/config/credentials.json';
-
-        $output->writeln("Load Credentials from file $filename");
-
-        $this->credentialService->loadCredentials($filename);
+        $this->credentialService->loadCredentials();
+        $output->writeln("Load Credential from crudit-studio");
 
         if ($this->cache->hasItem('group_credentials')) {
             $this->cache->deleteItem('group_credentials');

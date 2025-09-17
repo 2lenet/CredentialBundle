@@ -11,7 +11,7 @@ use Lle\CredentialBundle\Repository\GroupCredentialRepository;
     name: 'groupe_cred_unique_idx',
     columns: ['groupe_id', 'credential_id']
 )]
-class GroupCredential implements \JsonSerializable
+class GroupCredential
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -32,23 +32,6 @@ class GroupCredential implements \JsonSerializable
     #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => false])]
     private ?bool $statusAllowed = false;
 
-    public function jsonSerialize(): mixed
-    {
-        return [
-            "id" => $this->id,
-            "group" => $this->groupe?->getId(),
-            "credential" => $this->credential?->getId(),
-            "allowed" => $this->allowed,
-            "statusAllowed" => $this->statusAllowed,
-        ];
-    }
-
-    public function fromArray(array $data): void
-    {
-        $this->id = $data["id"];
-        $this->allowed = $data["allowed"];
-        $this->statusAllowed = $data["statusAllowed"];
-    }
 
     public function getId(): ?int
     {
