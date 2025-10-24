@@ -2,6 +2,7 @@
 
 namespace Lle\CredentialBundle\Service;
 
+use Lle\CredentialBundle\Exception\ProjectNotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Dto\CredentialDto;
 use Lle\CredentialBundle\Dto\GroupCredentialDto;
@@ -14,6 +15,7 @@ use Lle\CredentialBundle\Factory\GroupCredentialFactory;
 use Lle\CredentialBundle\Factory\GroupFactory;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Lle\CredentialBundle\Service\ClientService;
 
 class LoadCredentialService
 {
@@ -26,19 +28,16 @@ class LoadCredentialService
         protected CredentialFactory $credentialFactory,
         protected GroupFactory $groupFactory,
         protected GroupCredentialFactory $groupCredentialFactory,
+        protected ClientService $client,
     ) {
     }
 
+    /**
+     * @throws ProjectNotFoundException
+     */
     public function load(): void
     {
-        $clientUrl = $this->parameterBag->get('lle_credential.client_url');
-        $projectCode = $this->parameterBag->get('lle_credential.project_code');
-
-        $response = $this->client->request(
-            'GET',
-            $clientUrl . '/api/credential/pull/' . $projectCode,
-        );
-        $credentials = json_decode($response->getContent());
+        $credentials = $this->client->pull();
 
         $this->em->getRepository(Group::class)->createQueryBuilder('g')->delete()->getQuery()->execute();
         $this->em->getRepository(Credential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();

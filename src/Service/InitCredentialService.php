@@ -8,6 +8,9 @@ use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Lle\CredentialBundle\Exception\ProjectNotFoundException;
+use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
+use Lle\CredentialBundle\Service\ClientService;
 
 class InitCredentialService
 {
@@ -17,14 +20,16 @@ class InitCredentialService
         protected ParameterBagInterface $parameterBag,
         protected EntityManagerInterface $em,
         protected NormalizerInterface $normalizer,
+        protected ClientService $client,
     ) {
     }
 
+    /**
+     * @throws ProjectAlreadyInitializedException
+     * @throws ProjectNotFoundException
+     */
     public function init(): void
     {
-        $clientUrl = $this->parameterBag->get('lle_credential.client_url');
-        $projectCode = $this->parameterBag->get('lle_credential.project_code');
-
         $credentials = $this->em->getRepository(Credential::class)->findAllOrdered();
         $groups = $this->em->getRepository(Group::class)->findAllOrdered();
         $groupCredentials = $this->em->getRepository(GroupCredential::class)->findAll();
@@ -41,16 +46,7 @@ class InitCredentialService
             ]),
         ];
 
-        $response = $this->client->request(
-            'POST',
-            $clientUrl . '/api/credential/init' . $projectCode,
-            [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                ],
-                'body' => json_encode($data),
-            ]
-        );
+        $this->client->init($data);
 
         $this->resetCache();
     }
