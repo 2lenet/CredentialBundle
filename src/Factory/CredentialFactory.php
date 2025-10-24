@@ -8,82 +8,63 @@ use Lle\CredentialBundle\Entity\Credential;
 
 class CredentialFactory
 {
-    public function __construct(protected EntityManagerInterface $em)
-    {
+    public function __construct(
+        protected EntityManagerInterface $em,
+    ) {
     }
 
-    public function createCredentials(
+    public function create(
         string $role,
         ?string $rubrique = null,
         ?string $libelle = null,
         ?array $listeStatus = null,
-        ?bool $visible = null,
+        bool $visible = true,
         ?int $tri = null,
     ): Credential {
-        /** @var ?Credential $cred */
-        $cred = $this->em->getRepository(Credential::class)->findOneBy(['role' => $role]);
+        $credential = new Credential();
+        $credential
+            ->setRole($role)
+            ->setRubrique($rubrique ?? $this->generateRubrique($role))
+            ->setLibelle($libelle ?? $role)
+            ->setListeStatus($listeStatus ?? [])
+            ->setVisible($visible)
+            ->setTri($tri ?? $this->getTri());
 
-        if (!$cred) {
-            $cred = new Credential();
-            $cred->setCreatedAt(new \DateTimeImmutable());
-            $cred->setRole($role);
-            $cred->setRubrique("");
-        }
+        $this->em->persist($credential);
 
-        if ($libelle) {
-            $cred->setLibelle($libelle);
-        } elseif ($cred->getRole()) {
-            $cred->setLibelle($cred->getRole());
-        }
+        return $credential;
+    }
 
-        if ($rubrique) {
-            $cred->setRubrique($rubrique);
-        } elseif ($cred->getRole()) {
-            $cred->setRubrique($this->generateRubrique($role));
-        }
-        if ($visible) {
-            $cred->setVisible($visible);
-        }
-        if ($listeStatus) {
-            $cred->setListeStatus($listeStatus);
-        }
+    public function createFromDto(CredentialDto $credentialDto): Credential
+    {
+        $credential = new Credential();
+        $credential
+            ->setRole($credentialDto->role)
+            ->setRubrique($credentialDto->rubrique ?? $this->generateRubrique($credentialDto->role))
+            ->setLibelle($credentialDto->libelle ?? $credentialDto->role)
+            ->setListeStatus($credentialDto->listeStatus)
+            ->setVisible($credentialDto->visible)
+            ->setTri($credentialDto->tri ?? $this->getTri());
 
-        if (!$tri) {
-            $lastCredential = $this->em->getRepository(Credential::class)->findByLatestTri();
-            if ($lastCredential) {
-                $cred->setTri($lastCredential->getTri() + 1);
-            } else {
-                $cred->setTri(0);
-            }
-        } else {
-            $cred->setTri($tri);
-        }
+        $this->em->persist($credential);
 
-        $cred->setCreatedAt(new \DateTimeImmutable());
-
-        $this->em->persist($cred);
-        $this->em->flush();
-
-        return $cred;
+        return $credential;
     }
 
     public function generateRubrique(string $role): string
     {
-        $string = explode('_', $role);
+        $explodedRole = explode('_', $role);
 
-        return strtoupper($string[1]);
+        return strtoupper($explodedRole[1]);
     }
 
-    public function createCredentialDto(Credential $credential): CredentialDto
+    public function getTri(): int
     {
-        $credentialDto = new CredentialDto();
-        $credentialDto->role = $credential->getRole() ?? '';
-        $credentialDto->rubrique = $credential->getRubrique();
-        $credentialDto->libelle = $credential->getLibelle();
-        $credentialDto->listeStatus = $credential->getListeStatus() ?? [];
-        $credentialDto->visible = $credential->isVisible() ?? true;
-        $credentialDto->tri = $credential->getTri();
+        $lastCredential = $this->em->getRepository(Credential::class)->findOneBy([], ['tri' => 'DESC']);
+        if ($lastCredential) {
+            return $lastCredential->getTri() + 1;
+        }
 
-        return $credentialDto;
+        return 0;
     }
 }

@@ -22,7 +22,7 @@ class CredentialWarmupCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $output->writeln("Warmup Credential");
+        $output->writeln('Warmup Credential');
 
         $response = $this->credentialService->sendCredentials();
 //        if ($response === 200) {

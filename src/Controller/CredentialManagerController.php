@@ -34,7 +34,7 @@ class CredentialManagerController extends AbstractController
 
         $groupCreds = $this->em->getRepository(GroupCredential::class)->findAll();
 
-        $cruditStudioUrl = 
+        $cruditStudioUrl =
             $this->container->get('parameter_bag')->get('lle_credential.crudit_studio_public_url')
             . '/project/project/'
             . $this->container->get('parameter_bag')->get('lle_credential.project_name');
@@ -70,20 +70,5 @@ class CredentialManagerController extends AbstractController
                 'load_url' => $loadUrl,
             ]
         );
-    }
-
-    #[Route('/admin/credential/load', name: 'admin_credential_load')]
-    #[IsGranted('ROLE_ADMIN_DROITS')]
-    public function loadCredentials(): Response
-    {
-        $statusCode = $this->credentialService->loadCredentials();
-
-        $this->credentialService->resetCache();
-
-        if ($statusCode !== 200) {
-            return new Response(status: Response::HTTP_BAD_REQUEST);
-        }
-
-        return new Response();
     }
 }

@@ -23,7 +23,7 @@ class CredentialLoadCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->credentialService->loadCredentials();
-        $output->writeln("Load Credential from crudit-studio");
+        $output->writeln('Load Credential from crudit-studio');
 
         return Command::SUCCESS;
     }

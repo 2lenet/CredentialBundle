@@ -10,37 +10,47 @@ use Lle\CredentialBundle\Entity\GroupCredential;
 
 class GroupCredentialFactory
 {
-    public function __construct(protected EntityManagerInterface $em)
-    {
+    public function __construct(
+        protected EntityManagerInterface $em,
+    ) {
     }
 
-    public function createGroupCredential(
-        Group $group,
-        Credential $credential,
-        bool $allowed = true,
-        bool $statusAllowed = false
-    ): GroupCredential {
-        $groupCred = new GroupCredential();
-        $groupCred->setGroupe($group);
-        $groupCred->setCredential($credential);
-        $groupCred->setAllowed($allowed);
-        $groupCred->setStatusAllowed($statusAllowed);
+    public function create(Group $group, Credential $credential): GroupCredential
+    {
+        $groupCredential = new GroupCredential();
+        $groupCredential
+            ->setGroupe($group)
+            ->setCredential($credential);
 
-        $this->em->persist($groupCred);
-        $this->em->flush();
+        $this->em->persist($groupCredential);
 
-        return $groupCred;
+        return $groupCredential;
     }
 
-    public function createGroupCredentialDto(GroupCredential $groupCredential): ?GroupCredentialDto
+    public function createFromDto(GroupCredentialDto $groupCredentialDto): ?GroupCredential
     {
-    /** @var GroupCredential $groupCredential */
-        $groupCredentialDto = new GroupCredentialDto();
-        $groupCredentialDto->groupName = $groupCredential->getGroupe()?->getName() ?? '';
-        $groupCredentialDto->credentialRole = $groupCredential->getCredential()->getRole() ?? '';
-        $groupCredentialDto->statusAllowed = $groupCredential->isStatusAllowed() ?? false;
-        $groupCredentialDto->allowed = $groupCredential->isAllowed() ?? true;
+        $group = $this->em->getRepository(Group::class)->findOneBy([
+            'name' => $groupCredentialDto->groupName
+        ]);
+        $credential = $this->em->getRepository(Credential::class)->findOneBy([
+            'role' => $groupCredentialDto->credentialRole,
+        ]);
+        if (!$group || !$credential) {
+            return null;
+        }
 
-        return $groupCredentialDto;
+        $groupCredential = new GroupCredential();
+        $groupCredential
+            ->setGroupe($group)
+            ->setCredential($credential)
+            ->setAllowed($groupCredentialDto->allowed)
+            ->setStatusAllowed($groupCredentialDto->statusAllowed);
+
+        $this->em->persist($groupCredential);
+
+        $group->addGroupCredential($groupCredential);
+        $credential->addGroupCredential($groupCredential);
+
+        return $groupCredential;
     }
 }
