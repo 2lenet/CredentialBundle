@@ -14,15 +14,20 @@ services:
         resource: '../../Controller'
         tags: ['controller.service_arguments']
 
-    Lle\CredentialBundle\Command\CredentialWarmupCommand:
+    Lle\CredentialBundle\Command\WarmupCredentialCommand:
         tags:
             - { name: 'console.command' }
-    Lle\CredentialBundle\Command\CredentialLoadCommand:
+
+    Lle\CredentialBundle\Command\LoadCredentialCommand:
         tags:
             - { name: 'console.command' }
-    Lle\CredentialBundle\Command\CredentialInitProjectCommand:
+
+    Lle\CredentialBundle\Command\InitProjectCommand:
         tags:
             - { name: 'console.command' }
-    Lle\CredentialBundle\Service\CredentialService: ~
+
+    Lle\CredentialBundle\Service\:
+        resource: '../../Service'
+
     Lle\CredentialBundle\Factory\:
         resource: '../../Factory'

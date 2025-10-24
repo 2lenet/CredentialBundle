@@ -14,15 +14,15 @@ class Configuration implements ConfigurationInterface
         $children = $rootNode->children();
         $children
             ->scalarNode('client_url')
-            ->isRequired()
+            ->defaultNull()
             ->end();
         $children
             ->scalarNode('client_public_url')
-            ->isRequired()
+            ->defaultNull()
             ->end();
         $children
             ->scalarNode('project_code')
-            ->isRequired()
+            ->defaultNull()
             ->end();
 
         return $treeBuilder;
