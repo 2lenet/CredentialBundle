@@ -2,6 +2,8 @@
 
 namespace Lle\CredentialBundle\Service;
 
+use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefined;
+use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefined;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
 use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -22,8 +24,15 @@ class ClientService
         $this->projectCode = $this->parameterBag->get('lle_credential.project_code');
     }
 
+    /**
+     * @throws ConfigurationProjectCodeNotDefined
+     * @throws ConfigurationClientUrlNotDefined
+     * @throws ProjectNotFoundException
+     */
     public function pull(): array
     {
+        $this->checkClientConfig();
+
         $response = $this->client->request(
             'GET',
             $this->clientUrl . '/api/credential/pull/' .$this->projectCode
@@ -36,8 +45,15 @@ class ClientService
         return json_decode($response->getContent());
     }
 
+    /**
+     * @throws ConfigurationProjectCodeNotDefined
+     * @throws ConfigurationClientUrlNotDefined
+     * @throws ProjectNotFoundException
+     */
     public function warmup(array $credentials): void
     {
+        $this->checkClientConfig();
+
         $response = $this->client->request(
             'POST',
             $this->clientUrl . '/api/credential/warmup/' . $this->projectCode,
@@ -54,8 +70,16 @@ class ClientService
         }
     }
 
+    /**
+     * @throws ConfigurationProjectCodeNotDefined
+     * @throws ConfigurationClientUrlNotDefined
+     * @throws ProjectAlreadyInitializedException
+     * @throws ProjectNotFoundException
+     */
     public function init(array $data): void
     {
+        $this->checkClientConfig();
+
         $response = $this->client->request(
             'POST',
             $this->clientUrl . '/api/credential/init' . $this->projectCode,
@@ -77,5 +101,147 @@ class ClientService
         if ($response->getStatusCode() === Response::HTTP_BAD_REQUEST) {
             throw new ProjectAlreadyInitializedException($response->getContent());
         }
+    }
+
+    public function toggleGroup(Group $group, bool $check): void
+    {
+        if (!$this->hasClientConfig()) {
+            return;
+        }
+
+        $this->client->request(
+            'POST',
+            $this->clientUrl . '/api/project/toggle-group/' . $this->projectCode . '/' . $group->name . '/' . $check,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]
+        );
+    }
+
+    public function toggleRubrique(string $rubrique, Group $group, bool $check): void
+    {
+        if (!$this->hasClientConfig()) {
+            return;
+        }
+
+        $this->client->request(
+            'POST',
+            $this->clientUrl
+            . '/api/project/toggle-rubrique/'
+            . $this->projectCode
+            . '/'
+            . $rubrique
+            . '/'
+            . $group->name
+            . '/'
+            . $check,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]
+        );
+    }
+
+    public function toggleCredential(Credential $credential, Group $group, bool $check): void
+    {
+        if (!$this->hasClientConfig()) {
+            return;
+        }
+
+        $this->client->request(
+            'POST',
+            $this->clientUrl
+            . '/api/project/toggle-credential/'
+            . $this->projectCode
+            . '/'
+            . $credential->getRole()
+            . '/'
+            . $group->name
+            . '/'
+            . $check,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]
+        );
+    }
+
+    public function allowStatus(Credential $credential, Group $group, bool $check): void
+    {
+        if (!$this->hasClientConfig()) {
+            return;
+        }
+
+        $this->client->request(
+            'POST',
+            $this->clientUrl
+            . '/api/project/allow-status/'
+            . $this->projectCode
+            . '/'
+            . $credential->getRole()
+            . '/'
+            . $group->name
+            . '/'
+            . $check,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]
+        );
+    }
+
+    public function allowForStatus(Credential $credential, Group $group, string $status, bool $check): void
+    {
+        if (!$this->hasClientConfig()) {
+            return;
+        }
+
+        $this->client->request(
+            'POST',
+            $this->clientUrl
+            . '/api/project/allow-for-status/'
+            . $this->projectCode
+            . '/'
+            . $credential->getRole()
+            . '/'
+            . $group->name
+            . '/'
+            . $status
+            . '/'
+            . $check,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]
+        );
+    }
+
+    /**
+     * @throws ConfigurationProjectCodeNotDefined
+     * @throws ConfigurationClientUrlNotDefined
+     */
+    public function checkClientConfig(): void
+    {
+        if (!$this->clientUrl) {
+            throw new ConfigurationClientUrlNotDefined();
+        }
+        if (!$this->projectCode) {
+            throw new ConfigurationProjectCodeNotDefined();
+        }
+    }
+
+    public function hasClientConfig(): bool
+    {
+        if (!$this->clientUrl || !$this->projectCode) {
+            return false;
+        }
+
+        return true;
     }
 }
