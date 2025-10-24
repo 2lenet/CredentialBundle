@@ -31,13 +31,13 @@ class InitCredentialService
 
         $data = [
             'credentials' => $this->normalizer->normalize($credentials, 'array', [
-                'groups' => Credential::CREDENTIAL_API_GROUP
+                'groups' => Credential::CREDENTIAL_API_GROUP,
             ]),
             'groups' => $this->normalizer->normalize($groups, 'array', [
-                'groups' => Group::GROUP_API_GROUP
+                'groups' => Group::GROUP_API_GROUP,
             ]),
             'groupCredentials' => $this->normalizer->normalize($groupCredentials, 'array', [
-                'groups' => GroupCredential::GROUPCREDENTIAL_API_GROUP
+                'groups' => GroupCredential::GROUPCREDENTIAL_API_GROUP,
             ]),
         ];
 
