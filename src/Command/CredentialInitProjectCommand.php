@@ -10,14 +10,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AsCommand(
-    name: 'credential:init',
+    name: 'lle:credential:init',
     description: 'Initialize a project',
 )]
 class CredentialInitProjectCommand extends Command
 {
     public function __construct(
-        private ParameterBagInterface $parameterBag,
-        private CredentialService $credentialService,
+        protected CredentialService $credentialService,
     ) {
         parent::__construct();
     }

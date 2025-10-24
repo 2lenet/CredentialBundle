@@ -2,13 +2,8 @@
 
 namespace Lle\CredentialBundle\Service;
 
-use Lle\CredentialBundle\Dto\GroupCredentialDto;
-use Lle\CredentialBundle\Dto\GroupDto;
 use Lle\CredentialBundle\Dto\InitProjectDto;
 use Doctrine\ORM\EntityManagerInterface;
-use Lle\CredentialBundle\Contracts\CredentialWarmupInterface;
-use Lle\CredentialBundle\DependencyInjection\Configuration;
-use Lle\CredentialBundle\Dto\CredentialDto;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
@@ -18,20 +13,24 @@ use Lle\CredentialBundle\Factory\GroupFactory;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 class CredentialService
 {
     public function __construct(
-        private EntityManagerInterface $em,
-        private ContainerBagInterface $container,
-        private HttpClientInterface $client,
-        private CredentialFactory $credentialFactory,
-        private GroupFactory $groupFactory,
-        private GroupCredentialFactory $groupCredentialFactory,
+        #[AutowireIterator('credential.warmup')] protected iterable $warmuppers,
+        protected EntityManagerInterface $em,
+        protected ContainerBagInterface $container,
+        protected HttpClientInterface $client,
+        protected CredentialFactory $credentialFactory,
+        protected GroupFactory $groupFactory,
+        protected GroupCredentialFactory $groupCredentialFactory,
+        protected CacheItemPoolInterface $cache,
     ) {
     }
 
-    public function loadCredentials(): void
+    public function loadCredentials(): int
     {
         $projectUrl = $this->container->get('lle_credential.crudit_studio_url');
         $projectName = $this->container->get('lle_credential.project_name');
@@ -80,10 +79,19 @@ class CredentialService
                 $groupcredDto->statusAllowed
             );
         }
+
+        $this->resetCache();
+
+        return $response->getStatusCode();
     }
     
-    public function sendCredentials(array $credentials): int
+    public function sendCredentials(): int
     {
+        $credentials = [];
+        foreach ($this->warmuppers as $warmup) {
+            $credentials = array_merge($credentials, $warmup->warmup());
+        }
+
         $projectUrl = $this->container->get('lle_credential.crudit_studio_url');
         $projectName = $this->container->get('lle_credential.project_name');
 
@@ -97,6 +105,7 @@ class CredentialService
                 'body' => json_encode($credentials)
             ]
         );
+        $this->resetCache();
 
         return $response->getStatusCode();
     }
@@ -125,6 +134,8 @@ class CredentialService
                 )
             ]
         );
+
+        $this->resetCache();
     }
     
     public function createInitProjectDto(array $credentials, array $groups, array $groupCredentials): InitProjectDto
@@ -150,5 +161,16 @@ class CredentialService
         }
      
         return $initProjectDto;
+    }
+
+    public function resetCache(): void
+    {
+        if ($this->cache->hasItem('group_credentials')) {
+            $this->cache->deleteItem('group_credentials');
+        }
+
+        if ($this->cache->hasItem('all_credentials')) {
+            $this->cache->deleteItem('all_credentials');
+        }
     }
 }

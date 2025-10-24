@@ -19,9 +19,9 @@ class CredentialManagerController extends AbstractController
 {
     public function __construct(
         #[AutowireIterator('credential.warmup')] protected iterable $warmuppers,
-        private EntityManagerInterface $em,
-        private CacheItemPoolInterface $cache,
-        private CredentialService $credentialService,
+        protected EntityManagerInterface $em,
+        protected CacheItemPoolInterface $cache,
+        protected CredentialService $credentialService,
     ) {
     }
 
@@ -78,18 +78,12 @@ class CredentialManagerController extends AbstractController
     {
         $reponse = $this->credentialService->loadCredentials();
 
-        if ($this->cache->hasItem('group_credentials')) {
-            $this->cache->deleteItem('group_credentials');
+        $this->credentialService->resetCache();
+
+        if ($reponse->getStatusCode() !== 200) {
+            return new Response(status: Response::HTTP_BAD_REQUEST);
         }
 
-        if ($this->cache->hasItem('all_credentials')) {
-            $this->cache->deleteItem('all_credentials');
-        }
-
-        if ($reponse->getStatusCode() == 200) {
-            return new Response([], Response::HTTP_OK);
-        }
-
-        return new Response([], Response::HTTP_BAD_REQUEST);
+        return new Response();
     }
 }
