@@ -4,6 +4,7 @@ namespace Lle\CredentialBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Lle\CredentialBundle\Repository\GroupCredentialRepository;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Table(name: 'lle_credential_group_credential')]
 #[ORM\Entity(repositoryClass: GroupCredentialRepository::class)]
@@ -13,6 +14,8 @@ use Lle\CredentialBundle\Repository\GroupCredentialRepository;
 )]
 class GroupCredential
 {
+    public const string GROUPCREDENTIAL_API_GROUP = 'groupcredential-api';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -27,11 +30,24 @@ class GroupCredential
     private ?Group $groupe = null;
 
     #[ORM\Column(type: 'boolean')]
+    #[Groups([self::GROUPCREDENTIAL_API_GROUP])]
     private ?bool $allowed = false;
 
     #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => false])]
+    #[Groups([self::GROUPCREDENTIAL_API_GROUP])]
     private ?bool $statusAllowed = false;
-    
+
+    #[Groups([self::GROUPCREDENTIAL_API_GROUP])]
+    public function getGroupName(): string
+    {
+        return (string)$this->groupe->getName();
+    }
+
+    #[Groups([self::GROUPCREDENTIAL_API_GROUP])]
+    public function getCredentialRole(): string
+    {
+        return (string)$this->credential->getRole();
+    }
 
     public function getId(): ?int
     {

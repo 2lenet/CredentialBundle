@@ -6,17 +6,22 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Lle\CredentialBundle\Repository\GroupRepository;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Table(name: 'lle_credential_group')]
 #[ORM\Entity(repositoryClass: GroupRepository::class)]
 class Group
 {
+    public const string GROUP_API_GROUP = 'group-api';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups([self::GROUP_API_GROUP])]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: GroupCredential::class)]
@@ -24,18 +29,24 @@ class Group
     private Collection $credentials;
 
     #[ORM\Column(type: 'boolean')]
+    #[Groups([self::GROUP_API_GROUP])]
     private ?bool $isRole = null;
 
     #[ORM\Column(type: 'boolean')]
+    #[Groups([self::GROUP_API_GROUP])]
+    #[SerializedName('active')]
     private ?bool $actif = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups([self::GROUP_API_GROUP])]
     private ?string $requiredRole = null;
 
     #[ORM\Column(type: 'integer')]
+    #[Groups([self::GROUP_API_GROUP])]
     private ?int $tri = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups([self::GROUP_API_GROUP])]
     private ?string $libelle = null;
 
     public function __toString(): string

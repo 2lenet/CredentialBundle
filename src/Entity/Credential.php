@@ -4,37 +4,46 @@ namespace Lle\CredentialBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Lle\CredentialBundle\Repository\CredentialRepository;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Table(name: 'lle_credential_credential')]
 #[ORM\Entity(repositoryClass: CredentialRepository::class)]
 class Credential
 {
+    public const string CREDENTIAL_API_GROUP = 'crendential-api';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?string $role = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?string $libelle = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?string $rubrique = null;
 
     #[ORM\Column(type: 'integer')]
+    #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?int $tri = null;
 
     #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => true])]
+    #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?bool $visible = true;
 
     #[ORM\Column(type: 'json', nullable: true)]
+    #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?array $listeStatus = [];
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $createdAt;
-    
+
 
     public function __toString()
     {
