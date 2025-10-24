@@ -6,11 +6,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
-use Lle\CredentialBundle\Service\CredentialService;
-use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -18,43 +14,27 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class CredentialManagerController extends AbstractController
 {
     public function __construct(
-        #[AutowireIterator('credential.warmup')] protected iterable $warmuppers,
         protected EntityManagerInterface $em,
-        protected CacheItemPoolInterface $cache,
-        protected CredentialService $credentialService,
     ) {
     }
 
-    #[Route('/admin/credential', name: 'admin_credential')]
     #[IsGranted('ROLE_ADMIN_DROITS')]
+    #[Route('/admin/credential', name: 'admin_credential')]
     public function indexAction(): Response
     {
-        $credentials = $this->em->getRepository(Credential::class)->findAllOrdered();
-        $groupes = $this->em->getRepository(Group::class)->findByProjectExceptSuperAdmin();
-
-        $groupCreds = $this->em->getRepository(GroupCredential::class)->findAll();
-
-        $cruditStudioUrl =
-            $this->container->get('parameter_bag')->get('lle_credential.crudit_studio_public_url')
-            . '/project/project/'
-            . $this->container->get('parameter_bag')->get('lle_credential.project_name');
-
-        $loadUrl =
-            $this->container->get('parameter_bag')->get('lle_credential.crudit_studio_url')
-            . '/api/credential/pull/'
-            . $this->container->get('parameter_bag')->get('lle_credential.project_name');
+        $groups = $this->em->getRepository(Group::class)->findByProjectExceptSuperAdmin();
+        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findAll();
 
         $actives = [];
         $statusAllowed = [];
+        foreach ($groupCredentials as $groupCredential) {
+            if ($groupCredential->getGroupe() && $groupCredential->getCredential()) {
+                $actives[$groupCredential->getGroupe()->getName() . '-' . $groupCredential->getCredential()->getRole()] =
+                    $groupCredential->isAllowed();
 
-        foreach ($groupCreds as $groupCred) {
-            if ($groupCred->getGroupe() && $groupCred->getCredential()) {
-                $actives[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole()] =
-                    $groupCred->isAllowed();
-
-                if ($groupCred->getCredential()->getListeStatus() !== null) {
-                    $statusAllowed[$groupCred->getGroupe()->getName() . '-' . $groupCred->getCredential()->getRole()] =
-                        $groupCred->isStatusAllowed();
+                if ($groupCredential->getCredential()->getListeStatus() !== null) {
+                    $statusAllowed[$groupCredential->getGroupe()->getName() . '-' . $groupCredential->getCredential()->getRole()] =
+                        $groupCredential->isStatusAllowed();
                 }
             }
         }
@@ -62,13 +42,34 @@ class CredentialManagerController extends AbstractController
         return $this->render(
             '@LleCredential/credential/index.html.twig',
             [
-                'credentials' => $credentials,
-                'groupes' => $groupes,
+                'credentialsByRubriques' => $this->getCredentialsByRubriques(),
+                'groups' => $groups,
                 'actives' => $actives,
                 'statusAllowed' => $statusAllowed,
-                'crudit_studio_url' => $cruditStudioUrl,
-                'load_url' => $loadUrl,
             ]
         );
+    }
+
+    public function getCredentialsByRubriques(): array
+    {
+        $result = [];
+        $credentials = $this->em->getRepository(Credential::class)->findBy([], ['rubrique' => 'ASC', 'tri' => 'ASC']);
+        foreach ($credentials as $credential) {
+            if ($credential->getRubrique()) {
+                if (!array_key_exists($credential->getRubrique(), $result)) {
+                    $result[$credential->getRubrique()] = [];
+                }
+
+                $result[$credential->getRubrique()][] = $credential;
+            } else {
+                if (!array_key_exists('Others', $result)) {
+                    $result['Others'] = [];
+                }
+
+                $result['Others'][] = $credential;
+            }
+        }
+
+        return $result;
     }
 }
