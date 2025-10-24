@@ -16,13 +16,13 @@ class LleCredentialExtension extends Extension implements ExtensionInterface
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.yaml');
         $container->registerForAutoconfiguration(CredentialWarmupInterface::class)->addTag('credential.warmup');
-        
+
         $configuration = new Configuration();
         $processedConfig = $this->processConfiguration($configuration, $configs);
 
-        $container->setParameter('lle_credential.project_name', $processedConfig['project_name']);
-        $container->setParameter('lle_credential.crudit_studio_url', $processedConfig['crudit_studio_url']);
-        $container->setParameter('lle_credential.crudit_studio_public_url', $processedConfig['crudit_studio_public_url']);
+        $container->setParameter('lle_credential.client_url', $processedConfig['client_url']);
+        $container->setParameter('lle_credential.client_public_url', $processedConfig['client_public_url']);
+        $container->setParameter('lle_credential.project_code', $processedConfig['project_code']);
 
     }
 }

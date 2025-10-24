@@ -13,15 +13,15 @@ class Configuration implements ConfigurationInterface
         $rootNode = $treeBuilder->getRootNode();
         $children = $rootNode->children();
         $children
-            ->scalarNode('project_name')
+            ->scalarNode('client_url')
             ->isRequired()
             ->end();
         $children
-            ->scalarNode('crudit_studio_url')
+            ->scalarNode('client_public_url')
             ->isRequired()
             ->end();
         $children
-            ->scalarNode('crudit_studio_public_url')
+            ->scalarNode('project_code')
             ->isRequired()
             ->end();
 
