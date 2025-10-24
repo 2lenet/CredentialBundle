@@ -4,6 +4,8 @@ namespace Lle\CredentialBundle\Service;
 
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Lle\CredentialBundle\Exception\ProjectNotFoundException;
+use Lle\CredentialBundle\Service\ClientService;
 
 class WarmupCredentialService
 {
@@ -12,9 +14,13 @@ class WarmupCredentialService
     public function __construct(
         #[AutowireIterator('credential.warmup')] protected iterable $warmuppers,
         protected ParameterBagInterface $parameterBag,
+        protected ClientService $client,
     ) {
     }
 
+    /**
+     * @throws ProjectNotFoundException
+     */
     public function warmup(): void
     {
         $credentials = [];
@@ -22,19 +28,7 @@ class WarmupCredentialService
             $credentials = array_merge($credentials, $warmup->warmup());
         }
 
-        $projectUrl = $this->parameterBag->get('lle_credential.client_url');
-        $projectName = $this->parameterBag->get('lle_credential.project_code');
-
-        $response = $this->client->request(
-            'POST',
-            $projectUrl . '/api/credential/warmup/' . $projectName,
-            [
-                'headers' => [
-                    'Content-Type' => 'application/json',
-                ],
-                'body' => json_encode($credentials)
-            ]
-        );
+        $this->client->warmup($credentials);
 
         $this->resetCache();
     }
