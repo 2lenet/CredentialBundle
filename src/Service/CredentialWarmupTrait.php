@@ -3,8 +3,6 @@
 namespace Lle\CredentialBundle\Service;
 
 use Lle\CredentialBundle\Dto\CredentialDto;
-use Lle\CredentialBundle\Entity\Credential;
-use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 trait CredentialWarmupTrait
 {
