@@ -36,10 +36,10 @@ class GroupCredentialFactory
     {
     /** @var GroupCredential $groupCredential */
         $groupCredentialDto = new GroupCredentialDto();
-        $groupCredentialDto->groupName = $groupCredential->getGroupe()?->getName();
-        $groupCredentialDto->credentialRole = $groupCredential->getCredential()->getRole();
-        $groupCredentialDto->statusAllowed = $groupCredential->isStatusAllowed();
-        $groupCredentialDto->allowed = $groupCredential->isAllowed();
+        $groupCredentialDto->groupName = $groupCredential->getGroupe()?->getName() ?? '';
+        $groupCredentialDto->credentialRole = $groupCredential->getCredential()->getRole() ?? '';
+        $groupCredentialDto->statusAllowed = $groupCredential->isStatusAllowed() ?? false;
+        $groupCredentialDto->allowed = $groupCredential->isAllowed() ?? true;
 
         return $groupCredentialDto;
     }

@@ -18,7 +18,7 @@ class CredentialFactory
         ?string $libelle = null,
         ?array $listeStatus = null,
         ?bool $visible = null,
-        ?int $tri
+        ?int $tri = null,
     ): Credential {
         /** @var ?Credential $cred */
         $cred = $this->em->getRepository(Credential::class)->findOneBy(['role' => $role]);
@@ -77,11 +77,11 @@ class CredentialFactory
     public function createCredentialDto(Credential $credential): CredentialDto
     {
         $credentialDto = new CredentialDto();
-        $credentialDto->role = $credential->getRole();
+        $credentialDto->role = $credential->getRole() ?? '';
         $credentialDto->rubrique = $credential->getRubrique();
         $credentialDto->libelle = $credential->getLibelle();
-        $credentialDto->listeStatus = $credential->getListeStatus();
-        $credentialDto->visible = $credential->isVisible();
+        $credentialDto->listeStatus = $credential->getListeStatus() ?? [];
+        $credentialDto->visible = $credential->isVisible() ?? true;
         $credentialDto->tri = $credential->getTri();
 
         return $credentialDto;

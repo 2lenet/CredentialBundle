@@ -76,11 +76,11 @@ class CredentialManagerController extends AbstractController
     #[IsGranted('ROLE_ADMIN_DROITS')]
     public function loadCredentials(): Response
     {
-        $reponse = $this->credentialService->loadCredentials();
+        $statusCode = $this->credentialService->loadCredentials();
 
         $this->credentialService->resetCache();
 
-        if ($reponse->getStatusCode() !== 200) {
+        if ($statusCode !== 200) {
             return new Response(status: Response::HTTP_BAD_REQUEST);
         }
 
