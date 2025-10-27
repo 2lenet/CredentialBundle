@@ -19,7 +19,7 @@ class CredentialManagerController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN_DROITS')]
-    #[Route('/admin/credential', name: 'admin_credential')]
+    #[Route('/', name: 'admin_credential')]
     public function indexAction(): Response
     {
         $groups = $this->em->getRepository(Group::class)->findByProjectExceptSuperAdmin();

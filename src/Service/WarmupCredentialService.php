@@ -2,9 +2,12 @@
 
 namespace Lle\CredentialBundle\Service;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Lle\CredentialBundle\Entity\Credential;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class WarmupCredentialService
 {
@@ -14,6 +17,8 @@ class WarmupCredentialService
         #[AutowireIterator('credential.warmup')] protected iterable $warmuppers,
         protected ParameterBagInterface $parameterBag,
         protected ClientService $client,
+        protected EntityManagerInterface $em,
+        protected NormalizerInterface $normalizer,
     ) {
     }
 
@@ -22,12 +27,14 @@ class WarmupCredentialService
      */
     public function warmup(): void
     {
-        $credentials = [];
         foreach ($this->warmuppers as $warmup) {
-            $credentials = array_merge($credentials, $warmup->warmup());
+            $warmup->warmup();
         }
 
-        $this->client->warmup($credentials);
+        $credentials = $this->em->getRepository(Credential::class)->findAll();
+        $this->client->warmup($this->normalizer->normalize($credentials, 'array', [
+            'groups' => Credential::CREDENTIAL_API_GROUP,
+        ]));
 
         $this->resetCache();
     }

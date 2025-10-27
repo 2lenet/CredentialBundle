@@ -1,3 +1,4 @@
 cred_routes:
-    resource: ../../Controller/
+    resource: '../../Controller/'
     type: attribute
+    prefix: /admin/credential
