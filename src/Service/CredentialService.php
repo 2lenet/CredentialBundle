@@ -1,13 +1,13 @@
 <?php
 
+namespace Lle\CredentialBundle\Service;
+
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
-use Lle\CredentialBundle\Factory\Project\CredentialFactory;
-use Lle\CredentialBundle\Factory\Project\GroupCredentialFactory;
+use Lle\CredentialBundle\Factory\CredentialFactory;
+use Lle\CredentialBundle\Factory\GroupCredentialFactory;
 use Doctrine\ORM\EntityManagerInterface;
-use Lle\CredentialBundle\Service\ClientService;
-
 
 class CredentialService
 {

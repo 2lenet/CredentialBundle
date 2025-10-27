@@ -15,7 +15,6 @@ use Lle\CredentialBundle\Factory\GroupCredentialFactory;
 use Lle\CredentialBundle\Factory\GroupFactory;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Lle\CredentialBundle\Service\ClientService;
 
 class LoadCredentialService
 {
@@ -37,7 +36,7 @@ class LoadCredentialService
      */
     public function load(): void
     {
-        $credentials = $this->client->pull();
+        $credentials = $this->client->load();
 
         $this->em->getRepository(Group::class)->createQueryBuilder('g')->delete()->getQuery()->execute();
         $this->em->getRepository(Credential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();

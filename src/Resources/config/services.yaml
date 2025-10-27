@@ -12,19 +12,10 @@ services:
 
     Lle\CredentialBundle\Controller\:
         resource: '../../Controller'
-        tags: ['controller.service_arguments']
 
-    Lle\CredentialBundle\Command\WarmupCredentialCommand:
-        tags:
-            - { name: 'console.command' }
-
-    Lle\CredentialBundle\Command\LoadCredentialCommand:
-        tags:
-            - { name: 'console.command' }
-
-    Lle\CredentialBundle\Command\InitProjectCommand:
-        tags:
-            - { name: 'console.command' }
+    Lle\CredentialBundle\Command\:
+        resource: '../../Command'
+        tags: ['console.command']
 
     Lle\CredentialBundle\Service\:
         resource: '../../Service'

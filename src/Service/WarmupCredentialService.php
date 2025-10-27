@@ -5,7 +5,6 @@ namespace Lle\CredentialBundle\Service;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
-use Lle\CredentialBundle\Service\ClientService;
 
 class WarmupCredentialService
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exception;
+namespace Lle\CredentialBundle\Exception;
 
 class ProjectAlreadyInitializedException extends \Exception
 {

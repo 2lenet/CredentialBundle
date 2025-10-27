@@ -2,6 +2,8 @@
 
 namespace Lle\CredentialBundle\Service;
 
+use Lle\CredentialBundle\Entity\Credential;
+use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefined;
 use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefined;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
@@ -29,7 +31,7 @@ class ClientService
      * @throws ConfigurationClientUrlNotDefined
      * @throws ProjectNotFoundException
      */
-    public function pull(): array
+    public function load(): array
     {
         $this->checkClientConfig();
 
@@ -111,7 +113,7 @@ class ClientService
 
         $this->client->request(
             'POST',
-            $this->clientUrl . '/api/project/toggle-group/' . $this->projectCode . '/' . $group->name . '/' . $check,
+            $this->clientUrl . '/api/project/toggle-group/' . $this->projectCode . '/' . $group->getName() . '/' . $check,
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -134,7 +136,7 @@ class ClientService
             . '/'
             . $rubrique
             . '/'
-            . $group->name
+            . $group->getName()
             . '/'
             . $check,
             [
@@ -159,7 +161,7 @@ class ClientService
             . '/'
             . $credential->getRole()
             . '/'
-            . $group->name
+            . $group->getName()
             . '/'
             . $check,
             [
@@ -184,7 +186,7 @@ class ClientService
             . '/'
             . $credential->getRole()
             . '/'
-            . $group->name
+            . $group->getName()
             . '/'
             . $check,
             [
@@ -209,7 +211,7 @@ class ClientService
             . '/'
             . $credential->getRole()
             . '/'
-            . $group->name
+            . $group->getName()
             . '/'
             . $status
             . '/'

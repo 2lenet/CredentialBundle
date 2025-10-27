@@ -10,7 +10,6 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
 use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
-use Lle\CredentialBundle\Service\ClientService;
 
 class InitCredentialService
 {

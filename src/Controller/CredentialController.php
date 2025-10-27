@@ -4,21 +4,20 @@ namespace Lle\CredentialBundle\Controller\Credential;
 
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
-use Lle\CredentialBundle\Service\Api\Credential\CredentialService;
+use Lle\CredentialBundle\Service\CredentialService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/credential')]
-class CredentialController
+class CredentialController extends AbstractController
 {
     public function __construct(
-        CredentialCrudConfig $config,
         protected CredentialService $credentialService,
         protected Security $security,
     ) {
-        $this->config = $config;
     }
 
     #[IsGranted('ROLE_CREDENTIAL_ACTION_TOGGLEGROUP')]
