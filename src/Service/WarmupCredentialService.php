@@ -34,7 +34,7 @@ class WarmupCredentialService
         }
 
         $credentials = $this->em->getRepository(Credential::class)->findAll();
-        $this->client->warmup($this->normalizer->normalize($credentials, 'array', [
+        $this->client->warmup((array)$this->normalizer->normalize($credentials, 'array', [
             'groups' => Credential::CREDENTIAL_API_GROUP,
         ]));
 

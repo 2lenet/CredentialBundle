@@ -19,11 +19,16 @@ class ClientService
 
     public function __construct(
         protected ParameterBagInterface $parameterBag,
-        protected HttpClientInterface   $client,
+        protected HttpClientInterface $client,
     )
     {
-        $this->clientUrl = $this->parameterBag->get('lle_credential.client_url');
-        $this->projectCode = $this->parameterBag->get('lle_credential.project_code');
+        /** @var ?string $clientUrl */
+        $clientUrl = $this->parameterBag->get('lle_credential.client_url');
+        $this->clientUrl = $clientUrl;
+
+        /** @var ?string $projectCode */
+        $projectCode = $this->parameterBag->get('lle_credential.project_code');
+        $this->projectCode = $projectCode;
     }
 
     /**

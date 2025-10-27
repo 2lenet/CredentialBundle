@@ -23,7 +23,7 @@ class CredentialFactory
         $credential = new Credential();
         $credential
             ->setRole($role)
-            ->setSection($section ?? $this->generateRubrique($role))
+            ->setSection($section ?? $this->generateSection($role))
             ->setLabel($label ?? $role)
             ->setStatusList($statusList ?? [])
             ->setVisible($visible)
@@ -42,8 +42,8 @@ class CredentialFactory
         bool $visible = true,
     ): Credential {
         $credential
-            ->setSection($section ?? $this->generateRubrique($credential->getRole()))
-            ->setLabel($label ?? $credential->getRole())
+            ->setSection($section ?? $this->generateSection((string)$credential->getRole()))
+            ->setLabel($label ?? (string)$credential->getRole())
             ->setStatusList($statusList ?? [])
             ->setVisible($visible);
 
@@ -55,7 +55,7 @@ class CredentialFactory
         $credential = new Credential();
         $credential
             ->setRole($credentialDto->role)
-            ->setSection($credentialDto->rubrique ?? $this->generateRubrique($credentialDto->role))
+            ->setSection($credentialDto->rubrique ?? $this->generateSection($credentialDto->role))
             ->setLabel($credentialDto->libelle ?? $credentialDto->role)
             ->setStatusList($credentialDto->statusList)
             ->setVisible($credentialDto->visible)
@@ -66,7 +66,7 @@ class CredentialFactory
         return $credential;
     }
 
-    public function generateRubrique(string $role): string
+    public function generateSection(string $role): string
     {
         $explodedRole = explode('_', $role);
 

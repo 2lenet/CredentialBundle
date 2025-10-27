@@ -48,9 +48,6 @@ class GroupCredentialFactory
 
         $this->em->persist($groupCredential);
 
-        $group->addGroupCredential($groupCredential);
-        $credential->addGroupCredential($groupCredential);
-
         return $groupCredential;
     }
 }

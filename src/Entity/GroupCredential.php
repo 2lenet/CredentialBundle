@@ -40,13 +40,13 @@ class GroupCredential
     #[Groups([self::GROUPCREDENTIAL_API_GROUP])]
     public function getGroupName(): string
     {
-        return (string)$this->groupe->getName();
+        return (string)$this->groupe?->getName();
     }
 
     #[Groups([self::GROUPCREDENTIAL_API_GROUP])]
     public function getCredentialRole(): string
     {
-        return (string)$this->credential->getRole();
+        return (string)$this->credential?->getRole();
     }
 
     public function getId(): ?int
