@@ -2,8 +2,8 @@
 
 namespace Lle\CredentialBundle\Controller;
 
-use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefined;
-use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefined;
+use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
 use Lle\CredentialBundle\Service\LoadCredentialService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,7 +23,7 @@ class LoadCredentialController extends AbstractController
     {
         try {
             $this->loadCredentialService->load();
-        } catch (ConfigurationClientUrlNotDefined | ConfigurationProjectCodeNotDefined) {
+        } catch (ConfigurationClientUrlNotDefinedException | ConfigurationProjectCodeNotDefinedException) {
             $this->addFlash('danger', 'You must defined client configuration');
         }
 

@@ -4,8 +4,9 @@ namespace Lle\CredentialBundle\Service;
 
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
-use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefined;
-use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefined;
+use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectTokenNotDefinedException;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
 use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -16,6 +17,7 @@ class ClientService
 {
     private ?string $clientUrl;
     private ?string $projectCode;
+    private ?string $projectToken;
 
     public function __construct(
         protected ParameterBagInterface $parameterBag,
@@ -29,11 +31,15 @@ class ClientService
         /** @var ?string $projectCode */
         $projectCode = $this->parameterBag->get('lle_credential.project_code');
         $this->projectCode = $projectCode;
+
+        /** @var ?string $projectToken */
+        $projectToken = $this->parameterBag->get('lle_credential.project_token');
+        $this->projectToken = 'Bearer ' . $projectToken;
     }
 
     /**
-     * @throws ConfigurationProjectCodeNotDefined
-     * @throws ConfigurationClientUrlNotDefined
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationClientUrlNotDefinedException
      * @throws ProjectNotFoundException
      */
     public function load(): array
@@ -42,7 +48,12 @@ class ClientService
 
         $response = $this->client->request(
             'GET',
-            $this->clientUrl . '/api/credential/pull/' . $this->projectCode
+            $this->clientUrl . '/api/credential/pull/' . $this->projectCode,
+            [
+                'headers' => [
+                    'Authorization' => $this->projectToken,
+                ]
+            ]
         );
 
         if ($response->getStatusCode() === Response::HTTP_NOT_FOUND) {
@@ -67,6 +78,7 @@ class ClientService
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
+                    'Authorization' => $this->projectToken,
                 ],
                 'body' => json_encode($credentials)
             ]
@@ -78,8 +90,8 @@ class ClientService
     }
 
     /**
-     * @throws ConfigurationProjectCodeNotDefined
-     * @throws ConfigurationClientUrlNotDefined
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationClientUrlNotDefinedException
      * @throws ProjectAlreadyInitializedException
      * @throws ProjectNotFoundException
      */
@@ -89,10 +101,11 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl . '/api/credential/init' . $this->projectCode,
+            $this->clientUrl . '/api/credential/init/' . $this->projectCode,
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
+                    'Authorization' => $this->projectToken,
                 ],
                 'body' => json_encode(
                     $data,
@@ -122,6 +135,7 @@ class ClientService
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
+                    'Authorization' => $this->projectToken,
                 ],
             ]
         );
@@ -147,6 +161,7 @@ class ClientService
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
+                    'Authorization' => $this->projectToken,
                 ],
             ]
         );
@@ -172,6 +187,7 @@ class ClientService
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
+                    'Authorization' => $this->projectToken,
                 ],
             ]
         );
@@ -197,6 +213,7 @@ class ClientService
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
+                    'Authorization' => $this->projectToken,
                 ],
             ]
         );
@@ -224,24 +241,35 @@ class ClientService
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
+                    'Authorization' => $this->projectToken,
                 ],
             ]
         );
     }
 
+    /**
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     */
     public function checkClientConfig(): void
     {
         if (!$this->clientUrl) {
-            throw new ConfigurationClientUrlNotDefined();
+            throw new ConfigurationClientUrlNotDefinedException();
         }
+
         if (!$this->projectCode) {
-            throw new ConfigurationProjectCodeNotDefined();
+            throw new ConfigurationProjectCodeNotDefinedException();
+        }
+
+        if (!$this->projectToken) {
+            throw new ConfigurationProjectTokenNotDefinedException();
         }
     }
 
     public function hasClientConfig(): bool
     {
-        if (!$this->clientUrl || !$this->projectCode) {
+        if (!$this->clientUrl || !$this->projectCode || !$this->projectToken) {
             return false;
         }
 

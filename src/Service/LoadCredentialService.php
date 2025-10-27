@@ -2,8 +2,8 @@
 
 namespace Lle\CredentialBundle\Service;
 
-use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefined;
-use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefined;
+use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Dto\CredentialDto;
@@ -35,8 +35,8 @@ class LoadCredentialService
 
     /**
      * @throws ProjectNotFoundException
-     * @throws ConfigurationProjectCodeNotDefined
-     * @throws ConfigurationClientUrlNotDefined
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationClientUrlNotDefinedException
      */
     public function load(): void
     {

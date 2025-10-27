@@ -2,8 +2,8 @@
 
 namespace Lle\CredentialBundle\Command;
 
-use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefined;
-use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefined;
+use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
 use Lle\CredentialBundle\Service\InitCredentialService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -26,7 +26,7 @@ class InitProjectCommand extends Command
     {
         try {
             $this->initCredentialService->init();
-        } catch (ConfigurationProjectCodeNotDefined | ConfigurationClientUrlNotDefined) {
+        } catch (ConfigurationProjectCodeNotDefinedException | ConfigurationClientUrlNotDefinedException) {
             $output->writeln('<error>You must defined client configuration</error>');
         }
 

@@ -24,6 +24,10 @@ class Configuration implements ConfigurationInterface
             ->scalarNode('project_code')
             ->defaultNull()
             ->end();
+        $children
+            ->scalarNode('project_token')
+            ->defaultNull()
+            ->end();
 
         return $treeBuilder;
     }

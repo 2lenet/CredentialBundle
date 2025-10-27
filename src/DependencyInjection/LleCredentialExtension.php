@@ -23,5 +23,6 @@ class LleCredentialExtension extends Extension implements ExtensionInterface
         $container->setParameter('lle_credential.client_url', $processedConfig['client_url']);
         $container->setParameter('lle_credential.client_public_url', $processedConfig['client_public_url']);
         $container->setParameter('lle_credential.project_code', $processedConfig['project_code']);
+        $container->setParameter('lle_credential.project_token', $processedConfig['project_token']);
     }
 }
