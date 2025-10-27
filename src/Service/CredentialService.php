@@ -28,7 +28,6 @@ class CredentialService
         $this->checkGroupCredentials($groupCredentials, $check);
 
         $this->client->toggleGroup($group, $check);
-
     }
 
     public function toggleRubrique(string $rubrique, Group $group, bool $check): void

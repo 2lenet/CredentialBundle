@@ -37,10 +37,10 @@ class ClientService
 
         $response = $this->client->request(
             'GET',
-            $this->clientUrl . '/api/credential/pull/' .$this->projectCode
+            $this->clientUrl . '/api/credential/pull/' . $this->projectCode
         );
 
-        if ($response->getStatusCode() === Response::HTTP_NOT_FOUND){
+        if ($response->getStatusCode() === Response::HTTP_NOT_FOUND) {
             throw new ProjectNotFoundException($response->getContent());
         }
 
@@ -67,7 +67,7 @@ class ClientService
             ]
         );
 
-        if ($response->getStatusCode() === Response::HTTP_NOT_FOUND){
+        if ($response->getStatusCode() === Response::HTTP_NOT_FOUND) {
             throw new ProjectNotFoundException($response->getContent());
         }
     }
