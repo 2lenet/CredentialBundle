@@ -3,7 +3,6 @@
 namespace Lle\CredentialBundle\Factory;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Lle\CredentialBundle\Dto\GroupDto;
 use Lle\CredentialBundle\Entity\Group;
 
 class GroupFactory
