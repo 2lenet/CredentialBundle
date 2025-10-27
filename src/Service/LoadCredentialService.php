@@ -6,11 +6,7 @@ use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
 use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
 use Doctrine\ORM\EntityManagerInterface;
-use Lle\CredentialBundle\Dto\CredentialDto;
-use Lle\CredentialBundle\Dto\GroupCredentialDto;
-use Lle\CredentialBundle\Dto\GroupDto;
 use Lle\CredentialBundle\Entity\Credential;
-use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
 use Lle\CredentialBundle\Factory\CredentialFactory;
 use Lle\CredentialBundle\Factory\GroupCredentialFactory;
@@ -42,9 +38,8 @@ class LoadCredentialService
     {
         $credentials = $this->client->load();
 
-        $this->em->getRepository(Group::class)->createQueryBuilder('g')->delete()->getQuery()->execute();
-        $this->em->getRepository(Credential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();
         $this->em->getRepository(GroupCredential::class)->createQueryBuilder('g')->delete()->getQuery()->execute();
+        $this->em->getRepository(Credential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();
 
         $this->loadCredentials($credentials['credentials']);
         $this->loadGroups($credentials['groups']);
@@ -53,33 +48,28 @@ class LoadCredentialService
         $this->resetCache();
     }
 
-    /**
-     * @param CredentialDto[] $credentialDtos
-     */
-    public function loadCredentials(array $credentialDtos): void
+    public function loadCredentials(array $credentials): void
     {
-        foreach ($credentialDtos as $credentialDto) {
-            $this->credentialFactory->createFromDto($credentialDto);
+        foreach ($credentials as $credential) {
+            $this->credentialFactory->createFromArray($credential);
+        }
+
+        $this->em->flush();
+    }
+
+    public function loadGroups(array $groups): void
+    {
+        foreach ($groups as $group) {
+            $this->groupFactory->createFromArray($group);
         }
     }
 
-    /**
-     * @param GroupDto[] $groupDtos
-     */
-    public function loadGroups(array $groupDtos): void
+    public function loadGroupCredentials(array $groupCredentials): void
     {
-        foreach ($groupDtos as $groupDto) {
-            $this->groupFactory->createFromDto($groupDto);
+        foreach ($groupCredentials as $groupCredential) {
+            $this->groupCredentialFactory->createFromArray($groupCredential);
         }
-    }
 
-    /**
-     * @param GroupCredentialDto[] $groupCredentialDtos
-     */
-    public function loadGroupCredentials(array $groupCredentialDtos): void
-    {
-        foreach ($groupCredentialDtos as $groupCredentialDto) {
-            $this->groupCredentialFactory->createFromDto($groupCredentialDto);
-        }
+        $this->em->flush();
     }
 }

@@ -3,7 +3,6 @@
 namespace Lle\CredentialBundle\Factory;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Lle\CredentialBundle\Dto\CredentialDto;
 use Lle\CredentialBundle\Entity\Credential;
 
 class CredentialFactory
@@ -50,15 +49,15 @@ class CredentialFactory
         return $credential;
     }
 
-    public function createFromDto(CredentialDto $credentialDto): Credential
+    public function createFromArray(array $credentialArray): Credential
     {
         $credential = new Credential();
         $credential
-            ->setRole($credentialDto->role)
-            ->setSection($credentialDto->rubrique ?? $this->generateSection($credentialDto->role))
-            ->setLabel($credentialDto->libelle ?? $credentialDto->role)
-            ->setStatusList($credentialDto->statusList)
-            ->setVisible($credentialDto->visible)
+            ->setRole($credentialArray['role'])
+            ->setSection($credentialArray['section'] ?? $this->generateSection($credentialArray['role']))
+            ->setLabel($credentialArray['label'] ?? $credentialArray['role'])
+            ->setStatusList($credentialArray['statusList'])
+            ->setVisible($credentialArray['visible'])
             ->setCreatedAt(new \DateTimeImmutable());
 
         $this->em->persist($credential);

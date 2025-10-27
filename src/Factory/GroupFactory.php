@@ -13,18 +13,22 @@ class GroupFactory
     ) {
     }
 
-    public function createFromDto(GroupDto $groupDto): Group
+    public function createFromArray(array $groupArray): Group
     {
-        $group = new Group();
-        $group
-            ->setName($groupDto->name)
-            ->setLabel($groupDto->label)
-            ->setIsRole($groupDto->isRole)
-            ->setActive($groupDto->active)
-            ->setRequiredRole($groupDto->requiredRole)
-            ->setRank($groupDto->rank ?? $this->getRank());
+        $group = $this->em->getRepository(Group::class)->findOneBy(['name' => $groupArray['name']]);
+        if (!$group) {
+            $group = new Group();
+            $group->setName($groupArray['name']);
 
-        $this->em->persist($group);
+            $this->em->persist($group);
+        }
+
+        $group
+            ->setLabel($groupArray['label'])
+            ->setIsRole($groupArray['isRole'])
+            ->setActive($groupArray['active'])
+            ->setRequiredRole($groupArray['requiredRole'])
+            ->setRank($groupArray['rank'] ?? $this->getRank());
 
         return $group;
     }

@@ -48,7 +48,7 @@ class ClientService
 
         $response = $this->client->request(
             'GET',
-            $this->clientUrl . '/api/credential/pull/' . $this->projectCode,
+            $this->clientUrl . '/api/project/pull/' . $this->projectCode,
             [
                 'headers' => [
                     'Authorization' => $this->projectToken,
@@ -60,7 +60,7 @@ class ClientService
             throw new ProjectNotFoundException($response->getContent());
         }
 
-        return json_decode($response->getContent());
+        return json_decode($response->getContent(), true);
     }
 
     /**
@@ -74,7 +74,7 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl . '/api/credential/warmup/' . $this->projectCode,
+            $this->clientUrl . '/api/project/warmup/' . $this->projectCode,
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -101,7 +101,7 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl . '/api/credential/init/' . $this->projectCode,
+            $this->clientUrl . '/api/project/init/' . $this->projectCode,
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -131,7 +131,7 @@ class ClientService
 
         $this->client->request(
             'POST',
-            $this->clientUrl . '/api/project/toggle-group/' . $this->projectCode . '/' . $group->getName() . '/' . $check,
+            $this->clientUrl . '/api/project/toggle-group/' . $this->projectCode . '/' . $group->getName() . '/' . ($check ? 1 : 0),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -141,7 +141,7 @@ class ClientService
         );
     }
 
-    public function toggleRubrique(string $rubrique, Group $group, bool $check): void
+    public function toggleSection(string $section, Group $group, bool $check): void
     {
         if (!$this->hasClientConfig()) {
             return;
@@ -150,14 +150,14 @@ class ClientService
         $this->client->request(
             'POST',
             $this->clientUrl
-            . '/api/project/toggle-rubrique/'
+            . '/api/project/toggle-section/'
             . $this->projectCode
             . '/'
-            . $rubrique
+            . $section
             . '/'
             . $group->getName()
             . '/'
-            . $check,
+            . ($check ? 1 : 0),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -183,7 +183,7 @@ class ClientService
             . '/'
             . $group->getName()
             . '/'
-            . $check,
+            . ($check ? 1 : 0),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -209,7 +209,7 @@ class ClientService
             . '/'
             . $group->getName()
             . '/'
-            . $check,
+            . ($check ? 1 : 0),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -237,7 +237,7 @@ class ClientService
             . '/'
             . $status
             . '/'
-            . $check,
+            . ($check ? 1 : 0),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',

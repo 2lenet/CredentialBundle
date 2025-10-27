@@ -30,10 +30,10 @@ class CredentialService
         $this->client->toggleGroup($group, $check);
     }
 
-    public function toggleRubrique(string $rubrique, Group $group, bool $check): void
+    public function toggleSection(string $section, Group $group, bool $check): void
     {
         $credentials = $this->em->getRepository(Credential::class)->findBy([
-            'section' => $rubrique
+            'section' => $section
         ]);
         $groupCredentials = $this->em->getRepository(GroupCredential::class)->findBy([
             'groupe' => $group,
@@ -43,7 +43,7 @@ class CredentialService
         $this->createMissingGroupCredentials($groupCredentials, $credentials, $group);
         $this->checkGroupCredentials($groupCredentials, $check);
 
-        $this->client->toggleRubrique($rubrique, $group, $check);
+        $this->client->toggleSection($section, $group, $check);
     }
 
     public function toggleCredential(Credential $credential, Group $group, bool $check): void

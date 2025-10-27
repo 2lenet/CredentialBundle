@@ -30,9 +30,9 @@ class CredentialController extends AbstractController
 
     #[IsGranted('ROLE_CREDENTIAL_ACTION_TOGGLERUBRIQUE')]
     #[Route('/toggle-section/{section}/{group}/{check}')]
-    public function toggleRubrique(string $section, Group $group, bool $check): JsonResponse
+    public function toggleSection(string $section, Group $group, bool $check): JsonResponse
     {
-        $this->credentialService->toggleRubrique($section, $group, $check);
+        $this->credentialService->toggleSection($section, $group, $check);
 
         return new JsonResponse();
     }

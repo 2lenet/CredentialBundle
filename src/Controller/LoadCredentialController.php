@@ -17,8 +17,8 @@ class LoadCredentialController extends AbstractController
     ) {
     }
 
+//    #[IsGranted('ROLE_ADMIN_DROITS')]
     #[Route('/load', name: 'admin_credential_load')]
-    #[IsGranted('ROLE_ADMIN_DROITS')]
     public function loadCredentials(): Response
     {
         try {
@@ -27,6 +27,6 @@ class LoadCredentialController extends AbstractController
             $this->addFlash('danger', 'You must defined client configuration');
         }
 
-        return new Response();
+        return $this->redirectToRoute('admin_credential');
     }
 }

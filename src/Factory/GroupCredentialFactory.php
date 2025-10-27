@@ -3,7 +3,6 @@
 namespace Lle\CredentialBundle\Factory;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Lle\CredentialBundle\Dto\GroupCredentialDto;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
@@ -27,13 +26,13 @@ class GroupCredentialFactory
         return $groupCredential;
     }
 
-    public function createFromDto(GroupCredentialDto $groupCredentialDto): ?GroupCredential
+    public function createFromArray(array $groupCredentialArray): ?GroupCredential
     {
         $group = $this->em->getRepository(Group::class)->findOneBy([
-            'name' => $groupCredentialDto->groupName
+            'name' => $groupCredentialArray['group']
         ]);
         $credential = $this->em->getRepository(Credential::class)->findOneBy([
-            'role' => $groupCredentialDto->credentialRole,
+            'role' => $groupCredentialArray['credential'],
         ]);
         if (!$group || !$credential) {
             return null;
@@ -43,8 +42,8 @@ class GroupCredentialFactory
         $groupCredential
             ->setGroupe($group)
             ->setCredential($credential)
-            ->setAllowed($groupCredentialDto->allowed)
-            ->setStatusAllowed($groupCredentialDto->statusAllowed);
+            ->setAllowed($groupCredentialArray['allowed'])
+            ->setStatusAllowed($groupCredentialArray['statusAllowed']);
 
         $this->em->persist($groupCredential);
 
