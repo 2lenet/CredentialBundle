@@ -6,6 +6,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
+use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefined;
+use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefined;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
@@ -20,12 +23,15 @@ class InitCredentialService
         protected EntityManagerInterface $em,
         protected NormalizerInterface $normalizer,
         protected ClientService $client,
+        protected CacheItemPoolInterface $cache,
     ) {
     }
 
     /**
      * @throws ProjectAlreadyInitializedException
      * @throws ProjectNotFoundException
+     * @throws ConfigurationProjectCodeNotDefined
+     * @throws ConfigurationClientUrlNotDefined
      */
     public function init(): void
     {

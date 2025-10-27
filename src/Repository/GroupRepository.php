@@ -22,19 +22,10 @@ class GroupRepository extends ServiceEntityRepository
     public function findAllOrdered(): mixed
     {
         return $this->createQueryBuilder('g')
-            ->orderBy('g.tri', 'ASC')->where('g.actif = 1')
+            ->orderBy('g.rank', 'ASC')
+            ->where('g.active = 1')
             ->getQuery()
             ->getResult();
-    }
-
-    public function findByLatestTri(): ?Group
-    {
-        return $this->createQueryBuilder('g')
-            ->andWhere('g.tri IS NOT NULL')
-            ->orderBy('g.tri', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
     }
 
     public function findByProjectExceptSuperAdmin(): array
@@ -42,7 +33,7 @@ class GroupRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('g')
             ->andWhere('g.name != :superadmin')
             ->setParameter('superadmin', 'SUPER_ADMIN')
-            ->orderBy('g.tri', 'ASC')
+            ->orderBy('g.rank', 'ASC')
             ->getQuery()
             ->getResult();
     }

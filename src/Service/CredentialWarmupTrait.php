@@ -2,24 +2,24 @@
 
 namespace Lle\CredentialBundle\Service;
 
-use Lle\CredentialBundle\Dto\CredentialDto;
+use Lle\CredentialBundle\Entity\Credential;
 
 trait CredentialWarmupTrait
 {
-    protected function getCredentials(
+    protected function checkAndCreateCredential(
         string $role,
-        ?string $rubrique,
-        ?string $libelle,
-        ?array $listeStatus = [],
-        ?bool $visible = true
-    ): CredentialDto {
-        $dto = new CredentialDto();
-        $dto->role = $role;
-        $dto->libelle = $libelle;
-        $dto->rubrique = $rubrique;
-        $dto->listeStatus = $listeStatus;
-        $dto->visible = $visible;
+        ?string $section,
+        ?string $label,
+        ?array $statusList = null,
+        ?bool $visible = true,
+    ): void {
+        $credential = $this->entityManager->getRepository(Credential::class)->findOneBy(['role' => $role]);
+        if ($credential) {
+            $this->credentialFactory->update($credential, $section, $label, $statusList, $visible);
+        } else {
+            $this->credentialFactory->create($role, $section, $label, $statusList, $visible);
+        }
 
-        return $dto;
+        $this->entityManager->flush();
     }
 }

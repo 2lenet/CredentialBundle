@@ -15,22 +15,37 @@ class CredentialFactory
 
     public function create(
         string $role,
-        ?string $rubrique = null,
-        ?string $libelle = null,
-        ?array $listeStatus = null,
+        ?string $section = null,
+        ?string $label = null,
+        ?array $statusList = null,
         bool $visible = true,
-        ?int $tri = null,
     ): Credential {
         $credential = new Credential();
         $credential
             ->setRole($role)
-            ->setRubrique($rubrique ?? $this->generateRubrique($role))
-            ->setLibelle($libelle ?? $role)
-            ->setListeStatus($listeStatus ?? [])
+            ->setSection($section ?? $this->generateRubrique($role))
+            ->setLabel($label ?? $role)
+            ->setStatusList($statusList ?? [])
             ->setVisible($visible)
-            ->setTri($tri ?? $this->getTri());
+            ->setCreatedAt(new \DateTimeImmutable());
 
         $this->em->persist($credential);
+
+        return $credential;
+    }
+
+    public function update(
+        Credential $credential,
+        ?string $section = null,
+        ?string $label = null,
+        ?array $statusList = null,
+        bool $visible = true,
+    ): Credential {
+        $credential
+            ->setSection($section ?? $this->generateRubrique($credential->getRole()))
+            ->setLabel($label ?? $credential->getRole())
+            ->setStatusList($statusList ?? [])
+            ->setVisible($visible);
 
         return $credential;
     }
@@ -40,11 +55,11 @@ class CredentialFactory
         $credential = new Credential();
         $credential
             ->setRole($credentialDto->role)
-            ->setRubrique($credentialDto->rubrique ?? $this->generateRubrique($credentialDto->role))
-            ->setLibelle($credentialDto->libelle ?? $credentialDto->role)
-            ->setListeStatus($credentialDto->listeStatus)
+            ->setSection($credentialDto->rubrique ?? $this->generateRubrique($credentialDto->role))
+            ->setLabel($credentialDto->libelle ?? $credentialDto->role)
+            ->setStatusList($credentialDto->statusList)
             ->setVisible($credentialDto->visible)
-            ->setTri($credentialDto->tri ?? $this->getTri());
+            ->setCreatedAt(new \DateTimeImmutable());
 
         $this->em->persist($credential);
 
@@ -56,15 +71,5 @@ class CredentialFactory
         $explodedRole = explode('_', $role);
 
         return strtoupper($explodedRole[1]);
-    }
-
-    public function getTri(): int
-    {
-        $lastCredential = $this->em->getRepository(Credential::class)->findOneBy([], ['tri' => 'DESC']);
-        if ($lastCredential) {
-            return $lastCredential->getTri() + 1;
-        }
-
-        return 0;
     }
 }

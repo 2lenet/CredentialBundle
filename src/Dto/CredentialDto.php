@@ -9,13 +9,11 @@ class CredentialDto
     #[Assert\NotBlank]
     public string $role;
 
-    public ?string $rubrique = null;
+    public ?string $section = null;
 
-    public ?string $libelle = null;
+    public ?string $label = null;
 
-    public array $listeStatus = [];
+    public array $statusList = [];
 
     public bool $visible = true;
-
-    public ?int $tri = null;
 }

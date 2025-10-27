@@ -35,7 +35,7 @@ class Group
     #[ORM\Column(type: 'boolean')]
     #[Groups([self::GROUP_API_GROUP])]
     #[SerializedName('active')]
-    private ?bool $actif = null;
+    private ?bool $active = null;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups([self::GROUP_API_GROUP])]
@@ -43,11 +43,11 @@ class Group
 
     #[ORM\Column(type: 'integer')]
     #[Groups([self::GROUP_API_GROUP])]
-    private ?int $tri = null;
+    private ?int $rank = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     #[Groups([self::GROUP_API_GROUP])]
-    private ?string $libelle = null;
+    private ?string $label = null;
 
     public function __toString(): string
     {
@@ -112,14 +112,32 @@ class Group
         return $this;
     }
 
-    public function isActif(): ?bool
+    public function isActive(): ?bool
     {
-        return $this->actif;
+        return $this->active;
     }
 
-    public function setActif(?bool $actif): self
+    public function setActive(?bool $active): self
     {
-        $this->actif = $actif;
+        $this->active = $active;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated use isActive
+     */
+    public function isActif(): ?bool
+    {
+        return $this->active;
+    }
+
+    /**
+     * @deprecated use setActive
+     */
+    public function setActif(?bool $active): self
+    {
+        $this->active = $active;
 
         return $this;
     }
@@ -136,26 +154,62 @@ class Group
         return $this;
     }
 
-    public function getTri(): ?int
+    public function getRank(): ?int
     {
-        return $this->tri;
+        return $this->rank;
     }
 
-    public function setTri(?int $tri): self
+    public function setRank(?int $rank): self
     {
-        $this->tri = $tri;
+        $this->rank = $rank;
 
         return $this;
     }
 
-    public function getLibelle(): ?string
+    /**
+     * @deprecated use getRank
+     */
+    public function getTri(): ?int
     {
-        return $this->libelle;
+        return $this->rank;
     }
 
-    public function setLibelle(?string $libelle): self
+    /**
+     * @deprecated use setRank
+     */
+    public function setTri(?int $rank): self
     {
-        $this->libelle = $libelle;
+        $this->rank = $rank;
+
+        return $this;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->label;
+    }
+
+    public function setLabel(?string $label): self
+    {
+        $this->label = $label;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated use getLabel
+     */
+    public function getLibelle(): ?string
+    {
+        return $this->label;
+    }
+
+    /**
+     * @deprecated use setLabel
+     */
+    public function setLibelle(?string $label): self
+    {
+        $this->label = $label;
 
         return $this;
     }

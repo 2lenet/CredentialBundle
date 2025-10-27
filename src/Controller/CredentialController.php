@@ -1,6 +1,6 @@
 <?php
 
-namespace Lle\CredentialBundle\Controller\Credential;
+namespace Lle\CredentialBundle\Controller;
 
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
@@ -29,10 +29,10 @@ class CredentialController extends AbstractController
     }
 
     #[IsGranted('ROLE_CREDENTIAL_ACTION_TOGGLERUBRIQUE')]
-    #[Route('/toggle-rubrique/{rubrique}/{group}/{check}')]
-    public function toggleRubrique(string $rubrique, Group $group, bool $check): JsonResponse
+    #[Route('/toggle-section/{section}/{group}/{check}')]
+    public function toggleRubrique(string $section, Group $group, bool $check): JsonResponse
     {
-        $this->credentialService->toggleRubrique($rubrique, $group, $check);
+        $this->credentialService->toggleRubrique($section, $group, $check);
 
         return new JsonResponse();
     }

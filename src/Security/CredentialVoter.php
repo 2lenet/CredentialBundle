@@ -29,7 +29,7 @@ class CredentialVoter extends Voter
                     /** @var string $groupName */
                     $groupName = $groupCred->getGroupe()?->getName();
                     $credName = $groupCred->getCredential()?->getRole();
-                    $credListeStatus = $groupCred->getCredential()?->getListeStatus();
+                    $credListeStatus = $groupCred->getCredential()?->getStatusList();
 
                     if (!array_key_exists($groupName, $this->groupRights)) {
                         $this->groupRights[$groupName] = [];

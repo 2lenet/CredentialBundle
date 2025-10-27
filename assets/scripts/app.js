@@ -1,27 +1,29 @@
+import Toastify from 'toastify-js'
+
 window.addEventListener('load', () => {
-    let matrice = document.getElementById('matrice');
+    let matrice = document.getElementById('lle-credential-matrice');
     if (matrice) {
-        checkRubriques();
+        checkSections();
         checkGroups();
 
         checkAllCredentialsOfGroup();
-        checkAllCredentialsOfRubrique();
+        checkAllCredentialsOfSection();
         checkCredential();
         enableCredentialByStatus();
         checkCredentialByStatus();
     }
 });
 
-function checkRubriques() {
-    const rubriqueCheckboxes = document.querySelectorAll('.lle-credential-checkbox-group-rubrique');
+function checkSections() {
+    const sectionCheckboxes = document.querySelectorAll('.lle-credential-checkbox-group-section');
 
-    // Check rubriqueCheckbox if all credentials are checked
-    for (let rubriqueCheckbox of rubriqueCheckboxes) {
-        let groupId = rubriqueCheckbox.dataset.groupId;
-        let rubriqueName = rubriqueCheckbox.dataset.rubriqueName;
+    // Check sectionCheckbox if all credentials are checked
+    for (let sectionCheckbox of sectionCheckboxes) {
+        let groupId = sectionCheckbox.dataset.groupId;
+        let sectionName = sectionCheckbox.dataset.sectionName;
 
         let allChecked = true;
-        let checkboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-rubrique-' + rubriqueName + '-credential');
+        let checkboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-section-' + sectionName + '-credential');
 
         for (let checkbox of checkboxes) {
             if (!checkbox.checked) {
@@ -30,19 +32,19 @@ function checkRubriques() {
             }
         }
 
-        rubriqueCheckbox.checked = allChecked;
+        sectionCheckbox.checked = allChecked;
     }
 }
 
 function checkGroups() {
     const groupCheckboxes = document.querySelectorAll('.lle-credential-checkbox-group');
 
-    // Check groupCheckbox if all rubriques are checked
+    // Check groupCheckbox if all sections are checked
     for (let groupCheckbox of groupCheckboxes) {
         let groupId = groupCheckbox.dataset.groupId;
 
         let allChecked = true;
-        let checkboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-rubrique');
+        let checkboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-section');
 
         for (let checkbox of checkboxes) {
             if (!checkbox.checked) {
@@ -74,39 +76,47 @@ function checkAllCredentialsOfGroup() {
                             checkbox.checked = groupCheckbox.checked;
                         });
 
-                        let rubriqueCheckboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-rubrique');
-                        rubriqueCheckboxes.forEach((rubriqueCheckbox) => {
-                            rubriqueCheckbox.checked = groupCheckbox.checked;
+                        let sectionCheckboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-section');
+                        sectionCheckboxes.forEach((sectionCheckbox) => {
+                            sectionCheckbox.checked = groupCheckbox.checked;
                         });
+
+                        showToast("Success", "#1CC88A");
                     } else {
                         groupCheckbox.checked = !groupCheckbox.checked;
+
+                        showToast("Error", "#E74A3B");
                     }
                 });
         });
     });
 }
 
-function checkAllCredentialsOfRubrique() {
-    const rubriqueCheckboxes = document.querySelectorAll('.lle-credential-checkbox-group-rubrique');
-    rubriqueCheckboxes.forEach((rubriqueCheckbox) => {
-        rubriqueCheckbox.addEventListener('click', () => {
-            let shouldCheck = window.confirm(rubriqueCheckbox.dataset.confirmMessage);
+function checkAllCredentialsOfSection() {
+    const sectionCheckboxes = document.querySelectorAll('.lle-credential-checkbox-group-section');
+    sectionCheckboxes.forEach((sectionCheckbox) => {
+        sectionCheckbox.addEventListener('click', () => {
+            let shouldCheck = window.confirm(sectionCheckbox.dataset.confirmMessage);
             if (!shouldCheck) {
-                rubriqueCheckbox.checked = !rubriqueCheckbox.checked;
+                sectionCheckbox.checked = !sectionCheckbox.checked;
                 return;
             }
 
-            let groupId = rubriqueCheckbox.dataset.groupId;
-            let rubriqueName = rubriqueCheckbox.dataset.rubriqueName;
-            fetch('/admin/credential/toggle-rubrique/' + rubriqueName + '/' + groupId + '/' + (rubriqueCheckbox.checked ? 1 : 0), { method: 'post' })
+            let groupId = sectionCheckbox.dataset.groupId;
+            let sectionName = sectionCheckbox.dataset.sectionName;
+            fetch('/admin/credential/toggle-section/' + sectionName + '/' + groupId + '/' + (sectionCheckbox.checked ? 1 : 0), { method: 'post' })
                 .then((response) => {
                     if (response.status === 200) {
-                        let checkboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-rubrique-' + rubriqueName + '-credential');
+                        let checkboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-section-' + sectionName + '-credential');
                         checkboxes.forEach((checkbox) => {
-                            checkbox.checked = rubriqueCheckbox.checked;
+                            checkbox.checked = sectionCheckbox.checked;
                         });
+
+                        showToast("Success", "#1CC88A");
                     } else {
-                        rubriqueCheckbox.checked = !rubriqueCheckbox.checked;
+                        sectionCheckbox.checked = !sectionCheckbox.checked;
+
+                        showToast("Error", "#E74A3B");
                     }
                 });
 
@@ -123,12 +133,16 @@ function checkCredential() {
             let credentialId = credentialCheckbox.dataset.credentialId;
             fetch('/admin/credential/toggle-credential/' + credentialId + '/' + groupId + '/' + (credentialCheckbox.checked ? 1 : 0), { method: 'post' })
                 .then((response) => {
-                    if (response.status !== 200) {
+                    if (response.status === 200) {
+                        showToast("Success", "#1CC88A");
+                    } else {
                         credentialCheckbox.checked = !credentialCheckbox.checked;
+
+                        showToast("Error", "#E74A3B");
                     }
                 });
 
-            checkRubriques();
+            checkSections();
             checkGroups();
         });
     });
@@ -149,8 +163,12 @@ function enableCredentialByStatus() {
                         } else {
                             statusList.classList.add('d-none');
                         }
+
+                        showToast("Success", "#1CC88A");
                     } else {
                         credentialByStatus.checked = !credentialByStatus.checked;
+
+                        showToast("Error", "#E74A3B");
                     }
                 });
         });
@@ -166,10 +184,26 @@ function checkCredentialByStatus() {
             let credentialStatus = credentialStatusCheckbox.dataset.credentialStatus;
             fetch('/admin/credential/allowed-by-status/' + credentialId + '/' + groupId + '/' + credentialStatus + '/' + (credentialStatusCheckbox.checked ? 1 : 0), { method: 'post' })
                 .then((response) => {
-                    if (response.status !== 200) {
+                    if (response.status === 200) {
+                        showToast("Success", "#1CC88A");
+                    } else {
                         credentialStatusCheckbox.checked = !credentialStatusCheckbox.checked;
+
+                        showToast("Error", "#E74A3B");
                     }
                 });
         });
     });
+}
+
+function showToast(text, color) {
+    Toastify({
+        text: text,
+        duration: 1500,
+        style: {
+            background: color,
+            padding: '15px 20px',
+            fontSize: '17px',
+        },
+    }).showToast();
 }

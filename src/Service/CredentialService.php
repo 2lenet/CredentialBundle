@@ -34,7 +34,7 @@ class CredentialService
     public function toggleRubrique(string $rubrique, Group $group, bool $check): void
     {
         $credentials = $this->em->getRepository(Credential::class)->findBy([
-            'rubrique' => $rubrique
+            'section' => $rubrique
         ]);
         $groupCredentials = $this->em->getRepository(GroupCredential::class)->findBy([
             'groupe' => $group,
@@ -81,8 +81,8 @@ class CredentialService
         if (!$credentialForStatus) {
             $credentialForStatus = $this->credentialFactory->create(
                 $credential->getRole() . '_' . strtoupper($status),
-                $credential->getRubrique(),
-                $credential->getLibelle(),
+                $credential->getSection(),
+                $credential->getLabel(),
             );
 
             $this->em->persist($credentialForStatus);

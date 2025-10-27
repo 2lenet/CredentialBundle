@@ -14,8 +14,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ClientService
 {
-    private string $clientUrl;
-    private string $projectCode;
+    private ?string $clientUrl;
+    private ?string $projectCode;
 
     public function __construct(
         protected ParameterBagInterface $parameterBag,
@@ -48,13 +48,13 @@ class ClientService
     }
 
     /**
-     * @throws ConfigurationProjectCodeNotDefined
-     * @throws ConfigurationClientUrlNotDefined
      * @throws ProjectNotFoundException
      */
     public function warmup(array $credentials): void
     {
-        $this->checkClientConfig();
+        if (!$this->hasClientConfig()) {
+            return;
+        }
 
         $response = $this->client->request(
             'POST',
@@ -224,10 +224,6 @@ class ClientService
         );
     }
 
-    /**
-     * @throws ConfigurationProjectCodeNotDefined
-     * @throws ConfigurationClientUrlNotDefined
-     */
     public function checkClientConfig(): void
     {
         if (!$this->clientUrl) {

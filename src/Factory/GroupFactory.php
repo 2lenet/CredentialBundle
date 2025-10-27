@@ -18,22 +18,22 @@ class GroupFactory
         $group = new Group();
         $group
             ->setName($groupDto->name)
-            ->setLibelle($groupDto->libelle)
+            ->setLabel($groupDto->label)
             ->setIsRole($groupDto->isRole)
-            ->setActif($groupDto->active)
+            ->setActive($groupDto->active)
             ->setRequiredRole($groupDto->requiredRole)
-            ->setTri($groupDto->tri ?? $this->getTri());
+            ->setRank($groupDto->rank ?? $this->getRank());
 
         $this->em->persist($group);
 
         return $group;
     }
 
-    public function getTri(): int
+    public function getRank(): int
     {
-        $lastGroup = $this->em->getRepository(Group::class)->findOneBy([], ['tri' => 'DESC']);
+        $lastGroup = $this->em->getRepository(Group::class)->findOneBy([], ['rank' => 'DESC']);
         if ($lastGroup) {
-            return $lastGroup->getTri() + 1;
+            return $lastGroup->getRank() + 1;
         }
 
         return 0;

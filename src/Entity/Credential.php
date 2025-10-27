@@ -23,15 +23,11 @@ class Credential
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     #[Groups([self::CREDENTIAL_API_GROUP])]
-    private ?string $libelle = null;
+    private ?string $label = null;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups([self::CREDENTIAL_API_GROUP])]
-    private ?string $rubrique = null;
-
-    #[ORM\Column(type: 'integer')]
-    #[Groups([self::CREDENTIAL_API_GROUP])]
-    private ?int $tri = null;
+    private ?string $section = null;
 
     #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => true])]
     #[Groups([self::CREDENTIAL_API_GROUP])]
@@ -39,7 +35,7 @@ class Credential
 
     #[ORM\Column(type: 'json', nullable: true)]
     #[Groups([self::CREDENTIAL_API_GROUP])]
-    private ?array $listeStatus = [];
+    private ?array $statusList = [];
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $createdAt;
@@ -67,38 +63,62 @@ class Credential
         return $this;
     }
 
+    public function getLabel(): ?string
+    {
+        return $this->label;
+    }
+
+    public function setLabel(string $lable): self
+    {
+        $this->label = $lable;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated use getLabel
+     */
     public function getLibelle(): ?string
     {
-        return $this->libelle;
+        return $this->label;
     }
 
-    public function setLibelle(string $libelle): self
+    /**
+     * @deprecated use setLabel
+     */
+    public function setLibelle(string $label): self
     {
-        $this->libelle = $libelle;
+        $this->label = $label;
 
         return $this;
     }
 
+    public function getSection(): ?string
+    {
+        return $this->section;
+    }
+
+    public function setSection(?string $section): self
+    {
+        $this->section = $section;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated use getSection
+     */
     public function getRubrique(): ?string
     {
-        return $this->rubrique;
+        return $this->section;
     }
 
-    public function setRubrique(?string $rubrique): self
+    /**
+     * @deprecated use setSection
+     */
+    public function setRubrique(?string $section): self
     {
-        $this->rubrique = $rubrique;
-
-        return $this;
-    }
-
-    public function getTri(): ?int
-    {
-        return $this->tri;
-    }
-
-    public function setTri(int $tri): self
-    {
-        $this->tri = $tri;
+        $this->section = $section;
 
         return $this;
     }
@@ -115,14 +135,32 @@ class Credential
         return $this;
     }
 
-    public function getListeStatus(): ?array
+    public function getStatusList(): ?array
     {
-        return $this->listeStatus;
+        return $this->statusList;
     }
 
-    public function setListeStatus(array $listeStatus,): self
+    public function setStatusList(array $statusList,): self
     {
-        $this->listeStatus = $listeStatus;
+        $this->statusList = $statusList;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated use getStatusList
+     */
+    public function getListeStatus(): ?array
+    {
+        return $this->statusList;
+    }
+
+    /**
+     * @deprecated use setStatusList
+     */
+    public function setListeStatus(array $statusList,): self
+    {
+        $this->statusList = $statusList;
 
         return $this;
     }

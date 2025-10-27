@@ -12,6 +12,7 @@ services:
 
     Lle\CredentialBundle\Controller\:
         resource: '../../Controller'
+        tags: ['controller.service_arguments']
 
     Lle\CredentialBundle\Command\:
         resource: '../../Command'

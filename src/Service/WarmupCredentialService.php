@@ -4,6 +4,7 @@ namespace Lle\CredentialBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
@@ -19,6 +20,7 @@ class WarmupCredentialService
         protected ClientService $client,
         protected EntityManagerInterface $em,
         protected NormalizerInterface $normalizer,
+        protected CacheItemPoolInterface $cache,
     ) {
     }
 
