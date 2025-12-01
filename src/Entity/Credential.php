@@ -20,6 +20,9 @@ class Credential implements \JsonSerializable
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $libelle = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $type = null;
+
     #[ORM\Column(type: 'string', length: 255)]
     private ?string $rubrique = null;
 
@@ -94,9 +97,21 @@ class Credential implements \JsonSerializable
         return $this->libelle;
     }
 
-    public function setLibelle(string $libelle): self
+    public function setLibelle(?string $libelle): self
     {
         $this->libelle = $libelle;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): self
+    {
+        $this->type = $type;
 
         return $this;
     }

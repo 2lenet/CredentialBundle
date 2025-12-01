@@ -8,36 +8,38 @@ trait CredentialWarmupTrait
 {
     protected function checkAndCreateCredential(
         string $role,
-        ?string $rubrique,
+        string $rubrique,
         ?string $libelle,
         ?int $tri,
         ?array $listeStatus = null,
-        ?bool $visible = true
+        ?bool $visible = true,
+        ?string $type = null,
     ): void {
-        $cred = $this->credentialRepository->findOneBy(['role' => $role]);
-        if ($cred === null) {
-            echo "not found $role  / $libelle\n";
-            $cred = new Credential();
-            $cred->setCreatedAt(new \DateTimeImmutable());
-            $cred->setRole($role);
-            $cred->setRubrique("");
-            $cred->setTri(0);
+        $credential = $this->credentialRepository->findOneBy(['role' => $role]);
+        if (!$credential) {
+            echo "not found $role / $libelle\n";
+            $credential = new Credential();
+            $credential
+                ->setRole($role)
+                ->setTri(0)
+                ->setCreatedAt(new \DateTimeImmutable());
         }
-        if ($libelle !== null) {
-            $cred->setLibelle($libelle);
+
+        $credential
+            ->setRubrique($rubrique)
+            ->setLibelle($libelle)
+            ->setType($type)
+            ->setVisible($visible ?? true);
+
+        if ($listeStatus) {
+            $credential->setListeStatus($listeStatus);
         }
-        if ($rubrique !== null) {
-            $cred->setRubrique($rubrique);
+
+        if ($tri) {
+            $credential->setTri($tri);
         }
-        $cred->setVisible($visible);
-        if ($listeStatus !== null) {
-            $cred->setListeStatus($listeStatus);
-        }
-        if ($tri !== null) {
-            $cred->setTri($tri);
-        }
-        $cred->setCreatedAt(new \DateTimeImmutable());
-        $this->entityManager->persist($cred);
+
+        $this->entityManager->persist($credential);
         $this->entityManager->flush();
     }
 }
