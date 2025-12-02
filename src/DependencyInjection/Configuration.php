@@ -11,22 +11,21 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder('lle_credential');
         $rootNode = $treeBuilder->getRootNode();
-        $children = $rootNode->children();
-        $children
-            ->scalarNode('client_url')
-            ->defaultNull()
-            ->end();
-        $children
-            ->scalarNode('client_public_url')
-            ->defaultNull()
-            ->end();
-        $children
-            ->scalarNode('project_code')
-            ->defaultNull()
-            ->end();
-        $children
-            ->scalarNode('project_token')
-            ->defaultNull()
+        /** @phpstan-ignore-next-line */
+        $rootNode
+            ->children()
+                ->scalarNode('client_url')
+                    ->defaultNull()
+                ->end()
+                ->scalarNode('client_public_url')
+                    ->defaultNull()
+                ->end()
+                ->scalarNode('project_code')
+                    ->defaultNull()
+                ->end()
+                ->scalarNode('project_token')
+                    ->defaultNull()
+                ->end()
             ->end();
 
         return $treeBuilder;
