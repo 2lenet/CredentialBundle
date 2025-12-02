@@ -25,6 +25,9 @@ class Credential
     #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?string $label = null;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $type = null;
+
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?string $section = null;
@@ -89,6 +92,18 @@ class Credential
     public function setLibelle(string $label): self
     {
         $this->label = $label;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): self
+    {
+        $this->type = $type;
 
         return $this;
     }

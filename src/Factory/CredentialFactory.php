@@ -18,6 +18,7 @@ class CredentialFactory
         ?string $label = null,
         ?array $statusList = null,
         bool $visible = true,
+        ?string $type = null,
     ): Credential {
         $credential = new Credential();
         $credential
@@ -26,6 +27,7 @@ class CredentialFactory
             ->setLabel($label ?? $role)
             ->setStatusList($statusList ?? [])
             ->setVisible($visible)
+            ->setType($type)
             ->setCreatedAt(new \DateTimeImmutable());
 
         $this->em->persist($credential);
@@ -39,12 +41,14 @@ class CredentialFactory
         ?string $label = null,
         ?array $statusList = null,
         bool $visible = true,
+        ?string $type = null,
     ): Credential {
         $credential
             ->setSection($section ?? $this->generateSection((string)$credential->getRole()))
             ->setLabel($label ?? (string)$credential->getRole())
             ->setStatusList($statusList ?? [])
-            ->setVisible($visible);
+            ->setVisible($visible)
+            ->setType($type);
 
         return $credential;
     }
@@ -58,6 +62,7 @@ class CredentialFactory
             ->setLabel($credentialArray['label'] ?? $credentialArray['role'])
             ->setStatusList($credentialArray['statusList'])
             ->setVisible($credentialArray['visible'])
+            ->setType($credentialArray['type'])
             ->setCreatedAt(new \DateTimeImmutable());
 
         $this->em->persist($credential);
