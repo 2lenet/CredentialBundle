@@ -71,9 +71,9 @@ class Credential
         return $this->label;
     }
 
-    public function setLabel(string $lable): self
+    public function setLabel(string $label): self
     {
-        $this->label = $lable;
+        $this->label = $label;
 
         return $this;
     }
