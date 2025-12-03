@@ -70,7 +70,7 @@ class CredentialManagerController extends AbstractController
         $result = [];
         $credentials = $this->em->getRepository(Credential::class)->findBy([], [
             'section' => 'ASC',
-            'role' => 'ASC'
+            'type' => 'ASC'
         ]);
         foreach ($credentials as $credential) {
             if ($credential->getSection()) {

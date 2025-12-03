@@ -13,6 +13,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
 use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class InitCredentialService
 {
@@ -24,6 +25,7 @@ class InitCredentialService
         protected NormalizerInterface $normalizer,
         protected ClientService $client,
         protected CacheItemPoolInterface $cache,
+        protected TranslatorInterface $translator,
     ) {
     }
 
@@ -35,14 +37,12 @@ class InitCredentialService
      */
     public function init(): void
     {
-        $credentials = $this->em->getRepository(Credential::class)->findAllOrdered();
+        $credentials = $this->getCredentials($this->em->getRepository(Credential::class)->findAllOrdered());
         $groups = $this->em->getRepository(Group::class)->findAllOrdered();
         $groupCredentials = $this->em->getRepository(GroupCredential::class)->findAll();
 
         $data = [
-            'credentials' => $this->normalizer->normalize($credentials, 'array', [
-                'groups' => Credential::CREDENTIAL_API_GROUP,
-            ]),
+            'credentials' => $credentials,
             'groups' => $this->normalizer->normalize($groups, 'array', [
                 'groups' => Group::GROUP_API_GROUP,
             ]),

@@ -26,6 +26,7 @@ class Credential
     private ?string $label = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?string $type = null;
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -71,9 +72,9 @@ class Credential
         return $this->label;
     }
 
-    public function setLabel(string $label): self
+    public function setLabel(string $lable): self
     {
-        $this->label = $label;
+        $this->label = $lable;
 
         return $this;
     }

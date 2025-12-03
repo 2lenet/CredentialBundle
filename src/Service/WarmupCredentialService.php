@@ -9,6 +9,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Lle\CredentialBundle\Exception\ProjectNotFoundException;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class WarmupCredentialService
 {
@@ -21,6 +22,7 @@ class WarmupCredentialService
         protected EntityManagerInterface $em,
         protected NormalizerInterface $normalizer,
         protected CacheItemPoolInterface $cache,
+        protected TranslatorInterface $translator,
     ) {
     }
 
@@ -33,10 +35,8 @@ class WarmupCredentialService
             $warmup->warmup();
         }
 
-        $credentials = $this->em->getRepository(Credential::class)->findAll();
-        $this->client->warmup((array)$this->normalizer->normalize($credentials, 'array', [
-            'groups' => Credential::CREDENTIAL_API_GROUP,
-        ]));
+        $credentials = $this->getCredentials($this->em->getRepository(Credential::class)->findAll());
+        $this->client->warmup($credentials);
 
         $this->resetCache();
     }
