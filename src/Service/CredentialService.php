@@ -2,136 +2,146 @@
 
 namespace Lle\CredentialBundle\Service;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
+use Lle\CredentialBundle\Factory\CredentialFactory;
+use Lle\CredentialBundle\Factory\GroupCredentialFactory;
+use Doctrine\ORM\EntityManagerInterface;
 
 class CredentialService
 {
     public function __construct(
-        private EntityManagerInterface $em,
+        protected EntityManagerInterface $em,
+        protected GroupCredentialFactory $groupCredentialFactory,
+        protected CredentialFactory $credentialFactory,
+        protected ClientService $client,
     ) {
     }
 
-    public function toggleAll(array $groupCredentials, array $credentials, Group $group, bool $checked): void
-    {
-        $existingCredentials = [];
-        foreach ($groupCredentials as $groupCredential) {
-            $existingCredentials[$groupCredential->getCredential()->getId()] = $groupCredential;
-        }
-
-        /** @var Credential $credential */
-        foreach ($credentials as $credential) {
-            if (!array_key_exists((int)$credential->getId(), $existingCredentials)) {
-                $groupCredential = new GroupCredential();
-                $groupCredential->setGroupe($group);
-                $groupCredential->setCredential($credential);
-                $groupCredential->setAllowed($checked);
-
-                $this->em->persist($groupCredential);
-            }
-        }
-    }
-
-    public function allowedByStatus(?string $group, ?string $statusCred, ?string $parentCred): GroupCredential
-    {
-        /** @var Group $groupObj */
-        $groupObj = $this->em->getRepository(Group::class)->findOneBy(['name' => $group]);
-        $parentCred = $this->em->getRepository(Credential::class)->findOneBy(['role' => $parentCred]);
-
-        $credential = $this->em->getRepository(Credential::class)->findOneBy(['role' => $statusCred]);
-
-        if (!$credential) {
-            $credential = new Credential();
-            $credential->setRole((string)$statusCred);
-            $credential->setLibelle((string)$statusCred);
-            $credential->setRubrique($parentCred?->getRubrique());
-            $credential->setTri(0);
-            $credential->setVisible(false);
-
-            $this->em->persist($credential);
-        }
-
-        $groupCred = new GroupCredential();
-        $groupCred->setGroupe($groupObj);
-        $groupCred->setCredential($credential);
-        $groupCred->setAllowed(true);
-
-        return $groupCred;
-    }
-
-    public function dumpCredentials(string $filename): void
+    public function toggleGroup(Group $group, bool $check): void
     {
         $credentials = $this->em->getRepository(Credential::class)->findAll();
-        $groups = $this->em->getRepository(Group::class)->findAll();
-        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findAll();
+        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findBy(['groupe' => $group]);
 
-        $file = fopen($filename, 'wb');
-        if ($file) {
-            fwrite(
-                $file,
-                (string)json_encode(
-                    ['credential' => $credentials, 'group' => $groups, 'group_credential' => $groupCredentials],
-                    JSON_PRETTY_PRINT
-                )
-            );
-            fclose($file);
-        }
+        $this->createMissingGroupCredentials($groupCredentials, $credentials, $group);
+        $this->checkGroupCredentials($groupCredentials, $check);
+
+        $this->client->toggleGroup($group, $check);
     }
 
-    public function loadCredentials(string $filename): void
+    public function toggleSection(string $section, Group $group, bool $check): void
     {
-        $data = json_decode((string)file_get_contents($filename), true);
+        $credentials = $this->em->getRepository(Credential::class)->findBy([
+            'section' => $section
+        ]);
+        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findBy([
+            'groupe' => $group,
+            'credential' => $credentials
+        ]);
 
-        $this->em->getRepository(Credential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();
-        $this->em->getRepository(GroupCredential::class)->createQueryBuilder('c')->delete()->getQuery()->execute();
+        $this->createMissingGroupCredentials($groupCredentials, $credentials, $group);
+        $this->checkGroupCredentials($groupCredentials, $check);
 
-        // keep the ids
-        $metadata = $this->em->getClassMetaData(Credential::class);
-        $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+        $this->client->toggleSection($section, $group, $check);
+    }
 
-        $metadata = $this->em->getClassMetaData(Group::class);
-        $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+    public function toggleCredential(Credential $credential, Group $group, bool $check): void
+    {
+        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findBy([
+            'groupe' => $group,
+            'credential' => $credential
+        ]);
 
-        $metadata = $this->em->getClassMetaData(GroupCredential::class);
-        $metadata->setIdGeneratorType(\Doctrine\ORM\Mapping\ClassMetadata::GENERATOR_TYPE_NONE);
-        $metadata->setIdGenerator(new \Doctrine\ORM\Id\AssignedGenerator());
+        $this->createMissingGroupCredentials($groupCredentials, [$credential], $group);
+        $this->checkGroupCredentials($groupCredentials, $check);
 
-        foreach ($data['credential'] as $cred) {
-            $c = new Credential();
-            $c->fromArray($cred);
+        $this->client->toggleCredential($credential, $group, $check);
+    }
 
-            $this->em->persist($c);
+    public function allowStatus(Credential $credential, Group $group, bool $check): void
+    {
+        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findBy([
+            'groupe' => $group,
+            'credential' => $credential
+        ]);
+
+        $this->createMissingGroupCredentials($groupCredentials, [$credential], $group);
+        $this->allowStatusGroupCredentials($groupCredentials, $check);
+
+        $this->client->allowStatus($credential, $group, $check);
+    }
+
+    public function allowForStatus(Credential $credential, Group $group, string $status, bool $check): void
+    {
+        $credentialForStatus = $this->em->getRepository(Credential::class)->findOneBy([
+            'role' => $credential->getRole() . '_' . strtoupper($status)
+        ]);
+        if (!$credentialForStatus) {
+            $credentialForStatus = $this->credentialFactory->create(
+                $credential->getRole() . '_' . strtoupper($status),
+                $credential->getSection(),
+                $credential->getLabel(),
+            );
+
+            $this->em->persist($credentialForStatus);
+            $this->em->flush();
         }
 
-        foreach ($data['group'] as $group) {
-            $g = $this->em->getRepository(Group::class)->find($group['id']);
-            if ($g === null) {
-                $g = new Group();
+        $groupCredentials = $this->em->getRepository(GroupCredential::class)->findBy([
+            'groupe' => $group,
+            'credential' => $credentialForStatus
+        ]);
+
+        $this->createMissingGroupCredentials($groupCredentials, [$credentialForStatus], $group);
+        $this->checkGroupCredentials($groupCredentials, $check);
+
+        $this->client->allowForStatus($credential, $group, $status, $check);
+    }
+
+    /**
+     * @param GroupCredential[] $groupCredentials
+     * @param Credential[] $credentials
+     */
+    public function createMissingGroupCredentials(array &$groupCredentials, array $credentials, Group $group): void
+    {
+        $existingsGroupCredentials = [];
+        foreach ($groupCredentials as $groupCredential) {
+            $existingsGroupCredentials[$groupCredential->getCredential()?->getRole()] = $groupCredential;
+        }
+
+        foreach ($credentials as $credential) {
+            if (!array_key_exists((string)$credential->getRole(), $existingsGroupCredentials)) {
+                $groupCredential = $this->groupCredentialFactory->create($group, $credential);
+
+                $this->em->persist($groupCredential);
+
+                $groupCredentials[$credential->getRole()] = $groupCredential;
             }
-
-            $g->fromArray($group);
-
-            $this->em->persist($g);
         }
 
-        foreach ($data['group_credential'] as $groupcred) {
-            $gc = new GroupCredential();
-            $gc->fromArray($groupcred);
+        $this->em->flush();
+    }
 
-            /** @var Credential $c */
-            $c = $this->em->getReference(Credential::class, $groupcred['credential']);
-            /** @var Group $g */
-            $g = $this->em->getReference(Group::class, $groupcred['group']);
+    /**
+     * @param GroupCredential[] $groupCredentials
+     */
+    public function checkGroupCredentials(array $groupCredentials, bool $check): void
+    {
+        foreach ($groupCredentials as $groupCredential) {
+            $groupCredential->setAllowed($check);
+        }
 
-            $gc
-                ->setGroupe($g)
-                ->setCredential($c);
+        $this->em->flush();
+    }
 
-            $this->em->persist($gc);
+    /**
+     * @param GroupCredential[] $groupCredentials
+     */
+    public function allowStatusGroupCredentials(array $groupCredentials, bool $check): void
+    {
+        foreach ($groupCredentials as $groupCredential) {
+            $groupCredential->setStatusAllowed($check);
         }
 
         $this->em->flush();

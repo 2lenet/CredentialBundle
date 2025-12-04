@@ -6,17 +6,22 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Lle\CredentialBundle\Repository\GroupRepository;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\SerializedName;
 
 #[ORM\Table(name: 'lle_credential_group')]
 #[ORM\Entity(repositoryClass: GroupRepository::class)]
-class Group implements \JsonSerializable
+class Group
 {
+    public const string GROUP_API_GROUP = 'group-api';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups([self::GROUP_API_GROUP])]
     private ?string $name = null;
 
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: GroupCredential::class)]
@@ -24,19 +29,25 @@ class Group implements \JsonSerializable
     private Collection $credentials;
 
     #[ORM\Column(type: 'boolean')]
+    #[Groups([self::GROUP_API_GROUP])]
     private ?bool $isRole = null;
 
     #[ORM\Column(type: 'boolean')]
-    private ?bool $actif = null;
+    #[Groups([self::GROUP_API_GROUP])]
+    #[SerializedName('active')]
+    private ?bool $active = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups([self::GROUP_API_GROUP])]
     private ?string $requiredRole = null;
 
     #[ORM\Column(type: 'integer')]
-    private ?int $tri = null;
+    #[Groups([self::GROUP_API_GROUP])]
+    private ?int $rank = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $libelle = null;
+    #[Groups([self::GROUP_API_GROUP])]
+    private ?string $label = null;
 
     public function __toString(): string
     {
@@ -46,30 +57,6 @@ class Group implements \JsonSerializable
     public function __construct()
     {
         $this->credentials = new ArrayCollection();
-    }
-
-    public function jsonSerialize(): mixed
-    {
-        return [
-            "id" => $this->id,
-            "name" => $this->name,
-            "isRole" => $this->isRole,
-            "libelle" => $this->libelle,
-            "requiredRole" => $this->requiredRole,
-            "tri" => $this->tri,
-            "actif" => $this->actif,
-        ];
-    }
-
-    public function fromArray(array $data): void
-    {
-        $this->id = $data["id"];
-        $this->name = $data["name"];
-        $this->libelle = $data["libelle"];
-        $this->isRole = $data["isRole"];
-        $this->tri = $data["tri"];
-        $this->requiredRole = $data["requiredRole"];
-        $this->actif = $data["actif"];
     }
 
     public function getId(): ?int
@@ -125,14 +112,32 @@ class Group implements \JsonSerializable
         return $this;
     }
 
-    public function isActif(): ?bool
+    public function isActive(): ?bool
     {
-        return $this->actif;
+        return $this->active;
     }
 
-    public function setActif(?bool $actif): self
+    public function setActive(?bool $active): self
     {
-        $this->actif = $actif;
+        $this->active = $active;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated use isActive
+     */
+    public function isActif(): ?bool
+    {
+        return $this->active;
+    }
+
+    /**
+     * @deprecated use setActive
+     */
+    public function setActif(?bool $active): self
+    {
+        $this->active = $active;
 
         return $this;
     }
@@ -149,26 +154,62 @@ class Group implements \JsonSerializable
         return $this;
     }
 
-    public function getTri(): ?int
+    public function getRank(): ?int
     {
-        return $this->tri;
+        return $this->rank;
     }
 
-    public function setTri(?int $tri): self
+    public function setRank(?int $rank): self
     {
-        $this->tri = $tri;
+        $this->rank = $rank;
 
         return $this;
     }
 
-    public function getLibelle(): ?string
+    /**
+     * @deprecated use getRank
+     */
+    public function getTri(): ?int
     {
-        return $this->libelle;
+        return $this->rank;
     }
 
-    public function setLibelle(?string $libelle): self
+    /**
+     * @deprecated use setRank
+     */
+    public function setTri(?int $rank): self
     {
-        $this->libelle = $libelle;
+        $this->rank = $rank;
+
+        return $this;
+    }
+
+    public function getLabel(): ?string
+    {
+        return $this->label;
+    }
+
+    public function setLabel(?string $label): self
+    {
+        $this->label = $label;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated use getLabel
+     */
+    public function getLibelle(): ?string
+    {
+        return $this->label;
+    }
+
+    /**
+     * @deprecated use setLabel
+     */
+    public function setLibelle(?string $label): self
+    {
+        $this->label = $label;
 
         return $this;
     }
