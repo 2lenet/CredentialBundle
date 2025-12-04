@@ -13,6 +13,7 @@ use Lle\CredentialBundle\Factory\GroupCredentialFactory;
 use Lle\CredentialBundle\Factory\GroupFactory;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LoadCredentialService
 {
@@ -26,6 +27,7 @@ class LoadCredentialService
         protected GroupFactory $groupFactory,
         protected GroupCredentialFactory $groupCredentialFactory,
         protected ClientService $client,
+        protected TranslatorInterface $translator,
     ) {
     }
 
