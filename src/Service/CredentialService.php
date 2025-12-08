@@ -82,6 +82,7 @@ class CredentialService
                 $credential->getRole() . '_' . strtoupper($status),
                 $credential->getSection(),
                 $credential->getLabel(),
+                visible: false,
             );
 
             $this->em->persist($credentialForStatus);

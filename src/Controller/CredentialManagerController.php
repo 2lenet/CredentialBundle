@@ -68,7 +68,7 @@ class CredentialManagerController extends AbstractController
     public function getCredentialsBySections(): array
     {
         $result = [];
-        $credentials = $this->em->getRepository(Credential::class)->findBy([], [
+        $credentials = $this->em->getRepository(Credential::class)->findBy(['visible' => true], [
             'section' => 'ASC',
             'type' => 'ASC'
         ]);
