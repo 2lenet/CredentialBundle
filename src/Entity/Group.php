@@ -51,7 +51,7 @@ class Group
 
     public function __toString(): string
     {
-        return $this->libelle ?? '';
+        return $this->label ?? '';
     }
 
     public function __construct()
