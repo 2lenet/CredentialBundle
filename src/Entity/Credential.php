@@ -4,71 +4,46 @@ namespace Lle\CredentialBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Lle\CredentialBundle\Repository\CredentialRepository;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Table(name: 'lle_credential_credential')]
 #[ORM\Entity(repositoryClass: CredentialRepository::class)]
-class Credential implements \JsonSerializable
+class Credential
 {
+    public const string CREDENTIAL_API_GROUP = 'crendential-api';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?string $role = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
-    private ?string $libelle = null;
+    #[Groups([self::CREDENTIAL_API_GROUP])]
+    private ?string $label = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?string $type = null;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private ?string $rubrique = null;
-
-    #[ORM\Column(type: 'integer')]
-    private ?int $tri = null;
+    #[Groups([self::CREDENTIAL_API_GROUP])]
+    private ?string $section = null;
 
     #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => true])]
+    #[Groups([self::CREDENTIAL_API_GROUP])]
     private ?bool $visible = true;
 
     #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $listeStatus = [];
+    #[Groups([self::CREDENTIAL_API_GROUP])]
+    private ?array $statusList = [];
 
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $createdAt;
 
-    public function jsonSerialize(): mixed
-    {
-        $data = [
-            "id" => $this->id,
-            "role" => $this->role,
-            "libelle" => $this->libelle,
-            "rubrique" => $this->rubrique,
-            "visible" => $this->visible,
-            "tri" => $this->tri,
-            "listeStatus" => $this->listeStatus,
-        ];
-        if ($this->createdAt !== null) {
-            $data["createdAt"] = $this->createdAt->format("Y-m-d H:i:s");
-        }
-
-        return $data;
-    }
-
-    public function fromArray(array $data): void
-    {
-        $this->id = $data["id"];
-        $this->role = $data["role"];
-        $this->libelle = $data["libelle"];
-        $this->rubrique = $data["rubrique"];
-        $this->tri = $data["tri"];
-        $this->visible = $data["visible"];
-        $this->listeStatus = $data["listeStatus"];
-        if (array_key_exists("createdAt", $data)) {
-            $this->createdAt = new \DateTimeImmutable($data["createdAt"]);
-        }
-    }
 
     public function __toString()
     {
@@ -92,14 +67,32 @@ class Credential implements \JsonSerializable
         return $this;
     }
 
-    public function getLibelle(): ?string
+    public function getLabel(): ?string
     {
-        return $this->libelle;
+        return $this->label;
     }
 
-    public function setLibelle(?string $libelle): self
+    public function setLabel(string $label): self
     {
-        $this->libelle = $libelle;
+        $this->label = $label;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated use getLabel
+     */
+    public function getLibelle(): ?string
+    {
+        return $this->label;
+    }
+
+    /**
+     * @deprecated use setLabel
+     */
+    public function setLibelle(string $label): self
+    {
+        $this->label = $label;
 
         return $this;
     }
@@ -116,26 +109,32 @@ class Credential implements \JsonSerializable
         return $this;
     }
 
-    public function getRubrique(): ?string
+    public function getSection(): ?string
     {
-        return $this->rubrique;
+        return $this->section;
     }
 
-    public function setRubrique(?string $rubrique): self
+    public function setSection(?string $section): self
     {
-        $this->rubrique = $rubrique;
+        $this->section = $section;
 
         return $this;
     }
 
-    public function getTri(): ?int
+    /**
+     * @deprecated use getSection
+     */
+    public function getRubrique(): ?string
     {
-        return $this->tri;
+        return $this->section;
     }
 
-    public function setTri(int $tri): self
+    /**
+     * @deprecated use setSection
+     */
+    public function setRubrique(?string $section): self
     {
-        $this->tri = $tri;
+        $this->section = $section;
 
         return $this;
     }
@@ -152,14 +151,32 @@ class Credential implements \JsonSerializable
         return $this;
     }
 
-    public function getListeStatus(): ?array
+    public function getStatusList(): ?array
     {
-        return $this->listeStatus;
+        return $this->statusList;
     }
 
-    public function setListeStatus(array $listeStatus,): self
+    public function setStatusList(array $statusList,): self
     {
-        $this->listeStatus = $listeStatus;
+        $this->statusList = $statusList;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated use getStatusList
+     */
+    public function getListeStatus(): ?array
+    {
+        return $this->statusList;
+    }
+
+    /**
+     * @deprecated use setStatusList
+     */
+    public function setListeStatus(array $statusList,): self
+    {
+        $this->statusList = $statusList;
 
         return $this;
     }

@@ -24,8 +24,8 @@ class CredentialRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->andWhere('c.visible = true')
             ->orWhere('c.visible IS NULL')
-            ->orderBy('c.rubrique', 'ASC')
-            ->addOrderBy('c.tri', 'ASC')
+            ->orderBy('c.section', 'ASC')
+            ->addOrderBy('c.label', 'ASC')
             ->getQuery()
             ->getResult();
     }

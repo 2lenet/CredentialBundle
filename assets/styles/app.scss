@@ -1,0 +1,27 @@
+@import 'toastify-js/src/toastify.css';
+
+#lle-credential-matrice {
+    .card-header {
+        background-color: #cccccc;
+    }
+
+    tbody {
+        tr {
+            th:first-child {
+                width: 450px;
+            }
+        }
+
+        tr:first-child {
+            .groups {
+                height: 200px;
+                display: flex;
+                justify-content: center;
+
+                span {
+                    writing-mode: vertical-lr;
+                }
+            }
+        }
+    }
+}

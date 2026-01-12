@@ -4,6 +4,7 @@ namespace Lle\CredentialBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Lle\CredentialBundle\Repository\GroupCredentialRepository;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Table(name: 'lle_credential_group_credential')]
 #[ORM\Entity(repositoryClass: GroupCredentialRepository::class)]
@@ -11,8 +12,10 @@ use Lle\CredentialBundle\Repository\GroupCredentialRepository;
     name: 'groupe_cred_unique_idx',
     columns: ['groupe_id', 'credential_id']
 )]
-class GroupCredential implements \JsonSerializable
+class GroupCredential
 {
+    public const string GROUPCREDENTIAL_API_GROUP = 'groupcredential-api';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -27,27 +30,23 @@ class GroupCredential implements \JsonSerializable
     private ?Group $groupe = null;
 
     #[ORM\Column(type: 'boolean')]
+    #[Groups([self::GROUPCREDENTIAL_API_GROUP])]
     private ?bool $allowed = false;
 
     #[ORM\Column(type: 'boolean', nullable: true, options: ['default' => false])]
+    #[Groups([self::GROUPCREDENTIAL_API_GROUP])]
     private ?bool $statusAllowed = false;
 
-    public function jsonSerialize(): mixed
+    #[Groups([self::GROUPCREDENTIAL_API_GROUP])]
+    public function getGroupName(): string
     {
-        return [
-            "id" => $this->id,
-            "group" => $this->groupe?->getId(),
-            "credential" => $this->credential?->getId(),
-            "allowed" => $this->allowed,
-            "statusAllowed" => $this->statusAllowed,
-        ];
+        return (string)$this->groupe?->getName();
     }
 
-    public function fromArray(array $data): void
+    #[Groups([self::GROUPCREDENTIAL_API_GROUP])]
+    public function getCredentialRole(): string
     {
-        $this->id = $data["id"];
-        $this->allowed = $data["allowed"];
-        $this->statusAllowed = $data["statusAllowed"];
+        return (string)$this->credential?->getRole();
     }
 
     public function getId(): ?int

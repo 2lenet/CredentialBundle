@@ -1,3 +1,4 @@
 cred_routes:
-    resource: '../../Controller/CredentialManagerController.php'
+    resource: '../../Controller/'
     type: attribute
+    prefix: /admin/credential
