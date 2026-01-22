@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'lle:credential:warmup',
-    description: 'Initialise Credential list',
+    description: 'Update credentials list',
 )]
 class WarmupCredentialCommand extends Command
 {

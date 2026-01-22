@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'lle:credential:load',
-    description: 'Load Credential configuration',
+    description: 'Load credentials configuration',
 )]
 class LoadCredentialCommand extends Command
 {

@@ -44,3 +44,8 @@ Check that the changes are correct and execute them:
 ```bash
 php bin/console doctrine:migrations:migrate
 ```
+
+## Recipes
+
+- [List of available commands](docs/commands.md)
+- [Remote repository integration](docs/remote_repository.md)
