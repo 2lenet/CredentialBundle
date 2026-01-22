@@ -2,7 +2,7 @@
 
 ## Initialize a project
 
-This command requires the use of a remote repository ([Remote repository integration](docs/remote_repository.md)).
+This command requires the use of a remote repository ([Remote repository integration](remote_repository.md)).
 
 It allows the current configuration to be uploaded to the remote repository (groups, credentials and credentials by group).
 
@@ -22,7 +22,7 @@ bin/console lle:credential:warmup
 
 ## Load credentials configuration
 
-This command requires the use of a remote repository ([Remote repository integration](docs/remote_repository.md)).
+This command requires the use of a remote repository ([Remote repository integration](remote_repository.md)).
 
 It enables you to update your credentials by group using the data stored on your remote repository.
 
