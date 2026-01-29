@@ -2,7 +2,7 @@
 
 ## Configuration
 
-First, create a `lle_crendential.yaml` file.
+First, create a `lle_credential.yaml` file.
 
 Next, you need to define 4 configurations:
 
