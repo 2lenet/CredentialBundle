@@ -34,7 +34,7 @@ class ClientService
 
         /** @var ?string $projectToken */
         $projectToken = $this->parameterBag->get('lle_credential.project_token');
-        $this->projectToken = 'Bearer ' . $projectToken;
+        $this->projectToken = $projectToken ? 'Bearer ' . $projectToken : $projectToken;
     }
 
     /**
