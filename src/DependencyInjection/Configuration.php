@@ -11,7 +11,6 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder('lle_credential');
         $rootNode = $treeBuilder->getRootNode();
-        /** @phpstan-ignore-next-line */
         $rootNode
             ->children()
                 ->scalarNode('client_url')
