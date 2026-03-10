@@ -16,3 +16,6 @@ parameters:
             identifier: missingType.iterableValue
         -
             identifier: missingType.generics
+        -
+            identifier: trait.unused
+            path: ../src/Service/CredentialWarmupTrait.php
