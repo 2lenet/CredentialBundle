@@ -21,7 +21,7 @@ class CredentialController extends AbstractController
 
     #[IsGranted('ROLE_CREDENTIAL_ACTION_TOGGLEGROUP')]
     #[Route('/toggle-group/{group}/{check}')]
-    public function toggleGroup(group $group, bool $check): JsonResponse
+    public function toggleGroup(Group $group, bool $check): JsonResponse
     {
         $this->credentialService->toggleGroup($group, $check);
 
