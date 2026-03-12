@@ -83,7 +83,11 @@ class CredentialVoter extends Voter
             }
         }
 
-        $user = $token->getUser();
+        if ($subject instanceof UserInterface) {
+            $user = $subject;
+        } else {
+            $user = $token->getUser();
+        }
 
         // if the user is anonymous, do not grant access
         if (!$user instanceof UserInterface) {
