@@ -122,7 +122,7 @@ class CredentialVoter extends Voter
                 $statusPropertyValue = $subject->getStatusPropertyValue();
                 $attribute .= "_" . strtoupper($statusPropertyValue);
 
-                return array_key_exists($attribute, (array)$this->groupRights[$groupName]);
+                return isset($this->groupRights[$groupName][$attribute]);
             }
         }
 
