@@ -154,7 +154,7 @@ function enableCredentialByStatus() {
         credentialByStatus.addEventListener('click', () => {
             let groupId = credentialByStatus.dataset.groupId;
             let credentialId = credentialByStatus.dataset.credentialId;
-            fetch('/admin/credential/allowed-status/' + credentialId + '/' + groupId + '/' + (credentialByStatus.checked ? 1 : 0), { method: 'post' })
+            fetch('/admin/credential/allow-status/' + credentialId + '/' + groupId + '/' + (credentialByStatus.checked ? 1 : 0), { method: 'post' })
                 .then((response) => {
                     if (response.status === 200) {
                         let statusList = document.querySelector('.lle-credential-group-' + groupId + '-credential-' + credentialId + '-show-status');
@@ -182,7 +182,7 @@ function checkCredentialByStatus() {
             let groupId = credentialStatusCheckbox.dataset.groupId;
             let credentialId = credentialStatusCheckbox.dataset.credentialId;
             let credentialStatus = credentialStatusCheckbox.dataset.credentialStatus;
-            fetch('/admin/credential/allowed-by-status/' + credentialId + '/' + groupId + '/' + credentialStatus + '/' + (credentialStatusCheckbox.checked ? 1 : 0), { method: 'post' })
+            fetch('/admin/credential/allow-for-status/' + credentialId + '/' + groupId + '/' + credentialStatus + '/' + (credentialStatusCheckbox.checked ? 1 : 0), { method: 'post' })
                 .then((response) => {
                     if (response.status === 200) {
                         showToast("Success", "#1CC88A");
