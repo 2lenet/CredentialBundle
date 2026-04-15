@@ -23,16 +23,17 @@ class GroupRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('g')
             ->orderBy('g.rank', 'ASC')
-            ->where('g.active = 1')
             ->getQuery()
             ->getResult();
     }
 
-    public function findByProjectExceptSuperAdmin(): array
+    public function findActiveExceptSuperAdmin(): array
     {
         return $this->createQueryBuilder('g')
             ->andWhere('g.name != :superadmin')
+            ->andWhere('g.active = :active')
             ->setParameter('superadmin', 'SUPER_ADMIN')
+            ->setParameter('active', true)
             ->orderBy('g.rank', 'ASC')
             ->getQuery()
             ->getResult();

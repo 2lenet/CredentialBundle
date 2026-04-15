@@ -24,7 +24,7 @@ class CredentialManagerController extends AbstractController
     #[Route('/', name: 'admin_credential')]
     public function indexAction(): Response
     {
-        $groups = $this->em->getRepository(Group::class)->findByProjectExceptSuperAdmin();
+        $groups = $this->em->getRepository(Group::class)->findActiveExceptSuperAdmin();
         $groupCredentials = $this->em->getRepository(GroupCredential::class)->findAll();
 
         $actives = [];
