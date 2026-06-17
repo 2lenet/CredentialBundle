@@ -5,6 +5,10 @@ namespace Lle\CredentialBundle\Service;
 use Lle\CredentialBundle\Entity\Credential;
 use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
+use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectTokenNotDefinedException;
+use Lle\CredentialBundle\Exception\RemoteApiException;
 use Lle\CredentialBundle\Factory\CredentialFactory;
 use Lle\CredentialBundle\Factory\GroupCredentialFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,6 +23,12 @@ class CredentialService
     ) {
     }
 
+    /**
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     */
     public function toggleGroup(Group $group, bool $check): void
     {
         $credentials = $this->em->getRepository(Credential::class)->findAll();
@@ -30,6 +40,12 @@ class CredentialService
         $this->client->toggleGroup($group, $check);
     }
 
+    /**
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     */
     public function toggleSection(string $section, Group $group, bool $check): void
     {
         $credentials = $this->em->getRepository(Credential::class)->findBy([
@@ -46,6 +62,12 @@ class CredentialService
         $this->client->toggleSection($section, $group, $check);
     }
 
+    /**
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     */
     public function toggleCredential(Credential $credential, Group $group, bool $check): void
     {
         $groupCredentials = $this->em->getRepository(GroupCredential::class)->findBy([
@@ -59,6 +81,12 @@ class CredentialService
         $this->client->toggleCredential($credential, $group, $check);
     }
 
+    /**
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     */
     public function allowStatus(Credential $credential, Group $group, bool $check): void
     {
         $groupCredentials = $this->em->getRepository(GroupCredential::class)->findBy([
@@ -72,6 +100,12 @@ class CredentialService
         $this->client->allowStatus($credential, $group, $check);
     }
 
+    /**
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     */
     public function allowForStatus(Credential $credential, Group $group, string $status, bool $check): void
     {
         $credentialForStatus = $this->em->getRepository(Credential::class)->findOneBy([

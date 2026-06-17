@@ -2,6 +2,6 @@
 
 namespace Lle\CredentialBundle\Exception;
 
-class ProjectNotFoundException extends \Exception
+class RemoteApiException extends \Exception
 {
 }

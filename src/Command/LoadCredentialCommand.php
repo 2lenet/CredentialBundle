@@ -4,6 +4,8 @@ namespace Lle\CredentialBundle\Command;
 
 use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
 use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectTokenNotDefinedException;
+use Lle\CredentialBundle\Exception\RemoteApiException;
 use Lle\CredentialBundle\Service\LoadCredentialService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -26,8 +28,13 @@ class LoadCredentialCommand extends Command
     {
         try {
             $this->loadCredentialService->load();
-        } catch (ConfigurationProjectCodeNotDefinedException | ConfigurationClientUrlNotDefinedException) {
-            $output->writeln('<error>You must defined client configuration</error>');
+            $output->writeln('<info>Credentials loaded successfully.</info>');
+        } catch (ConfigurationProjectCodeNotDefinedException | ConfigurationClientUrlNotDefinedException | ConfigurationProjectTokenNotDefinedException) {
+            $output->writeln('<error>You must define client configuration.</error>');
+            return Command::FAILURE;
+        } catch (RemoteApiException $e) {
+            $output->writeln('<error>Remote error: ' . $e->getMessage() . '</error>');
+            return Command::FAILURE;
         }
 
         return Command::SUCCESS;

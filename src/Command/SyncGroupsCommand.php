@@ -5,22 +5,21 @@ namespace Lle\CredentialBundle\Command;
 use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
 use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
 use Lle\CredentialBundle\Exception\ConfigurationProjectTokenNotDefinedException;
-use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
 use Lle\CredentialBundle\Exception\RemoteApiException;
-use Lle\CredentialBundle\Service\InitCredentialService;
+use Lle\CredentialBundle\Service\SyncGroupService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'lle:credential:init-project',
-    description: 'Initialize a project',
+    name: 'lle:credential:sync-groups',
+    description: 'Sync local groups to the remote repository',
 )]
-class InitProjectCommand extends Command
+class SyncGroupsCommand extends Command
 {
     public function __construct(
-        protected InitCredentialService $initCredentialService,
+        protected SyncGroupService $syncGroupService,
     ) {
         parent::__construct();
     }
@@ -28,15 +27,13 @@ class InitProjectCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
-            $this->initCredentialService->init();
-            $output->writeln('<info>Project initialized successfully.</info>');
+            $this->syncGroupService->sync();
+            $output->writeln('<info>Groups synced successfully.</info>');
         } catch (ConfigurationProjectCodeNotDefinedException | ConfigurationClientUrlNotDefinedException | ConfigurationProjectTokenNotDefinedException) {
             $output->writeln('<error>You must define client configuration.</error>');
             return Command::FAILURE;
         } catch (RemoteApiException $e) {
             $output->writeln('<comment>Remote sync failed: ' . $e->getMessage() . '</comment>');
-        } catch (ProjectAlreadyInitializedException $e) {
-            $output->writeln('<comment>Project already initialized on remote: ' . $e->getMessage() . '</comment>');
         }
 
         return Command::SUCCESS;

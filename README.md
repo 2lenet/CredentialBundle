@@ -45,6 +45,12 @@ Check that the changes are correct and execute them:
 php bin/console doctrine:migrations:migrate
 ```
 
+## Translations
+
+The bundle ships with translations for the following locales: `fr`, `en`, `de`.
+
+To use a different locale, override the keys in your own translation file under the `CredentialBundle` domain.
+
 ## Recipes
 
 - [List of available commands](docs/commands.md)
