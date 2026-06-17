@@ -2,6 +2,6 @@
 
 namespace Lle\CredentialBundle\Exception;
 
-class RemoteApiException extends CredentialException
+class CredentialException extends \Exception
 {
 }

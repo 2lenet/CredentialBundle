@@ -2,6 +2,6 @@
 
 namespace Lle\CredentialBundle\Exception;
 
-class ProjectAlreadyInitializedException extends \Exception
+class ProjectAlreadyInitializedException extends CredentialException
 {
 }
