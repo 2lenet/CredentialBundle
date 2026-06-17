@@ -11,6 +11,8 @@ use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
 use Lle\CredentialBundle\Exception\RemoteApiException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -23,6 +25,7 @@ class ClientService
     public function __construct(
         protected ParameterBagInterface $parameterBag,
         protected HttpClientInterface $client,
+        protected NormalizerInterface $normalizer,
     )
     {
         /** @var ?string $clientUrl */
@@ -116,8 +119,12 @@ class ClientService
             ]
         );
 
-        if ($response->getStatusCode() === Response::HTTP_BAD_REQUEST) {
-            throw new ProjectAlreadyInitializedException($response->getContent(false));
+        try {
+            if ($response->getStatusCode() === Response::HTTP_BAD_REQUEST) {
+                throw new ProjectAlreadyInitializedException($response->getContent(false));
+            }
+        } catch (TransportExceptionInterface $e) {
+            throw new RemoteApiException($e->getMessage());
         }
 
         $this->throwIfRemoteError($response);
@@ -307,7 +314,9 @@ class ClientService
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
                 ],
-                'body' => json_encode($this->groupToArray($group)),
+                'body' => json_encode($this->normalizer->normalize($group, 'array', [
+                    'groups' => Group::GROUP_API_GROUP,
+                ])),
             ]
         );
 
@@ -334,7 +343,9 @@ class ClientService
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
                 ],
-                'body' => json_encode($this->groupToArray($group)),
+                'body' => json_encode($this->normalizer->normalize($group, 'array', [
+                    'groups' => Group::GROUP_API_GROUP,
+                ])),
             ]
         );
 
@@ -396,23 +407,15 @@ class ClientService
      */
     private function throwIfRemoteError(ResponseInterface $response): void
     {
-        $statusCode = $response->getStatusCode();
-        if ($statusCode >= 400) {
-            $body = json_decode($response->getContent(false), true);
-            throw new RemoteApiException($body['message'] ?? 'Remote API error.');
+        try {
+            $statusCode = $response->getStatusCode();
+            if ($statusCode >= 400) {
+                $body = json_decode($response->getContent(false), true) ?? [];
+                throw new RemoteApiException($body['message'] ?? 'Remote API error.');
+            }
+        } catch (TransportExceptionInterface $e) {
+            throw new RemoteApiException($e->getMessage());
         }
-    }
-
-    private function groupToArray(Group $group): array
-    {
-        return [
-            'name' => $group->getName(),
-            'label' => $group->getLabel(),
-            'isRole' => $group->isRole(),
-            'active' => $group->isActive(),
-            'requiredRole' => $group->getRequiredRole(),
-            'rank' => $group->getRank(),
-        ];
     }
 
     /**
