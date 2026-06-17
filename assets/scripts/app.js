@@ -57,6 +57,30 @@ function checkGroups() {
     }
 }
 
+const msg = window.lleCredentialMessages || {};
+const GENERIC_ERROR = msg.genericError || 'An error occurred. Please contact an administrator.';
+
+/**
+ * Fetch a URL and resolve with { ok, remoteError, error }.
+ * - ok: true if HTTP 2xx
+ * - remoteError: string if local succeeded but remote failed
+ * - error: generic message if local failed (HTTP error or network error)
+ * Never rejects.
+ */
+async function apiCall(url) {
+    try {
+        const response = await fetch(url, { method: 'post' });
+        const data = await response.json().catch(() => null);
+        return {
+            ok: response.ok,
+            remoteError: data && data.remoteError ? data.remoteError : null,
+            error: response.ok ? null : (data && data.error ? data.error : GENERIC_ERROR),
+        };
+    } catch {
+        return { ok: false, remoteError: null, error: GENERIC_ERROR };
+    }
+}
+
 function checkAllCredentialsOfGroup() {
     const groupCheckboxes = document.querySelectorAll('.lle-credential-checkbox-group');
     groupCheckboxes.forEach((groupCheckbox) => {
@@ -68,24 +92,24 @@ function checkAllCredentialsOfGroup() {
             }
 
             let groupId = groupCheckbox.dataset.groupId;
-            fetch('/admin/credential/toggle-group/' + groupId + '/' + (groupCheckbox.checked ? 1 : 0), { method: 'post' })
-                .then((response) => {
-                    if (response.status === 200) {
-                        let checkboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-credential');
-                        checkboxes.forEach((checkbox) => {
-                            checkbox.checked = groupCheckbox.checked;
-                        });
-
-                        let sectionCheckboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-section');
-                        sectionCheckboxes.forEach((sectionCheckbox) => {
-                            sectionCheckbox.checked = groupCheckbox.checked;
-                        });
-
-                        showToast("Success", "#1CC88A");
-                    } else {
+            apiCall('/admin/credential/toggle-group/' + groupId + '/' + (groupCheckbox.checked ? 1 : 0))
+                .then(({ ok, remoteError, error }) => {
+                    if (!ok) {
                         groupCheckbox.checked = !groupCheckbox.checked;
+                        showToast(error, "danger");
+                        return;
+                    }
 
-                        showToast("Error", "#E74A3B");
+                    let checkboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-credential');
+                    checkboxes.forEach((checkbox) => { checkbox.checked = groupCheckbox.checked; });
+
+                    let sectionCheckboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-section');
+                    sectionCheckboxes.forEach((sectionCheckbox) => { sectionCheckbox.checked = groupCheckbox.checked; });
+
+                    if (remoteError) {
+                        showToast(remoteError, "warning");
+                    } else {
+                        showToast(msg.toggleGroup?.success || 'Success', "success");
                     }
                 });
         });
@@ -104,19 +128,21 @@ function checkAllCredentialsOfSection() {
 
             let groupId = sectionCheckbox.dataset.groupId;
             let sectionName = sectionCheckbox.dataset.sectionName;
-            fetch('/admin/credential/toggle-section/' + sectionName + '/' + groupId + '/' + (sectionCheckbox.checked ? 1 : 0), { method: 'post' })
-                .then((response) => {
-                    if (response.status === 200) {
-                        let checkboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-section-' + sectionName + '-credential');
-                        checkboxes.forEach((checkbox) => {
-                            checkbox.checked = sectionCheckbox.checked;
-                        });
-
-                        showToast("Success", "#1CC88A");
-                    } else {
+            apiCall('/admin/credential/toggle-section/' + sectionName + '/' + groupId + '/' + (sectionCheckbox.checked ? 1 : 0))
+                .then(({ ok, remoteError, error }) => {
+                    if (!ok) {
                         sectionCheckbox.checked = !sectionCheckbox.checked;
+                        showToast(error, "danger");
+                        return;
+                    }
 
-                        showToast("Error", "#E74A3B");
+                    let checkboxes = document.querySelectorAll('.lle-credential-checkbox-group-' + groupId + '-section-' + sectionName + '-credential');
+                    checkboxes.forEach((checkbox) => { checkbox.checked = sectionCheckbox.checked; });
+
+                    if (remoteError) {
+                        showToast(remoteError, "warning");
+                    } else {
+                        showToast(msg.toggleSection?.success || 'Success', "success");
                     }
                 });
 
@@ -131,14 +157,18 @@ function checkCredential() {
         credentialCheckbox.addEventListener('click', () => {
             let groupId = credentialCheckbox.dataset.groupId;
             let credentialId = credentialCheckbox.dataset.credentialId;
-            fetch('/admin/credential/toggle-credential/' + credentialId + '/' + groupId + '/' + (credentialCheckbox.checked ? 1 : 0), { method: 'post' })
-                .then((response) => {
-                    if (response.status === 200) {
-                        showToast("Success", "#1CC88A");
-                    } else {
+            apiCall('/admin/credential/toggle-credential/' + credentialId + '/' + groupId + '/' + (credentialCheckbox.checked ? 1 : 0))
+                .then(({ ok, remoteError, error }) => {
+                    if (!ok) {
                         credentialCheckbox.checked = !credentialCheckbox.checked;
+                        showToast(error, "danger");
+                        return;
+                    }
 
-                        showToast("Error", "#E74A3B");
+                    if (remoteError) {
+                        showToast(remoteError, "warning");
+                    } else {
+                        showToast(msg.toggleCredential?.success || 'Success', "success");
                     }
                 });
 
@@ -154,21 +184,21 @@ function enableCredentialByStatus() {
         credentialByStatus.addEventListener('click', () => {
             let groupId = credentialByStatus.dataset.groupId;
             let credentialId = credentialByStatus.dataset.credentialId;
-            fetch('/admin/credential/allow-status/' + credentialId + '/' + groupId + '/' + (credentialByStatus.checked ? 1 : 0), { method: 'post' })
-                .then((response) => {
-                    if (response.status === 200) {
-                        let statusList = document.querySelector('.lle-credential-group-' + groupId + '-credential-' + credentialId + '-show-status');
-                        if (statusList.classList.contains('d-none')) {
-                            statusList.classList.remove('d-none');
-                        } else {
-                            statusList.classList.add('d-none');
-                        }
-
-                        showToast("Success", "#1CC88A");
-                    } else {
+            apiCall('/admin/credential/allow-status/' + credentialId + '/' + groupId + '/' + (credentialByStatus.checked ? 1 : 0))
+                .then(({ ok, remoteError, error }) => {
+                    if (!ok) {
                         credentialByStatus.checked = !credentialByStatus.checked;
+                        showToast(error, "danger");
+                        return;
+                    }
 
-                        showToast("Error", "#E74A3B");
+                    let statusList = document.querySelector('.lle-credential-group-' + groupId + '-credential-' + credentialId + '-show-status');
+                    statusList.classList.toggle('d-none');
+
+                    if (remoteError) {
+                        showToast(remoteError, "warning");
+                    } else {
+                        showToast(msg.allowStatus?.success || 'Success', "success");
                     }
                 });
         });
@@ -182,26 +212,35 @@ function checkCredentialByStatus() {
             let groupId = credentialStatusCheckbox.dataset.groupId;
             let credentialId = credentialStatusCheckbox.dataset.credentialId;
             let credentialStatus = credentialStatusCheckbox.dataset.credentialStatus;
-            fetch('/admin/credential/allow-for-status/' + credentialId + '/' + groupId + '/' + credentialStatus + '/' + (credentialStatusCheckbox.checked ? 1 : 0), { method: 'post' })
-                .then((response) => {
-                    if (response.status === 200) {
-                        showToast("Success", "#1CC88A");
-                    } else {
+            apiCall('/admin/credential/allow-for-status/' + credentialId + '/' + groupId + '/' + credentialStatus + '/' + (credentialStatusCheckbox.checked ? 1 : 0))
+                .then(({ ok, remoteError, error }) => {
+                    if (!ok) {
                         credentialStatusCheckbox.checked = !credentialStatusCheckbox.checked;
+                        showToast(error, "danger");
+                        return;
+                    }
 
-                        showToast("Error", "#E74A3B");
+                    if (remoteError) {
+                        showToast(remoteError, "warning");
+                    } else {
+                        showToast(msg.allowForStatus?.success || 'Success', "success");
                     }
                 });
         });
     });
 }
 
-function showToast(text, color) {
+function showToast(text, type) {
+    const colors = {
+        success: '#1CC88A',
+        warning: '#F6C23E',
+        danger: '#E74A3B',
+    };
     Toastify({
         text: text,
-        duration: 1500,
+        duration: type === 'success' ? 1500 : 3000,
         style: {
-            background: color,
+            background: colors[type],
             padding: '15px 20px',
             fontSize: '17px',
         },

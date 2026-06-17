@@ -8,10 +8,11 @@ use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Entity\GroupCredential;
 use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
 use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectTokenNotDefinedException;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Lle\CredentialBundle\Exception\ProjectNotFoundException;
+use Lle\CredentialBundle\Exception\RemoteApiException;
 use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -31,9 +32,10 @@ class InitCredentialService
 
     /**
      * @throws ProjectAlreadyInitializedException
-     * @throws ProjectNotFoundException
+     * @throws RemoteApiException
      * @throws ConfigurationProjectCodeNotDefinedException
      * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
      */
     public function init(): void
     {

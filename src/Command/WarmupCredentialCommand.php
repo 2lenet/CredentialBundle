@@ -2,6 +2,10 @@
 
 namespace Lle\CredentialBundle\Command;
 
+use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectTokenNotDefinedException;
+use Lle\CredentialBundle\Exception\RemoteApiException;
 use Lle\CredentialBundle\Service\WarmupCredentialService;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -22,7 +26,15 @@ class WarmupCredentialCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->warmupCredentialService->warmup();
+        try {
+            $this->warmupCredentialService->warmup();
+            $output->writeln('<info>Credentials warmed up successfully.</info>');
+        } catch (ConfigurationProjectCodeNotDefinedException | ConfigurationClientUrlNotDefinedException | ConfigurationProjectTokenNotDefinedException) {
+            $output->writeln('<error>You must define client configuration.</error>');
+            return Command::FAILURE;
+        } catch (RemoteApiException $e) {
+            $output->writeln('<comment>Remote sync failed: ' . $e->getMessage() . '</comment>');
+        }
 
         return Command::SUCCESS;
     }

@@ -2,6 +2,6 @@
 
 namespace Lle\CredentialBundle\Exception;
 
-class ConfigurationProjectCodeNotDefinedException extends \Exception
+class ConfigurationProjectCodeNotDefinedException extends CredentialException
 {
 }

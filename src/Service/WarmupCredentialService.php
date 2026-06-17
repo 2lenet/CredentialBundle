@@ -4,10 +4,13 @@ namespace Lle\CredentialBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Lle\CredentialBundle\Entity\Credential;
+use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
+use Lle\CredentialBundle\Exception\ConfigurationProjectTokenNotDefinedException;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Lle\CredentialBundle\Exception\ProjectNotFoundException;
+use Lle\CredentialBundle\Exception\RemoteApiException;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -27,7 +30,10 @@ class WarmupCredentialService
     }
 
     /**
-     * @throws ProjectNotFoundException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
      */
     public function warmup(): void
     {

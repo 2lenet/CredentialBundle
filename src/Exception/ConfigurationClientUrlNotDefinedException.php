@@ -2,6 +2,6 @@
 
 namespace Lle\CredentialBundle\Exception;
 
-class ConfigurationClientUrlNotDefinedException extends \Exception
+class ConfigurationClientUrlNotDefinedException extends CredentialException
 {
 }

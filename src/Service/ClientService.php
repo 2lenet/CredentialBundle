@@ -7,11 +7,14 @@ use Lle\CredentialBundle\Entity\Group;
 use Lle\CredentialBundle\Exception\ConfigurationClientUrlNotDefinedException;
 use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
 use Lle\CredentialBundle\Exception\ConfigurationProjectTokenNotDefinedException;
-use Lle\CredentialBundle\Exception\ProjectNotFoundException;
 use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
+use Lle\CredentialBundle\Exception\RemoteApiException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class ClientService
 {
@@ -22,6 +25,7 @@ class ClientService
     public function __construct(
         protected ParameterBagInterface $parameterBag,
         protected HttpClientInterface $client,
+        protected NormalizerInterface $normalizer,
     )
     {
         /** @var ?string $clientUrl */
@@ -40,7 +44,8 @@ class ClientService
     /**
      * @throws ConfigurationProjectCodeNotDefinedException
      * @throws ConfigurationClientUrlNotDefinedException
-     * @throws ProjectNotFoundException
+     * @throws RemoteApiException
+     * @throws ConfigurationProjectTokenNotDefinedException
      */
     public function load(): array
     {
@@ -56,19 +61,20 @@ class ClientService
             ]
         );
 
-        if ($response->getStatusCode() === Response::HTTP_NOT_FOUND) {
-            throw new ProjectNotFoundException($response->getContent());
-        }
+        $this->throwIfRemoteError($response);
 
-        return json_decode($response->getContent(), true);
+        return json_decode($response->getContent(false), true);
     }
 
     /**
-     * @throws ProjectNotFoundException
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
      */
     public function warmup(array $credentials): void
     {
-        if (!$this->hasClientConfig()) {
+        if (!$this->shouldCallRemote()) {
             return;
         }
 
@@ -84,16 +90,15 @@ class ClientService
             ]
         );
 
-        if ($response->getStatusCode() === Response::HTTP_NOT_FOUND) {
-            throw new ProjectNotFoundException($response->getContent());
-        }
+        $this->throwIfRemoteError($response);
     }
 
     /**
      * @throws ConfigurationProjectCodeNotDefinedException
      * @throws ConfigurationClientUrlNotDefinedException
      * @throws ProjectAlreadyInitializedException
-     * @throws ProjectNotFoundException
+     * @throws RemoteApiException
+     * @throws ConfigurationProjectTokenNotDefinedException
      */
     public function init(array $data): void
     {
@@ -114,22 +119,30 @@ class ClientService
             ]
         );
 
-        if ($response->getStatusCode() === Response::HTTP_NOT_FOUND) {
-            throw new ProjectNotFoundException($response->getContent());
+        try {
+            if ($response->getStatusCode() === Response::HTTP_BAD_REQUEST) {
+                throw new ProjectAlreadyInitializedException($response->getContent(false));
+            }
+        } catch (TransportExceptionInterface $e) {
+            throw new RemoteApiException($e->getMessage());
         }
 
-        if ($response->getStatusCode() === Response::HTTP_BAD_REQUEST) {
-            throw new ProjectAlreadyInitializedException($response->getContent());
-        }
+        $this->throwIfRemoteError($response);
     }
 
+    /**
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     */
     public function toggleGroup(Group $group, bool $check): void
     {
-        if (!$this->hasClientConfig()) {
+        if (!$this->shouldCallRemote()) {
             return;
         }
 
-        $this->client->request(
+        $response = $this->client->request(
             'POST',
             $this->clientUrl . '/api/project/toggle-group/' . $this->projectCode . '/' . $group->getName() . '/' . ($check ? 1 : 0),
             [
@@ -139,15 +152,23 @@ class ClientService
                 ],
             ]
         );
+
+        $this->throwIfRemoteError($response);
     }
 
+    /**
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     */
     public function toggleSection(string $section, Group $group, bool $check): void
     {
-        if (!$this->hasClientConfig()) {
+        if (!$this->shouldCallRemote()) {
             return;
         }
 
-        $this->client->request(
+        $response = $this->client->request(
             'POST',
             $this->clientUrl
             . '/api/project/toggle-section/'
@@ -165,15 +186,23 @@ class ClientService
                 ],
             ]
         );
+
+        $this->throwIfRemoteError($response);
     }
 
+    /**
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     */
     public function toggleCredential(Credential $credential, Group $group, bool $check): void
     {
-        if (!$this->hasClientConfig()) {
+        if (!$this->shouldCallRemote()) {
             return;
         }
 
-        $this->client->request(
+        $response = $this->client->request(
             'POST',
             $this->clientUrl
             . '/api/project/toggle-credential/'
@@ -191,15 +220,23 @@ class ClientService
                 ],
             ]
         );
+
+        $this->throwIfRemoteError($response);
     }
 
+    /**
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     */
     public function allowStatus(Credential $credential, Group $group, bool $check): void
     {
-        if (!$this->hasClientConfig()) {
+        if (!$this->shouldCallRemote()) {
             return;
         }
 
-        $this->client->request(
+        $response = $this->client->request(
             'POST',
             $this->clientUrl
             . '/api/project/allow-status/'
@@ -217,15 +254,23 @@ class ClientService
                 ],
             ]
         );
+
+        $this->throwIfRemoteError($response);
     }
 
+    /**
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     */
     public function allowForStatus(Credential $credential, Group $group, string $status, bool $check): void
     {
-        if (!$this->hasClientConfig()) {
+        if (!$this->shouldCallRemote()) {
             return;
         }
 
-        $this->client->request(
+        $response = $this->client->request(
             'POST',
             $this->clientUrl
             . '/api/project/allow-for-status/'
@@ -245,6 +290,132 @@ class ClientService
                 ],
             ]
         );
+
+        $this->throwIfRemoteError($response);
+    }
+
+    /**
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     */
+    public function createGroup(Group $group): void
+    {
+        if (!$this->shouldCallRemote()) {
+            return;
+        }
+
+        $response = $this->client->request(
+            'POST',
+            $this->clientUrl . '/api/project/group/create/' . $this->projectCode,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => $this->projectToken,
+                ],
+                'body' => json_encode($this->normalizer->normalize($group, 'array', [
+                    'groups' => Group::GROUP_API_GROUP,
+                ])),
+            ]
+        );
+
+        $this->throwIfRemoteError($response);
+    }
+
+    /**
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     */
+    public function editGroup(string $oldName, Group $group): void
+    {
+        if (!$this->shouldCallRemote()) {
+            return;
+        }
+
+        $response = $this->client->request(
+            'POST',
+            $this->clientUrl . '/api/project/group/edit/' . $this->projectCode . '/' . $oldName,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => $this->projectToken,
+                ],
+                'body' => json_encode($this->normalizer->normalize($group, 'array', [
+                    'groups' => Group::GROUP_API_GROUP,
+                ])),
+            ]
+        );
+
+        $this->throwIfRemoteError($response);
+    }
+
+    /**
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     */
+    public function deleteGroup(Group $group): void
+    {
+        if (!$this->shouldCallRemote()) {
+            return;
+        }
+
+        $response = $this->client->request(
+            'DELETE',
+            $this->clientUrl . '/api/project/group/delete/' . $this->projectCode . '/' . $group->getName(),
+            [
+                'headers' => [
+                    'Authorization' => $this->projectToken,
+                ],
+            ]
+        );
+
+        $this->throwIfRemoteError($response);
+    }
+
+    /**
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     * @throws RemoteApiException
+     */
+    public function syncGroups(array $groups): void
+    {
+        $this->checkClientConfig();
+
+        $response = $this->client->request(
+            'POST',
+            $this->clientUrl . '/api/project/group/sync/' . $this->projectCode,
+            [
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => $this->projectToken,
+                ],
+                'body' => json_encode($groups),
+            ]
+        );
+
+        $this->throwIfRemoteError($response);
+    }
+
+    /**
+     * @throws RemoteApiException
+     */
+    private function throwIfRemoteError(ResponseInterface $response): void
+    {
+        try {
+            $statusCode = $response->getStatusCode();
+            if ($statusCode >= 400) {
+                $body = json_decode($response->getContent(false), true) ?? [];
+                throw new RemoteApiException($body['message'] ?? 'Remote API error.');
+            }
+        } catch (TransportExceptionInterface $e) {
+            throw new RemoteApiException($e->getMessage());
+        }
     }
 
     /**
@@ -272,6 +443,26 @@ class ClientService
         if (!$this->clientUrl || !$this->projectCode || !$this->projectToken) {
             return false;
         }
+
+        return true;
+    }
+
+    /**
+     * Returns false if no remote config is set at all (remote is optional).
+     * Throws if config is partially set (misconfiguration).
+     * Returns true if all config is present and valid.
+     *
+     * @throws ConfigurationClientUrlNotDefinedException
+     * @throws ConfigurationProjectCodeNotDefinedException
+     * @throws ConfigurationProjectTokenNotDefinedException
+     */
+    private function shouldCallRemote(): bool
+    {
+        if (!$this->clientUrl && !$this->projectCode && !$this->projectToken) {
+            return false;
+        }
+
+        $this->checkClientConfig();
 
         return true;
     }

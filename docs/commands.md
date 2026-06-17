@@ -29,3 +29,15 @@ It enables you to update your credentials by group using the data stored on your
 ```bash
 bin/console lle:credential:load
 ```
+
+## Sync groups
+
+This command requires the use of a remote repository ([Remote repository integration](remote_repository.md)).
+
+It sends all local groups to the remote repository in a single bulk operation, replacing any groups previously stored there.
+
+Useful for an initial sync or to force a full resync after local changes made outside the application (e.g. fixtures, migrations).
+
+```bash
+bin/console lle:credential:sync-groups
+```

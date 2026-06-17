@@ -23,3 +23,6 @@ services:
 
     Lle\CredentialBundle\Factory\:
         resource: '../../Factory'
+
+    Lle\CredentialBundle\EventListener\:
+        resource: '../../EventListener'
