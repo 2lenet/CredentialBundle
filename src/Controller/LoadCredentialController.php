@@ -21,7 +21,7 @@ class LoadCredentialController extends AbstractController
     ) {
     }
 
-    #[IsGranted('ROLE_ADMIN_DROITS')]
+    #[IsGranted('ROLE_CREDENTIAL_ACTION_UPDATE')]
     #[Route('/load', name: 'admin_credential_load')]
     public function loadCredentials(): Response
     {
