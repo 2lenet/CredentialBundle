@@ -9,7 +9,9 @@ use Lle\CredentialBundle\Exception\ConfigurationProjectCodeNotDefinedException;
 use Lle\CredentialBundle\Exception\ConfigurationProjectTokenNotDefinedException;
 use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
 use Lle\CredentialBundle\Exception\RemoteApiException;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -26,6 +28,8 @@ class ClientService
         protected ParameterBagInterface $parameterBag,
         protected HttpClientInterface $client,
         protected NormalizerInterface $normalizer,
+        protected Security $security,
+        protected RequestStack $requestStack,
     )
     {
         /** @var ?string $clientUrl */
@@ -39,6 +43,30 @@ class ClientService
         /** @var ?string $projectToken */
         $projectToken = $this->parameterBag->get('lle_credential.project_token');
         $this->projectToken = $projectToken ? 'Bearer ' . $projectToken : $projectToken;
+    }
+
+    /**
+     * Best-effort identification of the end user behind a call, forwarded to crudit-studio for its
+     * audit trail. Both are naturally absent in CLI contexts (e.g. lle:credential:load), since a
+     * scheduled sync isn't attributable to a person. Older crudit-studio versions simply ignore these.
+     *
+     * @return array<string, string>
+     */
+    private function getActorHeaders(): array
+    {
+        $headers = [];
+
+        $user = $this->security->getUser();
+        if ($user) {
+            $headers['X-Credential-Actor'] = $user->getUserIdentifier();
+        }
+
+        $ip = $this->requestStack->getCurrentRequest()?->getClientIp();
+        if ($ip) {
+            $headers['X-Credential-Actor-Ip'] = $ip;
+        }
+
+        return $headers;
     }
 
     /**
@@ -57,6 +85,7 @@ class ClientService
             [
                 'headers' => [
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ]
             ]
         );
@@ -85,6 +114,7 @@ class ClientService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
                 'body' => json_encode($credentials)
             ]
@@ -111,6 +141,7 @@ class ClientService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
                 'body' => json_encode(
                     $data,
@@ -149,6 +180,7 @@ class ClientService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
             ]
         );
@@ -183,6 +215,7 @@ class ClientService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
             ]
         );
@@ -217,6 +250,7 @@ class ClientService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
             ]
         );
@@ -251,6 +285,7 @@ class ClientService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
             ]
         );
@@ -287,6 +322,7 @@ class ClientService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
             ]
         );
@@ -313,6 +349,7 @@ class ClientService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
                 'body' => json_encode($this->normalizer->normalize($group, 'array', [
                     'groups' => Group::GROUP_API_GROUP,
@@ -342,6 +379,7 @@ class ClientService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
                 'body' => json_encode($this->normalizer->normalize($group, 'array', [
                     'groups' => Group::GROUP_API_GROUP,
@@ -370,6 +408,7 @@ class ClientService
             [
                 'headers' => [
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
             ]
         );
@@ -394,6 +433,7 @@ class ClientService
                 'headers' => [
                     'Content-Type' => 'application/json',
                     'Authorization' => $this->projectToken,
+                    ...$this->getActorHeaders(),
                 ],
                 'body' => json_encode($groups),
             ]
