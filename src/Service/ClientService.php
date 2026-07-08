@@ -52,7 +52,7 @@ class ClientService
      *
      * @return array<string, string>
      */
-    private function getActorHeaders(): array
+    public function getActorHeaders(): array
     {
         $headers = [];
 
