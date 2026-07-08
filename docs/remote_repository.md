@@ -52,6 +52,22 @@ This synchronisation never interrupts a Doctrine flush — errors are caught and
 
 The listener is automatically disabled during `lle:credential:load` to avoid a sync loop when loading data from the remote.
 
+## Actor attribution headers
+
+Every remote call sent by `ClientService` attaches two best-effort headers so the remote repository can
+record who actually triggered the action (for audit purposes), on top of the project-level Bearer token:
+
+- `X-Credential-Actor`: the identifier (`Security::getUser()->getUserIdentifier()`) of the currently
+  authenticated user in the **calling app**, when there is one.
+- `X-Credential-Actor-Ip`: that user's real client IP (`RequestStack::getCurrentRequest()->getClientIp()`),
+  which is only accurate if the calling app itself has `framework.trusted_proxies` correctly configured
+  for its own front-proxy.
+
+Both are omitted (not sent at all) when there is no HTTP request/authenticated user in scope — e.g. CLI
+commands like `lle:credential:load` or `lle:credential:warmup` run outside of any user's action, so nothing
+is attributed to a person. This is purely additive: a remote repository that doesn't know about these
+headers just ignores them, so this requires no coordinated upgrade between this bundle and the repository.
+
 ## Error handling
 
 Remote errors throw a `RemoteApiException`. The bundle handles them as follows depending on the context:
