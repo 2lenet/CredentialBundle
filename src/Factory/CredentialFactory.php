@@ -46,7 +46,7 @@ class CredentialFactory
         $credential
             ->setSection($section ?? $this->generateSection((string)$credential->getRole()))
             ->setLabel($label ?? (string)$credential->getRole())
-            ->setStatusList($statusList ?? [])
+            ->setStatusList($statusList ?? $credential->getStatusList() ?? [])
             ->setVisible($visible)
             ->setType($type);
 

@@ -10,6 +10,7 @@ use Lle\CredentialBundle\Exception\ConfigurationProjectTokenNotDefinedException;
 use Lle\CredentialBundle\Exception\ProjectAlreadyInitializedException;
 use Lle\CredentialBundle\Exception\RemoteApiException;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,6 +21,8 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class ClientService
 {
+    private const string TEST_ENVIRONMENT = 'test';
+
     private ?string $clientUrl;
     private ?string $projectCode;
     private ?string $projectToken;
@@ -30,6 +33,7 @@ class ClientService
         protected NormalizerInterface $normalizer,
         protected Security $security,
         protected RequestStack $requestStack,
+        #[Autowire(param: 'kernel.environment')] protected string $environment = 'prod',
     )
     {
         /** @var ?string $clientUrl */
@@ -426,6 +430,12 @@ class ClientService
     {
         $this->checkClientConfig();
 
+        if ($this->environment === self::TEST_ENVIRONMENT) {
+            throw new RemoteApiException(
+                'Refusing to sync groups to the remote repository from the test environment.'
+            );
+        }
+
         $response = $this->client->request(
             'POST',
             $this->clientUrl . '/api/project/group/sync/' . $this->projectCode,
@@ -498,6 +508,10 @@ class ClientService
      */
     private function shouldCallRemote(): bool
     {
+        if ($this->environment === self::TEST_ENVIRONMENT) {
+            return false;
+        }
+
         if (!$this->clientUrl && !$this->projectCode && !$this->projectToken) {
             return false;
         }

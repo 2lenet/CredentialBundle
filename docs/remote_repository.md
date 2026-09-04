@@ -35,6 +35,29 @@ Commands that **require** a remote (they always fail without it): `lle:credentia
 
 Commands that use the remote **when available** (they succeed in local-only mode): `lle:credential:warmup`.
 
+## Guard against the test environment
+
+Every implicit remote call - the automatic group synchronisation below, and the push at the end of
+`lle:credential:warmup` - is silently skipped when `kernel.environment` is `test`, regardless of what
+`lle_credential.*` resolves to in that environment. These calls are side effects of a purely local
+operation (persisting a `Group`, running a warmup); a project's own test suite (fixtures, `hautelook:fixtures:load`)
+should never be able to reach a real repository just because `lle_credential.yaml` has no
+`when@test:` override - which is exactly the misconfiguration that once filled a real project's group list
+with dozens of duplicates on every test run.
+
+`lle:credential:load`, `lle:credential:init` and `lle:credential:sync-groups` are different: talking to the
+remote is the entire point of running them, and they are always invoked deliberately (never as a side effect
+of a Doctrine event or a warmup), so silently doing nothing in the test environment would defeat their
+documented "requires a remote" contract. `lle:credential:sync-groups` is the one exception: unlike `load`
+(read-only) and `init` (rejected server-side once the project already has data), it **replaces** the
+project's entire remote group list, so the same misconfiguration would silently delete real groups instead
+of merely duplicating one. It is therefore refused (`RemoteApiException`) when run from the test
+environment; `load` and `init` are not.
+
+**In all cases**, define a `when@test:` override for `lle_credential` that blanks the configuration (see
+crudit-studio's own `config/packages/lle_credential.yaml` for an example) - the guards above reduce the
+blast radius of a missing override, they do not replace having one.
+
 ## Automatic group synchronisation
 
 When the remote is configured, any create, update or delete operation on a `Group` entity is automatically mirrored to the remote repository via a Doctrine event listener (`GroupListener`).
