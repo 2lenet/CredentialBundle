@@ -63,8 +63,13 @@ blast radius of a missing override, they do not replace having one.
 When the remote is configured, any create, update or delete operation on a `Group` entity is automatically mirrored to the remote repository via a Doctrine event listener (`GroupListener`).
 
 - Group created → `POST /api/project/group/create/{code}`
-- Group renamed or updated → `POST /api/project/group/edit/{code}/{oldName}`
-- Group deleted → `DELETE /api/project/group/delete/{code}/{name}`
+- Group renamed or updated → `POST /api/project/group/edit/{code}?groupName={oldName}`
+- Group deleted → `DELETE /api/project/group/delete/{code}?groupName={name}`
+
+The group name always travels in the `groupName` query parameter, never as a path segment: names such
+as `admin/local` contain a `/`, and a `%2F` is decoded again before the remote router matches the path.
+The same applies to the credential matrix endpoints (`toggle-group`, `toggle-section`,
+`toggle-credential`, `allow-status`, `allow-for-status`).
 
 This synchronisation never interrupts a Doctrine flush — errors are caught and handled gracefully:
 

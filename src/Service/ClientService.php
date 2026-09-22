@@ -22,6 +22,7 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 class ClientService
 {
     private const string TEST_ENVIRONMENT = 'test';
+    private const string QUERY_PARAMETER_GROUP_NAME = 'groupName';
 
     private ?string $clientUrl;
     private ?string $projectCode;
@@ -85,7 +86,7 @@ class ClientService
 
         $response = $this->client->request(
             'GET',
-            $this->clientUrl . '/api/project/pull/' . $this->projectCode,
+            $this->buildUrl('/api/project/pull/' . rawurlencode((string)$this->projectCode)),
             [
                 'headers' => [
                     'Authorization' => $this->projectToken,
@@ -113,7 +114,7 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl . '/api/project/warmup/' . $this->projectCode,
+            $this->buildUrl('/api/project/warmup/' . rawurlencode((string)$this->projectCode)),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -140,7 +141,7 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl . '/api/project/init/' . $this->projectCode,
+            $this->buildUrl('/api/project/init/' . rawurlencode((string)$this->projectCode)),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -179,7 +180,13 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl . '/api/project/toggle-group/' . $this->projectCode . '/' . $group->getName() . '/' . ($check ? 1 : 0),
+            $this->buildUrl(
+                '/api/project/toggle-group/'
+                . rawurlencode((string)$this->projectCode)
+                . '/'
+                . ($check ? 1 : 0),
+                [self::QUERY_PARAMETER_GROUP_NAME => (string)$group->getName()],
+            ),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -206,15 +213,15 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl
-            . '/api/project/toggle-section/'
-            . $this->projectCode
-            . '/'
-            . $section
-            . '/'
-            . $group->getName()
-            . '/'
-            . ($check ? 1 : 0),
+            $this->buildUrl(
+                '/api/project/toggle-section/'
+                . rawurlencode((string)$this->projectCode)
+                . '/'
+                . rawurlencode($section)
+                . '/'
+                . ($check ? 1 : 0),
+                [self::QUERY_PARAMETER_GROUP_NAME => (string)$group->getName()],
+            ),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -241,15 +248,15 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl
-            . '/api/project/toggle-credential/'
-            . $this->projectCode
-            . '/'
-            . $credential->getRole()
-            . '/'
-            . $group->getName()
-            . '/'
-            . ($check ? 1 : 0),
+            $this->buildUrl(
+                '/api/project/toggle-credential/'
+                . rawurlencode((string)$this->projectCode)
+                . '/'
+                . rawurlencode((string)$credential->getRole())
+                . '/'
+                . ($check ? 1 : 0),
+                [self::QUERY_PARAMETER_GROUP_NAME => (string)$group->getName()],
+            ),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -276,15 +283,15 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl
-            . '/api/project/allow-status/'
-            . $this->projectCode
-            . '/'
-            . $credential->getRole()
-            . '/'
-            . $group->getName()
-            . '/'
-            . ($check ? 1 : 0),
+            $this->buildUrl(
+                '/api/project/allow-status/'
+                . rawurlencode((string)$this->projectCode)
+                . '/'
+                . rawurlencode((string)$credential->getRole())
+                . '/'
+                . ($check ? 1 : 0),
+                [self::QUERY_PARAMETER_GROUP_NAME => (string)$group->getName()],
+            ),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -311,17 +318,17 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl
-            . '/api/project/allow-for-status/'
-            . $this->projectCode
-            . '/'
-            . $credential->getRole()
-            . '/'
-            . $group->getName()
-            . '/'
-            . $status
-            . '/'
-            . ($check ? 1 : 0),
+            $this->buildUrl(
+                '/api/project/allow-for-status/'
+                . rawurlencode((string)$this->projectCode)
+                . '/'
+                . rawurlencode((string)$credential->getRole())
+                . '/'
+                . rawurlencode($status)
+                . '/'
+                . ($check ? 1 : 0),
+                [self::QUERY_PARAMETER_GROUP_NAME => (string)$group->getName()],
+            ),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -348,7 +355,7 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl . '/api/project/group/create/' . $this->projectCode,
+            $this->buildUrl('/api/project/group/create/' . rawurlencode((string)$this->projectCode)),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -378,7 +385,10 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl . '/api/project/group/edit/' . $this->projectCode . '/' . $oldName,
+            $this->buildUrl(
+                '/api/project/group/edit/' . rawurlencode((string)$this->projectCode),
+                [self::QUERY_PARAMETER_GROUP_NAME => $oldName],
+            ),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -408,7 +418,10 @@ class ClientService
 
         $response = $this->client->request(
             'DELETE',
-            $this->clientUrl . '/api/project/group/delete/' . $this->projectCode . '/' . $group->getName(),
+            $this->buildUrl(
+                '/api/project/group/delete/' . rawurlencode((string)$this->projectCode),
+                [self::QUERY_PARAMETER_GROUP_NAME => (string)$group->getName()],
+            ),
             [
                 'headers' => [
                     'Authorization' => $this->projectToken,
@@ -438,7 +451,7 @@ class ClientService
 
         $response = $this->client->request(
             'POST',
-            $this->clientUrl . '/api/project/group/sync/' . $this->projectCode,
+            $this->buildUrl('/api/project/group/sync/' . rawurlencode((string)$this->projectCode)),
             [
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -450,6 +463,23 @@ class ClientService
         );
 
         $this->throwIfRemoteError($response);
+    }
+
+    /**
+     * Free-text identifiers (a group name may contain a "/") travel in the query string: a path
+     * segment cannot carry one, and %2F never survives routing.
+     *
+     * @param array<string, string> $query
+     */
+    private function buildUrl(string $path, array $query = []): string
+    {
+        $url = $this->clientUrl . $path;
+
+        if ($query) {
+            $url .= '?' . http_build_query($query);
+        }
+
+        return $url;
     }
 
     /**
