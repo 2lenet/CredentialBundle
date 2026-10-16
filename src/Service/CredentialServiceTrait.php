@@ -3,6 +3,7 @@
 namespace Lle\CredentialBundle\Service;
 
 use Lle\CredentialBundle\Entity\Credential;
+use Lle\CredentialBundle\Security\CredentialVoter;
 
 trait CredentialServiceTrait
 {
@@ -50,12 +51,13 @@ trait CredentialServiceTrait
 
     public function resetCache(): void
     {
-        if ($this->cache->hasItem('group_credentials')) {
-            $this->cache->deleteItem('group_credentials');
-        }
+        $this->cache->deleteItems([
+            CredentialVoter::CACHE_KEY_GROUP_RIGHTS,
+            CredentialVoter::CACHE_KEY_ROLES,
+        ]);
 
-        if ($this->cache->hasItem('all_credentials')) {
-            $this->cache->deleteItem('all_credentials');
-        }
+        $version = $this->cache->getItem(CredentialVoter::CACHE_KEY_VERSION);
+        $version->set(bin2hex(random_bytes(8)));
+        $this->cache->save($version);
     }
 }

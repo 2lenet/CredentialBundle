@@ -11,16 +11,65 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
-class CredentialVoter extends Voter
+class CredentialVoter extends Voter implements ResetInterface
 {
+    public const CACHE_KEY_GROUP_RIGHTS = 'group_credentials';
+    public const CACHE_KEY_ROLES = 'all_credentials';
+    public const CACHE_KEY_VERSION = 'credentials_version';
+
+    private bool $checked = true;
+
+    private ?string $version = null;
+
     public function __construct(
         private EntityManagerInterface $em,
-        CacheItemPoolInterface $cache,
+        private CacheItemPoolInterface $cache,
         private array $groupRights = [],
         private array $roles = [],
     ) {
-        $cachedGroupRights = $cache->getItem('group_credentials');
+        $this->load();
+    }
+
+    /**
+     * Le voter survit aux requêtes sous un runtime à processus long (FrankenPHP worker) : à chaque
+     * requête, la première décision compare le numéro de version du cache au sien, ce qui coûte
+     * une lecture minuscule, et ne relit les droits que si un chargement les a remplacés.
+     */
+    public function reset(): void
+    {
+        $this->checked = false;
+    }
+
+    private function refreshIfStale(): void
+    {
+        if ($this->checked) {
+            return;
+        }
+
+        $this->checked = true;
+
+        if ($this->readVersion() !== $this->version) {
+            $this->groupRights = [];
+            $this->roles = [];
+            $this->load();
+        }
+    }
+
+    private function readVersion(): ?string
+    {
+        $version = $this->cache->getItem(self::CACHE_KEY_VERSION)->get();
+
+        return is_string($version) ? $version : null;
+    }
+
+    private function load(): void
+    {
+        // lue avant les droits : un chargement concurrent fait diverger la version, donc relire
+        $this->version = $this->readVersion();
+
+        $cachedGroupRights = $this->cache->getItem(self::CACHE_KEY_GROUP_RIGHTS);
 
         if (!$cachedGroupRights->isHit()) {
             $groupCreds = $this->em->getRepository(GroupCredential::class)->findAll();
@@ -44,12 +93,12 @@ class CredentialVoter extends Voter
             }
 
             $cachedGroupRights->set($this->groupRights);
-            $cache->save($cachedGroupRights);
+            $this->cache->save($cachedGroupRights);
         } else {
             $this->groupRights = $cachedGroupRights->get();
         }
 
-        $cachedRoles = $cache->getItem('all_credentials');
+        $cachedRoles = $this->cache->getItem(self::CACHE_KEY_ROLES);
 
         if (!$cachedRoles->isHit()) {
             $allCreds = $this->em->getRepository(Credential::class)->findAll();
@@ -59,7 +108,7 @@ class CredentialVoter extends Voter
             }
 
             $cachedRoles->set($this->roles);
-            $cache->save($cachedRoles);
+            $this->cache->save($cachedRoles);
         } else {
             $this->roles = $cachedRoles->get();
         }
@@ -67,6 +116,8 @@ class CredentialVoter extends Voter
 
     protected function supports(?string $attribute, mixed $subject): bool
     {
+        $this->refreshIfStale();
+
         // vote on every role in database
         return in_array($attribute, $this->roles);
     }
